@@ -18,8 +18,7 @@ const generateTokenAndSetCookie = (userId, res) => {
 
         res.cookie("User", token, {
             maxAge: 1 * 24 * 60 * 60 * 1000,
-            httpOnly: true,
-            sameSite: "strict",
+            sameSite: "None",
             secure: process.env.NODE_ENV !== "development",
             // Optional: specify the path if needed
             // path: "/",
