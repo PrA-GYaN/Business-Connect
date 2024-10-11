@@ -1,7 +1,58 @@
 import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
 import User from "../models/user.model.js";
 import generateTokenAndSetCookie from "../utils/generateToken.js";
+import gridfsStream from 'gridfs-stream';
+// import { Readable } from 'stream';
+// import { connectToMongoDB } from "../db/connectToMongoDB.js";
+// let gfs;
 
+// const setupGridFS = (connection) => {
+//     const dbConnection = connection.connection.db;
+//     gfs = gridfsStream(dbConnection, mongoose.mongo);
+//     gfs.collection('uploads');
+// };
+
+// const init = async () => {
+//     const dbConnection = await connectToMongoDB();
+//     setupGridFS(dbConnection);
+// };
+// init();
+
+// export const imageUpload = async(req, res) => {
+// 	console.log('GridFS initialized'+gfs);
+// 	if (!req.file) {
+// 	  return res.status(400).json({ error: 'No file uploaded.' });
+// 	}
+  
+// 	const { buffer, originalname, mimetype } = req.file;
+// 	console.log(req.file);
+// 	const writeStream = gfs.createWriteStream({
+// 	  filename: originalname,
+// 	  content_type: mimetype,
+// 	});
+  
+// 	const readableStream = Readable.from(buffer);
+// 	readableStream.pipe(writeStream);
+  
+// 	writeStream.on('close', (file) => {
+// 	  const fileUrl = `${req.protocol}://${req.get('host')}/image/${file.filename}`;
+// 	  res.json({
+// 		fileId: file._id,
+// 		fileUrl: fileUrl,
+// 	  });
+// 	});
+// 	readableStream.on('error', (err) => {
+// 	  res.status(500).json({ error: 'Error reading file buffer', details: err.message });
+// 	});
+  
+// 	writeStream.on('error', (err) => {
+// 	  res.status(500).json({ error: 'Error uploading file', details: err.message });
+// 	});
+//   };
+export const imageUpload = async(req, res) => {
+	console.log(req.file);
+}
 export const signup = async (req, res) => {
 	try {
 		const { fullName, username, password, gender } = req.body;
