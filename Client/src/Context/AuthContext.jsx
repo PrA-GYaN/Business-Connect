@@ -16,6 +16,7 @@ export const AuthContextProvider = ({ children }) => {
             try {
                 const decodedUser = jwtDecode(userCookie);
                 setAuthUser(decodedUser.userId);
+                console.log("User authenticated:", decodedUser);
             } catch (error) {
                 console.error("Error decoding JWT:", error);
             }

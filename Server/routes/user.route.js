@@ -3,7 +3,7 @@ import multer from 'multer';
 import crypto from 'crypto';
 import path from 'path';
 import mongoose from "mongoose";
-import { imageUpload, login, logout, signup } from "../controllers/user.controller.js";
+import { imageUpload, login, logout, getNotification, signup, sendNotification } from "../controllers/user.controller.js";
 import { GridFsStorage } from 'multer-gridfs-storage';
 import dotenv from 'dotenv';
 import { connectToMongoDB } from "../db/connectToMongoDB.js";
@@ -51,6 +51,8 @@ const router = express.Router();
 router.post("/signup", signup);
 router.post("/login", login);
 router.post("/upload", upload.single('image'), imageUpload);
+router.get("/notification/:userId",getNotification);
+router.post("/notify",sendNotification);
 
 router.post("/logout", logout);
 

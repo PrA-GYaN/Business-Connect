@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import { getReceiverSocketId, io } from "../socket/socket.js";
 import mongoose from "mongoose";
 import User from "../models/user.model.js";
 import generateTokenAndSetCookie from "../utils/generateToken.js";
@@ -131,4 +132,32 @@ export const logout = (req, res) => {
 		console.log("Error in logout controller", error.message);
 		res.status(500).json({ error: "Internal Server Error" });
 	}
+};
+
+export const getNotification = (req, res) => {
+	console.log("GET NOTIFICATION Called");
+    const userId = req.params.userId;
+    let userNotifications = ['Notification 1','Notification 2'];
+    if (userId === '6703c44dfd53728b2ef7a835') {
+        userNotifications.push('Notification 3');
+        // userNotifications.push('Notification 1');
+		setTimeout(()=>{
+			sendNotification('New Message');
+		},10000);
+    } else if (userId) {
+        userNotifications.push('Notification 2');
+    } else {
+        return res.status(400).json({ message: 'Invalid user ID provided.' });
+    }
+    return res.status(200).json(userNotifications);
+};
+
+export const sendNotification = (message) => {
+	const newNotification = message;
+	const receiverSocketId = getReceiverSocketId('6703c44dfd53728b2ef7a835');
+		if (receiverSocketId) {
+			// io.to(<socket_id>).emit() used to send events to specific client
+			io.to(receiverSocketId).emit("newNotification", newNotification);
+			console.log("Notification sent:",message);
+		}
 };

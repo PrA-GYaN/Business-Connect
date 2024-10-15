@@ -5,15 +5,16 @@ import "./index.css";
 import { BrowserRouter } from "react-router-dom";
 import { AuthContextProvider } from "./Context/AuthContext.jsx";
 import { SocketContextProvider } from "./Context/SocketContext.jsx";
+import { NotificationProvider } from "./Context/NotificationContext.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-	<React.StrictMode>
-		<BrowserRouter>
-			<AuthContextProvider>
-				<SocketContextProvider>
+	<BrowserRouter>
+		<AuthContextProvider>
+			<SocketContextProvider>
+				<NotificationProvider>
 					<App />
-				</SocketContextProvider>
-			</AuthContextProvider>
-		</BrowserRouter>
-	</React.StrictMode>
+				</NotificationProvider>
+			</SocketContextProvider>
+		</AuthContextProvider>
+	</BrowserRouter>
 );

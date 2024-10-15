@@ -1,10 +1,12 @@
 import React from 'react'
-import ImageUpload from './ImageUpload'
+// import ImageUpload from './ImageUpload'
+import Notification from './Notification'
 
 const Home = () => {
   return (
     <>
-      <ImageUpload/>
+      
+      <Notification/>
     </>
     
   )
