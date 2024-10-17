@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import http from "http";
 import express from "express";
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 app.use(cors({
@@ -9,7 +10,7 @@ app.use(cors({
   methods: ['GET', 'POST'],
   credentials: true,  // Allow credentials (cookies, etc.)
 }));
-
+app.use(cookieParser());
 const server = http.createServer(app)
 const io = new Server(server, {
   cors: {

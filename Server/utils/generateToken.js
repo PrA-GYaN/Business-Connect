@@ -10,16 +10,16 @@ const generateTokenAndSetCookie = (userId, res) => {
             throw new Error("Invalid userId");
         }
 
-        console.log("Generating token for userId:", userId);
+        // console.log("Generating token for userId:", userId);
         const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
             expiresIn: "1d",
         });
-        console.log("Token generated:", token);
+        // console.log("Token generated:", token);
 
         res.cookie("User", token, {
             maxAge: 1 * 24 * 60 * 60 * 1000,
             sameSite: "None",
-            secure: process.env.NODE_ENV !== "development",
+            secure: true,
             // Optional: specify the path if needed
             // path: "/",
         });

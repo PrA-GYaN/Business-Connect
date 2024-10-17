@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import{useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Login = () => {
+  const navigate = useNavigate ();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -14,6 +16,10 @@ const Login = () => {
       });
 
       console.log('Success:', response.data);
+      setTimeout(function () {
+        navigate('/');
+      },2000);
+      
     } catch (error) {
       console.error('Error:', error.response ? error.response.data : error.message);
     }

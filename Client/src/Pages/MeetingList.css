@@ -1,0 +1,94 @@
+.meeting-list {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.button-group {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.status-button {
+    padding: 10px 20px;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+    background-color: #3993f3;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.status-button:hover {
+    background-color: #007BFF;
+}
+
+.status-button.active {
+    
+    font-weight: bold;
+    background-color: #0056b3;
+}
+.status-button:focus
+{
+    border: none;
+    outline: none;
+}
+
+/* Styles for meeting items */
+.meeting-container {
+    max-height: 400px;
+    overflow-y: auto; /* Add scrolling for long lists */
+}
+
+.meeting-list-ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.meeting-item {
+    padding: 15px;
+    border-bottom: 1px solid #eaeaea;
+    transition: background-color 0.3s;
+}
+
+.meeting-item.pending {
+    background-color: #fff3cd; /* Light yellow for pending */
+}
+
+.meeting-item.accepted {
+    background-color: #9decaf; /* Light green for accepted */
+}
+
+.meeting-item:last-child {
+    border-bottom: none;
+}
+
+.join-link {
+    color: #007BFF;
+    text-decoration: none;
+}
+
+.join-link:hover {
+    text-decoration: underline;
+}
+
+.rejected {
+    background-color: rgb(236, 141, 141);
+    text-align: center;
+}
+
+.loading, .error {
+    text-align: center;
+    font-weight: bold;
+}
