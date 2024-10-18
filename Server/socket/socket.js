@@ -31,6 +31,7 @@ io.on("connection", (socket) => {
     userSocketMap[userId] = socket.id;
     console.log(`User ${userId} connected with socket id ${socket.id}`);
   }
+  io.emit("getOnlineUsers", Object.keys(userSocketMap));
   socket.on("disconnect", () => {
     console.log("user disconnected", socket.id);
     const disconnectedUserId = Object.keys(userSocketMap).find(

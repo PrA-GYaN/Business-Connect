@@ -11,6 +11,7 @@ export const useSocketContext = () => {
 export const SocketContextProvider = ({ children }) => {
 	const [socket, setSocket] = useState(null);
 	const { authUser } = useAuthContext();
+	const [onlineUsers, setOnlineUsers] = useState([]);
 
 	useEffect(() => {
 		if (authUser) {
@@ -21,6 +22,9 @@ export const SocketContextProvider = ({ children }) => {
 			});
 
 			setSocket(socket);
+			socket.on("getOnlineUsers", (users) => {
+				setOnlineUsers(users);
+			});
 
 			return () => socket.close();
 		} else {
@@ -32,5 +36,5 @@ export const SocketContextProvider = ({ children }) => {
 		console.log(authUser);
 	}, [authUser]);
 
-	return <SocketContext.Provider value={{ socket }}>{children}</SocketContext.Provider>;
+	return <SocketContext.Provider value={{ socket,onlineUsers }}>{children}</SocketContext.Provider>;
 };
