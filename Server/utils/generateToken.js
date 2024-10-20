@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-const generateTokenAndSetCookie = (userId, res) => {
+const generateTokenAndSetCookie = (userId,fullName,profilePic,res) => {
     try {
         if (!process.env.JWT_SECRET) {
             throw new Error("JWT_SECRET is not defined");
@@ -11,7 +11,7 @@ const generateTokenAndSetCookie = (userId, res) => {
         }
 
         // console.log("Generating token for userId:", userId);
-        const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
+        const token = jwt.sign({ userId,fullName,profilePic }, process.env.JWT_SECRET, {
             expiresIn: "1d",
         });
         // console.log("Token generated:", token);

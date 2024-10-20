@@ -9,6 +9,8 @@ export const useAuthContext = () => {
 
 export const AuthContextProvider = ({ children }) => {
     const [authUser, setAuthUser] = useState(null);
+    const [fullName, setName] = useState(null);
+    const [profilePic, setprofile] = useState(null);
 
     useEffect(() => {
         const userCookie = Cookies.get('User');
@@ -16,6 +18,8 @@ export const AuthContextProvider = ({ children }) => {
             try {
                 const decodedUser = jwtDecode(userCookie);
                 setAuthUser(decodedUser.userId);
+                setName(decodedUser.fullName);
+                setprofile(decodedUser.profilePic);
                 console.log("User authenticated:", decodedUser);
             } catch (error) {
                 console.error("Error decoding JWT:", error);
@@ -31,7 +35,7 @@ export const AuthContextProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ authUser, setAuthUser, logout }}>
+        <AuthContext.Provider value={{ authUser,fullName,profilePic, setAuthUser, logout }}>
             {children}
         </AuthContext.Provider>
     );

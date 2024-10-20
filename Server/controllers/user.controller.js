@@ -1,84 +1,40 @@
 import bcrypt from "bcryptjs";
 import { getReceiverSocketId, io } from "../socket/socket.js";
-import mongoose from "mongoose";
 import User from "../models/user.model.js";
 import generateTokenAndSetCookie from "../utils/generateToken.js";
-import gridfsStream from 'gridfs-stream';
-// import { Readable } from 'stream';
-// import { connectToMongoDB } from "../db/connectToMongoDB.js";
-// let gfs;
+import cloudinary from "../utils/cloudinary.js";
+import stream from 'stream';
 
-// const setupGridFS = (connection) => {
-//     const dbConnection = connection.connection.db;
-//     gfs = gridfsStream(dbConnection, mongoose.mongo);
-//     gfs.collection('uploads');
-// };
-
-// const init = async () => {
-//     const dbConnection = await connectToMongoDB();
-//     setupGridFS(dbConnection);
-// };
-// init();
-
-// export const imageUpload = async(req, res) => {
-// 	console.log('GridFS initialized'+gfs);
-// 	if (!req.file) {
-// 	  return res.status(400).json({ error: 'No file uploaded.' });
-// 	}
-  
-// 	const { buffer, originalname, mimetype } = req.file;
-// 	console.log(req.file);
-// 	const writeStream = gfs.createWriteStream({
-// 	  filename: originalname,
-// 	  content_type: mimetype,
-// 	});
-  
-// 	const readableStream = Readable.from(buffer);
-// 	readableStream.pipe(writeStream);
-  
-// 	writeStream.on('close', (file) => {
-// 	  const fileUrl = `${req.protocol}://${req.get('host')}/image/${file.filename}`;
-// 	  res.json({
-// 		fileId: file._id,
-// 		fileUrl: fileUrl,
-// 	  });
-// 	});
-// 	readableStream.on('error', (err) => {
-// 	  res.status(500).json({ error: 'Error reading file buffer', details: err.message });
-// 	});
-  
-// 	writeStream.on('error', (err) => {
-// 	  res.status(500).json({ error: 'Error uploading file', details: err.message });
-// 	});
-//   };
-export const imageUpload = async(req, res) => {
-	console.log(req.file);
-}
 export const signup = async (req, res) => {
 	try {
 		const { fullName, username, password, gender } = req.body;
-
-
 		const user = await User.findOne({ username });
-
 		if (user) {
 			return res.status(400).json({ error: "Username already exists" });
 		}
+		if (!req.file) {
+			return res.status(400).send('Error: Missing file');
+		}
+		const bufferStream = new stream.PassThrough();
+		bufferStream.end(req.file.buffer);
+		bufferStream.pipe(cloudinary.uploader.upload_stream({ resource_type: 'image' }, async (error, result) => {
+			if (error) {
+				return res.status(400).send('Error uploading image: ' + error.message);
+			}
 
 		const salt = await bcrypt.genSalt(10);
 		const hashedPassword = await bcrypt.hash(password, salt);
-
-		// https://avatar-placeholder.iran.liara.run/
-
-		const boyProfilePic = `https://avatar.iran.liara.run/public/boy?username=${username}`;
-		const girlProfilePic = `https://avatar.iran.liara.run/public/girl?username=${username}`;
 
 		const newUser = new User({
 			fullName,
 			username,
 			password: hashedPassword,
 			gender,
-			profilePic: gender === "male" ? boyProfilePic : girlProfilePic,
+			profilePic:
+			{
+				url: result.secure_url,
+                public_id: result.public_id,
+			}
 		});
 
 		if (newUser) {
@@ -94,7 +50,8 @@ export const signup = async (req, res) => {
 		} else {
 			res.status(400).json({ error: "Invalid user data" });
 		}
-	} catch (error) {
+	}));}
+	catch (error) {
 		console.log("Error in signup controller", error.message);
 		res.status(500).json({ error: "Internal Server Error" });
 	}
@@ -110,7 +67,7 @@ export const login = async (req, res) => {
 			return res.status(400).json({ error: "Invalid username or password" });
 		}
 
-		generateTokenAndSetCookie(user._id, res);
+		generateTokenAndSetCookie(user._id,user.fullName,user.profilePic,res);
 		console.log("Token Generated");	
 		res.status(200).json({
 			_id: user._id,

@@ -27,6 +27,6 @@ app.use("/meetings", meetingRoutes);
 app.use("/posts", postRoutes);
 
 server.listen(PORT, () => {
-    // connectToMongoDB();
+    connectToMongoDB();
     console.log(`Server is running on port ${PORT}`);
 });
