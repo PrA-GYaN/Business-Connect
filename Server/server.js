@@ -6,6 +6,8 @@ import {connectToMongoDB} from "./db/connectToMongoDB.js";
 import userRoutes from "./routes/user.route.js";
 import meetingRoutes from "./routes/meeting.route.js";
 import postRoutes from "./routes/post.route.js";
+import threadRoutes from "./routes/threads.route.js";
+import commentRoutes from "./routes/comment.route.js";
 import cookieParser from 'cookie-parser';
 
 dotenv.config();
@@ -25,6 +27,8 @@ const PORT = process.env.PORT || 5000;
 app.use("/users", userRoutes);
 app.use("/meetings", meetingRoutes);
 app.use("/posts", postRoutes);
+app.use("/thread", threadRoutes);
+app.use("/comment", commentRoutes);
 
 server.listen(PORT, () => {
     connectToMongoDB();

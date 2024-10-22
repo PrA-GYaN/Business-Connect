@@ -25,6 +25,22 @@ export const getReceiverSocketId = (receiverId) => {
   return userSocketMap[receiverId] || null;
 };
 io.on("connection", (socket) => {
+
+  socket.on('signal', (data) => {
+    const { signal, to } = data;
+    if (to) {
+      socket.to(to).emit('signal', {
+        signal,
+        from: socket.id
+      });
+    }
+  });
+
+  // Handle user disconnection
+  socket.on('disconnect', () => {
+    console.log(`User disconnected: ${socket.id}`);
+  });
+
   console.log("a user connected", socket.id);
   const userId = socket.handshake.query.userId;
   if (userId && userId !== "undefined") {
