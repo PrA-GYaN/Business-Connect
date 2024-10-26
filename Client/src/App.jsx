@@ -8,6 +8,8 @@ import { useAuthContext } from "./Context/AuthContext";
 import CreatePost from "./Components/CreatePost";
 import ThreadList from "./Pages/ThreadList";
 import CommentList from "./Pages/CommentList";
+import VideoCall from "./Pages/Meeting";
+import Meeting from "./Pages/Meeting";
 
 function App() {
 	const { authUser } = useAuthContext();
@@ -18,6 +20,7 @@ function App() {
 				<Route path='/login' element={authUser ? <Navigate to='/' /> : <Login />} />
 				<Route path='/signup' element={authUser ? <Navigate to='/' /> : <SignUp />} />
 				<Route path='/post' element={authUser ? <CreatePost/>  : <Login />} />
+				<Route path="/call" element = {<Meeting id={'a'}/>} />
 				<Route path="/threads" element={<ThreadList/>}/>
                 <Route path="/threads/:threadId" element={<CommentList/>} />
 			</Routes>
