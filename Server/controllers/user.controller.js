@@ -4,57 +4,141 @@ import User from "../models/user.model.js";
 import generateTokenAndSetCookie from "../utils/generateToken.js";
 import cloudinary from "../utils/cloudinary.js";
 import stream from 'stream';
+import qrcode from 'qrcode-terminal';
+import pkg from 'whatsapp-web.js';
+import CustomAuth from '../utils/CustomAuth.js';
+const { Client } = pkg;
+
+const client = new Client({
+    authStrategy: new CustomAuth(),
+});
+
+client.on('qr', (qr) => {
+    qrcode.generate(qr, { small: true });
+});
+
+client.on('ready', () => {
+    console.log('Client is ready!');
+});
+
+client.initialize();
+
+export const sendOTP = async (req, res) => {
+    const { phoneNumber, otp } = req.body;
+    console.log(`Sending OTP: ${otp} to Phone Number: ${phoneNumber}`);
+    const formattedPhoneNumber = phoneNumber.trim();
+	if (formattedPhoneNumber.startsWith('+')) {
+        formattedPhoneNumber = formattedPhoneNumber.substring(1);
+    }
+    const chatId = `${formattedPhoneNumber}@c.us`;
+    console.log('Formatted Chat ID:', chatId);
+
+    try {
+        const message = `Your OTP is: ${otp}`;
+        console.log('About to send message:', message, 'to:', chatId);
+        await client.sendMessage(chatId, message);
+        res.status(200).json({ success: true, message: 'OTP sent!' });
+    } catch (error) {
+        console.error('Error sending message:', error);
+        res.status(500).json({ success: false, message: 'Failed to send OTP.' });
+    }
+};
+
+
 
 export const signup = async (req, res) => {
-	try {
-		const { fullName, username, password, gender } = req.body;
-		const user = await User.findOne({ username });
-		if (user) {
-			return res.status(400).json({ error: "Username already exists" });
-		}
-		if (!req.file) {
-			return res.status(400).send('Error: Missing file');
-		}
-		const bufferStream = new stream.PassThrough();
-		bufferStream.end(req.file.buffer);
-		bufferStream.pipe(cloudinary.uploader.upload_stream({ resource_type: 'image' }, async (error, result) => {
-			if (error) {
-				return res.status(400).send('Error uploading image: ' + error.message);
-			}
+    try {
+        console.log("Signup Called", req.body);
 
-		const salt = await bcrypt.genSalt(10);
-		const hashedPassword = await bcrypt.hash(password, salt);
+        const {
+            fullName,
+            email, // Added email here
+            password,
+            gender,
+            businessTitle,
+            phoneNumber,
+            address,
+            dob,
+            industry,
+        } = req.body;
 
-		const newUser = new User({
-			fullName,
-			username,
-			password: hashedPassword,
-			gender,
-			profilePic:
-			{
-				url: result.secure_url,
-                public_id: result.public_id,
-			}
-		});
+        console.log(fullName, email, password, gender, businessTitle, phoneNumber, address, dob, industry);
 
-		if (newUser) {
-			generateTokenAndSetCookie(newUser._id, res);
-			await newUser.save();
+        // Validate required fields
+        if (!fullName || !email || !password || !gender || !businessTitle || !phoneNumber || !address || !dob || !industry) {
+            return res.status(400).json({ error: "All fields are required." });
+        }
 
-			res.status(201).json({
-				_id: newUser._id,
-				fullName: newUser.fullName,
-				username: newUser.username,
-				profilePic: newUser.profilePic,
-			});
-		} else {
-			res.status(400).json({ error: "Invalid user data" });
-		}
-	}));}
-	catch (error) {
-		console.log("Error in signup controller", error.message);
-		res.status(500).json({ error: "Internal Server Error" });
-	}
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ error: "Invalid email format." });
+        }
+
+        // Check if the username or email already exists
+        const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+        if (existingUser) {
+            return res.status(400).json({ error: "Username or email already exists." });
+        }
+
+        // Handle image upload to Cloudinary
+        if (!req.file) {
+            return res.status(400).json({ error: "Image file is required." });
+        }
+
+        const bufferStream = new stream.PassThrough();
+        bufferStream.end(req.file.buffer);
+
+        bufferStream.pipe(cloudinary.uploader.upload_stream(
+            { resource_type: 'image' },
+            async (error, result) => {
+                if (error) {
+                    return res.status(400).json({ error: 'Error uploading image: ' + error.message });
+                }
+
+                // Hash the password
+                const salt = await bcrypt.genSalt(10);
+                const hashedPassword = await bcrypt.hash(password, salt);
+
+                // Create a new user
+                const newUser = new User({
+                    fullName,
+                    email, // Added email here
+                    password: hashedPassword,
+                    gender,
+                    businessTitle,
+                    phoneNumber,
+                    address,
+                    dob,
+                    industry,
+                    profilePic: {
+                        url: result.secure_url,
+                        public_id: result.public_id,
+                    },
+                });
+
+                // Save the user and generate a token
+                await newUser.save();
+                generateTokenAndSetCookie(newUser._id, res);
+
+                // Respond with the new user's details
+                res.status(201).json({
+                    _id: newUser._id,
+                    fullName: newUser.fullName,
+                    email: newUser.email, // Include email in the response
+                    businessTitle: newUser.businessTitle,
+                    phoneNumber: newUser.phoneNumber,
+                    address: newUser.address,
+                    dob: newUser.dob,
+                    industry: newUser.industry,
+                    profilePic: newUser.profilePic,
+                });
+            }
+        ));
+    } catch (error) {
+        console.error("Error in signup controller", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 };
 
 export const login = async (req, res) => {
@@ -117,4 +201,20 @@ export const sendNotification = (message) => {
 			io.to(receiverSocketId).emit("newNotification", newNotification);
 			console.log("Notification sent:",message);
 		}
+};
+
+export const getProfileById = async (req, res) => {
+	const id = req.params.id;
+	try{
+		const user = await User.findById(id).select("-password");
+		if(user){
+			res.status(200).json(user);
+		}
+		else{
+			res.status(404).json({error: "User not found"});
+		}
+	}
+	catch(error){
+		console.log("Error in getProfileById controller", error.message);
+	}
 };

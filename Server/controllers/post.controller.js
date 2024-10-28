@@ -140,3 +140,26 @@ export const commentPost = async (req, res) => {
     res.status(500).send('Error adding comment: ' + error.message);
   }
 };
+
+export const getPostById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const post = await Post.find({ authorId: id })
+    .populate('authorId') // Populate the author of the post
+    .populate({
+      path: 'comments.userId', // Populate the userId in each comment
+      model: 'User' // Specify the User model to populate
+    });;
+
+    if (!post) {
+      console.error('Post not found');
+    }
+
+    res.status(200).json(post);
+  }
+  catch (error) {
+    console.error('Error fetching post:', error);
+    res.status(500).send('Error fetching post: ' + error.message);
+  }
+};

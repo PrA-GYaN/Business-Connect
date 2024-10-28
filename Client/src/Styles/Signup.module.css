@@ -1,0 +1,111 @@
+.signupbox
+{
+    width: 100vw;
+    /* background-color: #b3aeae; */
+    margin: 1rem;
+    display: grid;
+    place-items: center;
+}
+.formbox {
+    width: 50%;
+    background: #a9ccf5;
+    overflow: hidden;
+    border-radius: 16px;
+}
+.gendergrp input[type="radio"] {
+    width: auto;
+    margin-left: 1rem;
+}
+
+.form {
+display: flex;
+flex-direction: column;
+padding: 32px 24px 24px;
+gap: 1rem;
+}
+
+/*Form text*/
+.title {
+font-weight: bold;
+font-size: 1.6rem;
+}
+
+.subtitle {
+font-size: 1rem;
+}
+.input::placeholder {
+    color: black;
+}
+.grp
+{
+    display: flex;
+    flex-direction: row;
+    gap:1rem;
+}
+.grp>div
+{
+    flex: 1;
+}
+.grp>div>span
+{
+    color: red;
+}
+.formContainer {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 8px;
+    background-color: transparent;
+    margin: 1rem 0 .5rem;
+    gap: 1rem;
+    width: 100%;
+}
+
+.input {
+    background: none;
+    border: 1px solid black;
+    outline: 0;
+    height: 40px;
+    width: 99%;
+    font-size: .9rem;
+    padding: 8px 15px;
+}
+.gender
+{
+    width: auto;
+    margin-left: 1rem;
+}
+.formsection {
+padding: 16px;
+font-size: .85rem;
+background-color: #e0ecfb;
+box-shadow: rgb(0 0 0 / 8%) 0 -1px;
+}
+
+.formsection a {
+font-weight: bold;
+color: #0066ff;
+transition: color .3s ease;
+}
+
+.formsection a:hover {
+color: #005ce6;
+text-decoration: underline;
+}
+
+/*Button*/
+.form button {
+background-color: #0066ff;
+color: #fff;
+border: 0;
+border-radius: 24px;
+padding: 10px 16px;
+font-size: 1rem;
+font-weight: 600;
+cursor: pointer;
+transition: background-color .3s ease;
+}
+
+.form button:hover {
+background-color: #005ce6;
+}

@@ -18,7 +18,7 @@ function App() {
 			<Routes>
 				<Route path='/' element={authUser ? <Home /> : <Navigate to={"/login"} />} />
 				<Route path='/login' element={authUser ? <Navigate to='/' /> : <Login />} />
-				<Route path='/signup' element={authUser ? <Navigate to='/' /> : <SignUp />} />
+				<Route path='/signup' element={<SignUp />} />
 				<Route path='/post' element={authUser ? <CreatePost/>  : <Login />} />
 				<Route path="/call" element = {<Meeting id={'a'}/>} />
 				<Route path="/threads" element={<ThreadList/>}/>

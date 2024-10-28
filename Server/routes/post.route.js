@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { createPost,deletePost, getPosts,likePost,commentPost} from '../controllers/post.controller.js';
+import { createPost,deletePost,getPostById, getPosts,likePost,commentPost} from '../controllers/post.controller.js';
 import protectedRoute from '../middleware/protectedRoute.js';
 
 const router = express.Router();
@@ -12,5 +12,6 @@ router.post('/upload', upload.single('image'), createPost);
 router.post('/like/:id',protectedRoute, likePost);
 router.post('/comment/:id',protectedRoute, commentPost);
 router.get('/getposts', getPosts);
+router.get('/getpossbyid/:id', getPostById);
 
 export default router;
