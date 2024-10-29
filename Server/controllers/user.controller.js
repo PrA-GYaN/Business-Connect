@@ -26,7 +26,7 @@ client.initialize();
 export const sendOTP = async (req, res) => {
     const { phoneNumber, otp } = req.body;
     console.log(`Sending OTP: ${otp} to Phone Number: ${phoneNumber}`);
-    const formattedPhoneNumber = phoneNumber.trim();
+    let formattedPhoneNumber = phoneNumber.trim();
 	if (formattedPhoneNumber.startsWith('+')) {
         formattedPhoneNumber = formattedPhoneNumber.substring(1);
     }
@@ -44,15 +44,11 @@ export const sendOTP = async (req, res) => {
     }
 };
 
-
-
 export const signup = async (req, res) => {
     try {
-        console.log("Signup Called", req.body);
-
         const {
             fullName,
-            email, // Added email here
+            email,
             password,
             gender,
             businessTitle,
@@ -62,23 +58,20 @@ export const signup = async (req, res) => {
             industry,
         } = req.body;
 
-        console.log(fullName, email, password, gender, businessTitle, phoneNumber, address, dob, industry);
-
-        // Validate required fields
+        console.log("Received data:", fullName, email, password, gender, businessTitle, phoneNumber, address, dob, industry);
         if (!fullName || !email || !password || !gender || !businessTitle || !phoneNumber || !address || !dob || !industry) {
             return res.status(400).json({ error: "All fields are required." });
         }
 
-        // Validate email format
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             return res.status(400).json({ error: "Invalid email format." });
         }
 
         // Check if the username or email already exists
-        const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+        const existingUser = await User.findOne({ $or: [{ phoneNumber }, { email }] });
         if (existingUser) {
-            return res.status(400).json({ error: "Username or email already exists." });
+            return res.status(400).json({ error: "Full Name or email already exists." });
         }
 
         // Handle image upload to Cloudinary
@@ -89,6 +82,7 @@ export const signup = async (req, res) => {
         const bufferStream = new stream.PassThrough();
         bufferStream.end(req.file.buffer);
 
+        // Upload the image to Cloudinary
         bufferStream.pipe(cloudinary.uploader.upload_stream(
             { resource_type: 'image' },
             async (error, result) => {
@@ -103,7 +97,7 @@ export const signup = async (req, res) => {
                 // Create a new user
                 const newUser = new User({
                     fullName,
-                    email, // Added email here
+                    email,
                     password: hashedPassword,
                     gender,
                     businessTitle,
@@ -117,15 +111,13 @@ export const signup = async (req, res) => {
                     },
                 });
 
-                // Save the user and generate a token
                 await newUser.save();
-                generateTokenAndSetCookie(newUser._id, res);
-
-                // Respond with the new user's details
+                generateTokenAndSetCookie(newUser._id,newUser.fullName,newUser.profilePic,res);
+		        console.log("Token Generated");
                 res.status(201).json({
                     _id: newUser._id,
                     fullName: newUser.fullName,
-                    email: newUser.email, // Include email in the response
+                    email: newUser.email,
                     businessTitle: newUser.businessTitle,
                     phoneNumber: newUser.phoneNumber,
                     address: newUser.address,
@@ -133,18 +125,51 @@ export const signup = async (req, res) => {
                     industry: newUser.industry,
                     profilePic: newUser.profilePic,
                 });
+                console.log("User created successfully:");
             }
         ));
     } catch (error) {
-        console.error("Error in signup controller", error.message);
+        console.error("Error in signup controller:", error.message);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
 
+
+export const updateUserSelection = async (req, res) => {
+    const { fullName, interests, skills, languages, education } = req.body;
+  
+    console.log('Received data:', fullName, skills, languages, education, interests);
+    
+    try {
+      const user = await User.findOneAndUpdate(
+        { fullName },
+        {
+          $addToSet: {  
+            skills: { $each: skills },
+            languages: { $each: languages },
+            interests: { $each: interests }
+          },
+          education
+        },
+        { new: true }
+      );
+  
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      console.log('Updated User:', user);
+      return res.status(200).json({ message: 'User updated successfully', user });
+    } catch (error) {
+      console.error('Error updating user:', error);
+      return res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+  };
+  
 export const login = async (req, res) => {
 	try {
-		const { username, password } = req.body;
-		const user = await User.findOne({ username });
+		const { phoneNumber, password } = req.body;
+		const user = await User.findOne({ phoneNumber });
 		const isPasswordCorrect = await bcrypt.compare(password, user?.password || "");
 
 		if (!user || !isPasswordCorrect) {

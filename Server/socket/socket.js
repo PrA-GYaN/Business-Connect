@@ -3,6 +3,8 @@ import http from "http";
 import express from "express";
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
 app.use(cors({
@@ -24,7 +26,6 @@ const userSocketMap = {};
 export const getReceiverSocketId = (receiverId) => {
   return userSocketMap[receiverId] || null;
 };
-
 
 io.on("connection", (socket) => {
 

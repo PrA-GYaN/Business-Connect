@@ -1,0 +1,69 @@
+.setupBox
+{
+    width: 100%;
+    display: grid;
+    place-items: center;
+    padding: 1.5rem;
+}
+.setupContainer {
+    padding: 20px;
+    width: 40%;
+    background-color: #a9ccf5;;
+    min-width: 300px;
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .optionsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  
+  .optionButton {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    padding: 10px 15px;
+    margin: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+    font-size: 14px;
+  }
+  
+  /* .optionButton:hover {
+    background-color: #e0e0e0;
+  } */
+  
+  .selected {
+    background-color: #007bff;
+    border: none;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .selected:hover {
+    outline: 1px solid #0056b3;
+  }
+  
+  .selections {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fafafa;
+  }
+  .subbtn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    width: 50%;
+    border-radius: 25px;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-align: center;
+  }

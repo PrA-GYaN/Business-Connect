@@ -10,22 +10,29 @@ import ThreadList from "./Pages/ThreadList";
 import CommentList from "./Pages/CommentList";
 import VideoCall from "./Pages/Meeting";
 import Meeting from "./Pages/Meeting";
+import Setup from "./Pages/Setup";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
 	const { authUser } = useAuthContext();
 	return (
-		<div>
-			<Routes>
-				<Route path='/' element={authUser ? <Home /> : <Navigate to={"/login"} />} />
-				<Route path='/login' element={authUser ? <Navigate to='/' /> : <Login />} />
-				<Route path='/signup' element={<SignUp />} />
-				<Route path='/post' element={authUser ? <CreatePost/>  : <Login />} />
-				<Route path="/call" element = {<Meeting id={'a'}/>} />
-				<Route path="/threads" element={<ThreadList/>}/>
-                <Route path="/threads/:threadId" element={<CommentList/>} />
-			</Routes>
-			<Toaster />
-		</div>
+		<>
+			<ToastContainer />
+			<div>
+				<Routes>
+					<Route path='/' element={authUser ? <Home/> :<Navigate to='/login'/>} />
+					<Route path='/login' element={authUser ? <Navigate to='/' /> : <Login />} />
+					<Route path='/signup' element={<SignUp />} />
+					<Route path='/setup' element={<Setup fullName={''}/>} />
+					<Route path='/post' element={authUser ? <CreatePost/>  : <Login />} />
+					<Route path="/call" element = {<Meeting id={'a'}/>} />
+					<Route path="/threads" element={<ThreadList/>}/>
+					<Route path="/threads/:threadId" element={<CommentList/>} />
+				</Routes>
+				<Toaster />
+			</div>
+		</>
 	);
 }
 

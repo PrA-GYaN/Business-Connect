@@ -1,12 +1,23 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import styles from '../Styles/Signup.module.css';
+import useOtpSender from '../Hooks/useOtpSender';
+import PhoneVerification from '../Components/PhoneVerification';
 
 const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const validatePhoneNumber = (phone) => /^\+\d{1,3}\d{10}$/.test(phone);
-const validatePassword = (password) => /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/.test(password);
+// const validatePassword = (password) => /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/.test(password);
+const validatePassword = (password) => /^.{5,}$/.test(password);
+
 
 const Signup = () => {
+    const [formDataObject, setFormDataObject] = useState(null);
+    const [otpPage,setOtpPage] = useState(false);
+    const [otp,setOtp] = useState('');
+    const {
+        setPhoneNumber,
+        sendOtpfunc,
+    } = useOtpSender();
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
@@ -65,8 +76,7 @@ const Signup = () => {
         const obj = {};
         for (const [key, value] of formData.entries()) {
             if (key === 'image') {
-                // Handle the image separately if needed
-                obj[key] = value; // This will be a File object
+                obj[key] = value;
             } else {
                 obj[key] = value;
             }
@@ -81,225 +91,217 @@ const Signup = () => {
             setErrors(validationErrors);
             return;
         }
-    
         setLoading(true);
         const formDataToSubmit = new FormData();
-    
-        // Append each field from formData to the FormData instance
         for (const key in formData) {
             formDataToSubmit.append(key, formData[key]);
         }
         if (formData.image) {
             formDataToSubmit.append('image', formData.image);
         }
-    
-        // Convert FormData to object for easier handling
         const formDataObject = formDataToObject(formDataToSubmit);
-        console.log('Converted FormData Object:', formDataObject);
-    
-        try {
-            const res = await axios.post('http://localhost:5000/users/signup', formDataObject, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
-            console.log(res.data);
-        } catch (error) {
-            console.error(error.response ? error.response.data : error.message);
-        } finally {
-            setLoading(false);
-        }
+        setFormDataObject(formDataObject);
+        const phone = formData.phoneNumber;
+        setPhoneNumber(phone);
+        setOtpPage(true); 
+        const genotp = await sendOtpfunc(phone);
+        setOtp(genotp);
     };
-    
-    
 
     return (
-        <div className={styles.signupbox}>
-            <div className={styles.formbox}>
-                <form className={styles.form} onSubmit={handleSubmit}>
-                    <span className={styles.title}>Sign up</span>
-                    <span className={styles.subtitle}>Create a free account with your email.</span>
-                    <div className={styles.formContainer}>
-                        <div className={styles.grp}>
-                            <div>
-                                <input
-                                    type="text"
-                                    className={styles.input}
-                                    placeholder="Full Name"
-                                    name="fullName"
-                                    value={formData.fullName}
-                                    onChange={handleChange}
-                                />
-                                {errors.fullName && <span className={styles.error}>{errors.fullName}</span>}
-                            </div>
-                            <div>
-                                <input
-                                    type="email"
-                                    className={styles.input}
-                                    placeholder="Email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                />
-                                {errors.email && <span className={styles.error}>{errors.email}</span>}
-                            </div>
-                        </div>
-                        <div className={styles.grp}>
-                            <div>
-                                <input
-                                    type="password"
-                                    className={styles.input}
-                                    placeholder="Password"
-                                    name="password"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                />
-                                {errors.password && <span className={styles.error}>{errors.password}</span>}
-                            </div>
-                            <div>
-                                <input
-                                    type="password"
-                                    className={styles.input}
-                                    placeholder="Confirm Password"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                />
-                                {errors.confirmPassword && <span className={styles.error}>{errors.confirmPassword}</span>}
-                            </div>
-                        </div>
-                        <div className={styles.grp}>
-                            <div>
-                                <input
-                                    type="text"
-                                    className={styles.input}
-                                    placeholder="Phone Number (+CountryCode 1234567890)"
-                                    name="phoneNumber"
-                                    value={formData.phoneNumber}
-                                    onChange={handleChange}
-                                />
-                                {errors.phoneNumber && <span className={styles.error}>{errors.phoneNumber}</span>}
-                            </div>
-                        </div>
-                        <div className={styles.grp}>
-                            <div>
-                                <input
-                                    type="text"
-                                    className={styles.input}
-                                    placeholder="Business Title"
-                                    name="businessTitle"
-                                    value={formData.businessTitle}
-                                    onChange={handleChange}
-                                />
-                                {errors.businessTitle && <span className={styles.error}>{errors.businessTitle}</span>}
-                            </div>
-                        </div>
-                        <div className={styles.grp}>
-                            <div>
-                                <input
-                                    type="text"
-                                    className={styles.input}
-                                    placeholder="Address"
-                                    name="address"
-                                    value={formData.address}
-                                    onChange={handleChange}
-                                />
-                                {errors.address && <span className={styles.error}>{errors.address}</span>}
-                            </div>
-                        </div>
-                        <div className={styles.grp}>
-                            <div>
-                                <input
-                                    type="date"
-                                    className={styles.input}
-                                    name="dob"
-                                    value={formData.dob}
-                                    onChange={handleChange}
-                                />
-                                {errors.dob && <span className={styles.error}>{errors.dob}</span>}
-                            </div>
-                        </div>
-                        <div className={styles.grp}>
-                            <div className={styles.genderGrp}>
-                                <div className={styles.genderLabel}>Gender:</div>
-                                <div className={styles.genderOptions}>
-                                    <label>
-                                        <input
-                                            type="radio"
-                                            name="gender"
-                                            value="male"
-                                            className={styles.gender}
-                                            checked={formData.gender === 'male'}
-                                            onChange={handleChange}
-                                        />
-                                        Male
-                                    </label>
-                                    <label>
-                                        <input
-                                            type="radio"
-                                            name="gender"
-                                            value="female"
-                                            className={styles.gender}
-                                            checked={formData.gender === 'female'}
-                                            onChange={handleChange}
-                                        />
-                                        Female
-                                    </label>
-                                    <label>
-                                        <input
-                                            type="radio"
-                                            name="gender"
-                                            value="other"
-                                            className={styles.gender}
-                                            checked={formData.gender === 'other'}
-                                            onChange={handleChange}
-                                        />
-                                        Other
-                                    </label>
+        <>
+        {otpPage ? (<PhoneVerification data={formDataObject} sentOtp={otp}/>):(
+            <div className={styles.signupbox}>
+                <div className={styles.formbox}>
+                    <form className={styles.form} onSubmit={handleSubmit}>
+                        <span className={styles.title}>Sign up</span>
+                        <span className={styles.subtitle}>Create a free account with your email.</span>
+                        <div className={styles.formContainer}>
+                            <div className={styles.grp}>
+                                <div>
+                                    <input
+                                        type="text"
+                                        className={styles.input}
+                                        placeholder="Full Name"
+                                        name="fullName"
+                                        value={formData.fullName}
+                                        onChange={handleChange}
+                                    />
+                                    {errors.fullName && <span className={styles.error}>{errors.fullName}</span>}
                                 </div>
-                                {errors.gender && <span className={styles.error}>{errors.gender}</span>}
+                                <div>
+                                    <input
+                                        type="email"
+                                        className={styles.input}
+                                        placeholder="Email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                    />
+                                    {errors.email && <span className={styles.error}>{errors.email}</span>}
+                                </div>
+                            </div>
+                            <div className={styles.grp}>
+                                <div>
+                                    <input
+                                        type="password"
+                                        className={styles.input}
+                                        placeholder="Password"
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                    />
+                                    {errors.password && <span className={styles.error}>{errors.password}</span>}
+                                </div>
+                                <div>
+                                    <input
+                                        type="password"
+                                        className={styles.input}
+                                        placeholder="Confirm Password"
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                    />
+                                    {errors.confirmPassword && <span className={styles.error}>{errors.confirmPassword}</span>}
+                                </div>
+                            </div>
+                            <div className={styles.grp}>
+                                <div>
+                                    <input
+                                        type="text"
+                                        className={styles.input}
+                                        placeholder="Phone Number (+CountryCode 1234567890)"
+                                        name="phoneNumber"
+                                        value={formData.phoneNumber}
+                                        onChange={handleChange}
+                                    />
+                                    {errors.phoneNumber && <span className={styles.error}>{errors.phoneNumber}</span>}
+                                </div>
+                            </div>
+                            <div className={styles.grp}>
+                                <div>
+                                    <input
+                                        type="text"
+                                        className={styles.input}
+                                        placeholder="Business Title"
+                                        name="businessTitle"
+                                        value={formData.businessTitle}
+                                        onChange={handleChange}
+                                    />
+                                    {errors.businessTitle && <span className={styles.error}>{errors.businessTitle}</span>}
+                                </div>
+                            </div>
+                            <div className={styles.grp}>
+                                <div>
+                                    <input
+                                        type="text"
+                                        className={styles.input}
+                                        placeholder="Address"
+                                        name="address"
+                                        value={formData.address}
+                                        onChange={handleChange}
+                                    />
+                                    {errors.address && <span className={styles.error}>{errors.address}</span>}
+                                </div>
+                            </div>
+                            <div className={styles.grp}>
+                                <div>
+                                    <input
+                                        type="date"
+                                        className={styles.input}
+                                        name="dob"
+                                        value={formData.dob}
+                                        onChange={handleChange}
+                                    />
+                                    {errors.dob && <span className={styles.error}>{errors.dob}</span>}
+                                </div>
+                            </div>
+                            <div className={styles.grp}>
+                                <div className={styles.genderGrp}>
+                                    <div className={styles.genderLabel}>Gender:</div>
+                                    <div className={styles.genderOptions}>
+                                        <label>
+                                            <input
+                                                type="radio"
+                                                name="gender"
+                                                value="male"
+                                                className={styles.gender}
+                                                checked={formData.gender === 'male'}
+                                                onChange={handleChange}
+                                            />
+                                            Male
+                                        </label>
+                                        <label>
+                                            <input
+                                                type="radio"
+                                                name="gender"
+                                                value="female"
+                                                className={styles.gender}
+                                                checked={formData.gender === 'female'}
+                                                onChange={handleChange}
+                                            />
+                                            Female
+                                        </label>
+                                        <label>
+                                            <input
+                                                type="radio"
+                                                name="gender"
+                                                value="other"
+                                                className={styles.gender}
+                                                checked={formData.gender === 'other'}
+                                                onChange={handleChange}
+                                            />
+                                            Other
+                                        </label>
+                                    </div>
+                                    {errors.gender && <span className={styles.error}>{errors.gender}</span>}
+                                </div>
+                            </div>
+                            <div className={styles.grp}>
+                                <div>
+                                    <label>
+                                        Profile Picture:
+                                        <input type="file" onChange={handleImageChange} />
+                                    </label>
+                                    {image && <p>{image.name}</p>}
+                                </div>
+                            </div>
+                            <label className={styles.inputLabel} htmlFor="industry">Industry:</label>
+                            <div className={styles.grp}>
+                                <div>
+                                    <select
+                                        className={styles.input}
+                                        name="industry"
+                                        value={formData.industry}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="">Select Industry</option>
+                                        <option value="technology">Technology</option>
+                                        <option value="healthcare">Healthcare</option>
+                                        <option value="finance">Finance</option>
+                                        <option value="education">Education</option>
+                                        <option value="retail">Retail</option>
+                                        <option value="manufacturing">Manufacturing</option>
+                                        <option value="hospitality">Hospitality</option>
+                                        <option value="real estate">Real Estate</option>
+                                        <option value="transportation">Transportation</option>
+                                        <option value="non-profit">Non-Profit</option>
+                                    </select>
+                                    {errors.industry && <span className={styles.error}>{errors.industry}</span>}
+                                </div>
                             </div>
                         </div>
-                        <div className={styles.grp}>
-                            <div>
-                                <label>
-                                    Profile Picture:
-                                    <input type="file" onChange={handleImageChange} required />
-                                </label>
-                                {image && <p>{image.name}</p>}
-                            </div>
-                        </div>
-                        <label className={styles.inputLabel} htmlFor="industry">Industry:</label>
-                        <div className={styles.grp}>
-                            <div>
-                                <select
-                                    className={styles.input}
-                                    name="industry"
-                                    value={formData.industry}
-                                    onChange={handleChange}
-                                >
-                                    <option value="">Select Industry</option>
-                                    <option value="technology">Technology</option>
-                                    <option value="healthcare">Healthcare</option>
-                                    <option value="finance">Finance</option>
-                                    <option value="education">Education</option>
-                                    <option value="retail">Retail</option>
-                                    <option value="manufacturing">Manufacturing</option>
-                                    <option value="hospitality">Hospitality</option>
-                                    <option value="real estate">Real Estate</option>
-                                    <option value="transportation">Transportation</option>
-                                    <option value="non-profit">Non-Profit</option>
-                                </select>
-                                {errors.industry && <span className={styles.error}>{errors.industry}</span>}
-                            </div>
-                        </div>
+                        <button type="submit" className={styles.submitButton} disabled={loading}>
+                            {loading ? 'Signing Up...' : 'Sign up'}
+                        </button>
+                    </form>
+                    <div className={styles.formSection}>
+                        <p>Have an account? <a href="">Log in</a></p>
                     </div>
-                    <button type="submit" className={styles.submitButton} disabled={loading}>
-                        {loading ? 'Signing Up...' : 'Sign up'}
-                    </button>
-                </form>
-                <div className={styles.formSection}>
-                    <p>Have an account? <a href="">Log in</a></p>
                 </div>
-            </div>
-        </div>
+            </div>)
+        }
+        </>
+        
     );
 };
 

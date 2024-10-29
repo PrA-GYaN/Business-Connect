@@ -49,7 +49,7 @@ const userSchema = new Schema({
         type: String,
         required: true,
         unique: true,
-        match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ // Basic email format validation
+        match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     },
     password: {
         type: String,
@@ -90,30 +90,35 @@ const userSchema = new Schema({
 	profilePic: [ImageSchema],
     bio: {
       type: String,
-      required:false
+      required:false,
+      default: "No bio provided",
     },
     education: {
       type: String,
-      required:false
+      required:false,
+        default: "No education provided",
     },
     job: {
       type: String,
-      required:false
+      required:false,
+        default: "No job provided",
     },
     company: {
       type: String,
-      required:false
+      required:false,
+        default: "No company provided",
     },
     verified: {
       type: Boolean,
-      required:false
+      required:false,
+      default: false,
     },
     imageData: { type: Buffer, required: false }, 
     contentType: { type: String, required: false },
-    interests:[interest],
-    languages:[language],
-    activities:[activity],
-    skills:[skill],
+    interests:[String],
+    languages:[String],
+    activities:[String],
+    skills:[String],
     certificates:[certificate],
     swipes:[swipe],
     connections:[connection],

@@ -6,25 +6,18 @@ import stream from 'stream';
 export const createPost = async (req, res) => {
   try {
       console.log("Creating post");
-
-      // Check for the uploaded file
       if (!req.file) {
           return res.status(400).send('Error: Missing file');
       }
-
-      // Create a PassThrough stream
       const bufferStream = new stream.PassThrough();
       bufferStream.end(req.file.buffer);
 
-      // Upload the image to Cloudinary
       bufferStream.pipe(cloudinary.uploader.upload_stream({ resource_type: 'image' }, async (error, result) => {
           if (error) {
               return res.status(400).send('Error uploading image: ' + error.message);
           }
 
           console.log("Uploaded Image");
-
-          // Create a new post with the uploaded image details
           const newPost = new Post({
               authorId: req.body.authorId,
               content: req.body.content,

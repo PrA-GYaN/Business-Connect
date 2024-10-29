@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const useOtpSender = () => {
-    const [phoneNumber, setPhoneNumber] = useState('');
+    const [phone, setPhoneNumber] = useState('');
     const [sentOtp, setSentOtp] = useState(''); 
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -11,8 +12,11 @@ const useOtpSender = () => {
         return Math.floor(100000 + Math.random() * 900000).toString();
     };
 
-    const sendOtp = async (e) => {
-        e.preventDefault();
+    const verifyOtp = (otp,sentOtp) => {
+        return otp === sentOtp;
+    };
+
+    const sendOtpfunc = async (phoneNumber) => {
         const generatedOtp = generateOtp();
         setSentOtp(generatedOtp);
         setLoading(true);
@@ -23,9 +27,12 @@ const useOtpSender = () => {
                 phoneNumber,
                 otp: generatedOtp,
             });
-            alert(response.data.message);
+            toast.success(response.data.message);
+            return generatedOtp;
         } catch (err) {
-            setError('Failed to send OTP.');
+            const errorMessage = err.response?.data?.message || 'Failed to send OTP.';
+            setError(errorMessage);
+            toast.error(errorMessage);
             console.error('Error:', err);
         } finally {
             setLoading(false);
@@ -33,10 +40,11 @@ const useOtpSender = () => {
     };
 
     return {
-        phoneNumber,
+        phone,
         setPhoneNumber,
-        sentOtp, // Changed otp to sentOtp
-        sendOtp,
+        sentOtp,
+        sendOtpfunc,
+        verifyOtp,
         error,
         loading,
     };
