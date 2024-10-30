@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 export const AuthContext = createContext();
 export const useAuthContext = () => {
@@ -10,7 +10,8 @@ export const useAuthContext = () => {
 export const AuthContextProvider = ({ children }) => {
     const [authUser, setAuthUser] = useState(null);
     const [fullName, setName] = useState(null);
-    const [profilePic, setprofile] = useState(null);
+    const [profilePic, setProfile] = useState(null);
+    const [loading, setLoading] = useState(true); // Loading state
 
     useEffect(() => {
         const userCookie = Cookies.get('User');
@@ -19,7 +20,7 @@ export const AuthContextProvider = ({ children }) => {
                 const decodedUser = jwtDecode(userCookie);
                 setAuthUser(decodedUser.userId);
                 setName(decodedUser.fullName);
-                setprofile(decodedUser.profilePic);
+                setProfile(decodedUser.profilePic);
                 console.log("User authenticated:", decodedUser);
             } catch (error) {
                 console.error("Error decoding JWT:", error);
@@ -27,6 +28,7 @@ export const AuthContextProvider = ({ children }) => {
         } else {
             console.log("No user cookie found");
         }
+        setLoading(false); // Set loading to false after checking cookie
     }, []);
 
     const logout = () => {
@@ -35,7 +37,7 @@ export const AuthContextProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ authUser,fullName,profilePic, setAuthUser, logout }}>
+        <AuthContext.Provider value={{ authUser, fullName, profilePic, loading, setAuthUser, logout }}>
             {children}
         </AuthContext.Provider>
     );

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState,useRef  } from "react";
 import axios from "axios";
 import { useAuthContext } from "../Context/AuthContext";
 import { useNotificationContext } from '../Context/NotificationContext';
@@ -6,7 +6,7 @@ import { useNotificationContext } from '../Context/NotificationContext';
 const useNotification = () => {
     const { authUser } = useAuthContext();
     const [loading, setLoading] = useState(false);
-    const {notifications, addNotification,clearNotifications} = useNotificationContext();
+    const {notifications,playAudio, addNotification,clearNotifications} = useNotificationContext();
     const [error, setError] = useState(null);
 
     useEffect(() => {
@@ -35,7 +35,7 @@ const useNotification = () => {
         getNotification();
     }, [authUser]);
 
-    return { notifications, loading, error,addNotification};
+    return { notifications,loading,playAudio, error,addNotification};
 };
 
 export default useNotification;

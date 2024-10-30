@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState,useRef} from 'react';
+import notificationSound from '../assets/audios/notification.wav';
 
 const NotificationContext = createContext();
 export const useNotificationContext = () => {
@@ -6,6 +7,7 @@ export const useNotificationContext = () => {
 };
 
 export const NotificationProvider = ({ children }) => {
+    const audioRef = useRef(new Audio(notificationSound));
     const [notifications, setNotifications] = useState([]);
     const addNotification = (notification) => {
         setNotifications((prevNotifications) => [
@@ -14,6 +16,14 @@ export const NotificationProvider = ({ children }) => {
         ]);
     };
 
+
+	const playAudio = () => {
+		audioRef.current
+			.play()
+			.catch((error) => {
+				console.error("Error playing audio:", error);
+			});
+	};
     // Function to clear notifications
     const clearNotifications = () => {
         setNotifications([]);
@@ -25,6 +35,7 @@ export const NotificationProvider = ({ children }) => {
                 notifications,
                 addNotification,
                 clearNotifications,
+                playAudio,
             }}
         >
             {children}

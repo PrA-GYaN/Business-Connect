@@ -10,11 +10,11 @@ const generateTokenAndSetCookie = (userId,fullName,profilePic,res) => {
             throw new Error("Invalid userId");
         }
 
-        console.log("Generating token for userId:", userId);
+        // console.log("Generating token for userId:", userId);
         const token = jwt.sign({ userId,fullName,profilePic }, process.env.JWT_SECRET, {
             expiresIn: "1d",
         });
-        console.log("Token generated:", token);
+        // console.log("Token generated:", token);
 
         res.cookie("User", token, {
             maxAge: 1 * 24 * 60 * 60 * 1000,

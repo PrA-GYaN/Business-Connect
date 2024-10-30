@@ -3,8 +3,7 @@ import {useNotificationContext} from '../Context/NotificationContext';
 import useListenNotification from '../Hooks/useListenNotification';
 
 const Notify = () => {
-    const { notifications } = useNotificationContext(); // Use the correct variable name
-    useListenNotification();
+    const { notifications,playAudio } = useNotificationContext(); // Use the correct variable name
     useEffect(() => {
         console.log("Notification state updated:", notifications);
     }, [notifications]);

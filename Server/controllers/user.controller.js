@@ -34,7 +34,7 @@ export const sendOTP = async (req, res) => {
     console.log('Formatted Chat ID:', chatId);
 
     try {
-        const message = `Your OTP is: ${otp}`;
+        const message = `Your OTP for Business-Connect Verification is: ${otp}`;
         console.log('About to send message:', message, 'to:', chatId);
         await client.sendMessage(chatId, message);
         res.status(200).json({ success: true, message: 'OTP sent!' });
@@ -113,7 +113,6 @@ export const signup = async (req, res) => {
 
                 await newUser.save();
                 generateTokenAndSetCookie(newUser._id,newUser.fullName,newUser.profilePic,res);
-		        console.log("Token Generated");
                 res.status(201).json({
                     _id: newUser._id,
                     fullName: newUser.fullName,
@@ -177,7 +176,6 @@ export const login = async (req, res) => {
 		}
 
 		generateTokenAndSetCookie(user._id,user.fullName,user.profilePic,res);
-		console.log("Token Generated");	
 		res.status(200).json({
 			_id: user._id,
 			fullName: user.fullName,
@@ -190,16 +188,6 @@ export const login = async (req, res) => {
 	}
 };
 
-export const logout = (req, res) => {
-	try {
-		res.cookie("jwt", "", { maxAge: 0 });
-		res.status(200).json({ message: "Logged out successfully" });
-	} catch (error) {
-		console.log("Error in logout controller", error.message);
-		res.status(500).json({ error: "Internal Server Error" });
-	}
-};
-
 export const getNotification = (req, res) => {
 	console.log("GET NOTIFICATION Called");
     const userId = req.params.userId;
@@ -207,31 +195,35 @@ export const getNotification = (req, res) => {
     if (userId === '6703c44dfd53728b2ef7a835') {
         userNotifications.push('Notification 3');
         // userNotifications.push('Notification 1');
-		setTimeout(()=>{
-			sendNotification('New Message');
-		},10000);
+		
     } else if (userId) {
-        userNotifications.push('Notification 2');
+        userNotifications.push('Notification 4');
     } else {
         return res.status(400).json({ message: 'Invalid user ID provided.' });
     }
     return res.status(200).json(userNotifications);
 };
 
-export const sendNotification = (message) => {
+export const sendNotification = (message,receiverId) => {
 	const newNotification = message;
-	const receiverSocketId = getReceiverSocketId('6703c44dfd53728b2ef7a835');
+	const receiverSocketId = getReceiverSocketId(receiverId);
+    console.log("Receiver Socket ID:",receiverSocketId);
 		if (receiverSocketId) {
+            console.log("Sending Notification to:",receiverSocketId);
 			// io.to(<socket_id>).emit() used to send events to specific client
 			io.to(receiverSocketId).emit("newNotification", newNotification);
-			console.log("Notification sent:",message);
+			console.log("Notification sent:",newNotification);
 		}
 };
 
 export const getProfileById = async (req, res) => {
 	const id = req.params.id;
 	try{
-		const user = await User.findById(id).select("-password");
+		const user = await User.findById(id).select("-password")
+        .populate({
+            path: 'connections.userId', // Populate the userId in each comment
+            model: 'Users'
+          });
 		if(user){
 			res.status(200).json(user);
 		}
@@ -242,4 +234,77 @@ export const getProfileById = async (req, res) => {
 	catch(error){
 		console.log("Error in getProfileById controller", error.message);
 	}
+};
+
+export const getAllUser = async (req, res) => {
+    const userId = req.user._id;
+    try {
+        const users = await User.find({ _id: { $ne: userId } }).select('-password');
+        res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+export const Liked_Dislike = async (req, res) => {
+    const userId = req.user._id;
+    try {
+        console.log("User ID:", userId);
+        const { likedUserId, action: initialAction } = req.body;
+
+        // Validate action
+        if (!likedUserId || !['right', 'left'].includes(initialAction)) {
+            return res.status(400).json({ message: 'Invalid input' });
+        }
+
+        const action = initialAction === 'right' ? 'Liked' : 'Disliked';
+        const [user, likedUser] = await Promise.all([
+            User.findById(userId).select('-password'),
+            User.findById(likedUserId).select('-password'),
+        ]);
+
+        if (!user || !likedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        console.log("User Swipes:", user.swipes);
+        console.log("Liked User Swipes:", likedUser.swipes);
+
+        const existingSwipe = user.swipes.find(swipe => swipe.userId.toString() === likedUserId.toString());
+        const reverseSwipe = likedUser.swipes.find(swipe => swipe.userId.toString() === userId.toString());
+
+        if (existingSwipe) {
+            existingSwipe.action = action; 
+        } else {
+            user.swipes.push({ userId: likedUserId, action });
+        }
+        await user.save();
+
+        if (reverseSwipe && reverseSwipe.action === 'Liked') {
+            console.log("Mutual liking detected");
+
+            if (!likedUser.connections.some(conn => conn.userId.toString() === userId.toString())) {
+                likedUser.connections.push({ userId });
+                await likedUser.save();
+                console.log("Added Connection in Liked User");
+                sendNotification(`${user.fullName} has liked you!`,likedUserId);
+                sendNotification(`${likedUser.fullName} has liked you!`,userId);
+            }
+
+            if (!user.connections.some(conn => conn.userId.toString() === likedUserId.toString())) {
+                user.connections.push({ userId: likedUserId });
+                await user.save();
+                console.log("Added Connection in User");
+                sendNotification(`${likedUser.fullName} has liked you back!`,userId);
+            }
+        } else {
+            console.log("Reverse swipe not found or conditions not met");
+        }
+
+        return res.status(200).json({ message: 'Swipe processed successfully' });
+
+    } catch (error) {
+        console.error("Error processing swipe:", error);
+        return res.status(500).json({ message: 'Server error' });
+    }
 };

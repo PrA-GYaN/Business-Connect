@@ -27,6 +27,7 @@ const useOtpSender = () => {
                 phoneNumber,
                 otp: generatedOtp,
             });
+            console.log(generatedOtp);
             toast.success(response.data.message);
             return generatedOtp;
         } catch (err) {
