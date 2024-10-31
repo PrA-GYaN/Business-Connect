@@ -20,7 +20,7 @@ export const AuthContextProvider = ({ children }) => {
                 const decodedUser = jwtDecode(userCookie);
                 setAuthUser(decodedUser.userId);
                 setName(decodedUser.fullName);
-                setProfile(decodedUser.profilePic);
+                setProfile(decodedUser.profilePic[0].url);
                 console.log("User authenticated:", decodedUser);
             } catch (error) {
                 console.error("Error decoding JWT:", error);

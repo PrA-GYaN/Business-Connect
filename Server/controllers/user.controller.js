@@ -267,9 +267,6 @@ export const Liked_Dislike = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        console.log("User Swipes:", user.swipes);
-        console.log("Liked User Swipes:", likedUser.swipes);
-
         const existingSwipe = user.swipes.find(swipe => swipe.userId.toString() === likedUserId.toString());
         const reverseSwipe = likedUser.swipes.find(swipe => swipe.userId.toString() === userId.toString());
 
@@ -281,7 +278,6 @@ export const Liked_Dislike = async (req, res) => {
         await user.save();
 
         if (reverseSwipe && reverseSwipe.action === 'Liked') {
-            console.log("Mutual liking detected");
 
             if (!likedUser.connections.some(conn => conn.userId.toString() === userId.toString())) {
                 likedUser.connections.push({ userId });

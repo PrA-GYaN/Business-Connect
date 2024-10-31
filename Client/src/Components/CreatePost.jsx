@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useAuthContext } from '../Context/AuthContext';
+import Modal from './Modal';
 
 const CreatePost = () => {
+    const {authUser} = useAuthContext();
     const [image, setImage] = useState(null);
-    const [authorId, setAuthorId] = useState('');
     const [content, setContent] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
     const handleImageChange = (e) => {
         setImage(e.target.files[0]);
-    };
-
-    const handleAuthorIdChange = (e) => {
-        setAuthorId(e.target.value);
     };
 
     const handleContentChange = (e) => {
@@ -26,8 +28,8 @@ const CreatePost = () => {
         }
 
         const formData = new FormData();
-        formData.append('image', image); // Ensure this matches your backend
-        formData.append('authorId', authorId);
+        formData.append('image', image);
+        formData.append('authorId', authUser);
         formData.append('content', content);
 
         try {
@@ -43,13 +45,10 @@ const CreatePost = () => {
     };
 
     return (
+        <>
+        <button onClick={openModal}>Open Modal</button>
+        <Modal isOpen={isModalOpen} onClose={closeModal} />
         <form onSubmit={handleSubmit}>
-            <div>
-                <label>
-                    Author ID:
-                    <input type="text" value={authorId} onChange={handleAuthorIdChange} required />
-                </label>
-            </div>
             <div>
                 <label>
                     Content:
@@ -64,6 +63,7 @@ const CreatePost = () => {
             </div>
             <button type="submit">Upload</button>
         </form>
+        </>
     );
 };
 

@@ -1,5 +1,4 @@
 // src/hooks/useFeed.js
-
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuthContext } from '../Context/AuthContext';
@@ -12,23 +11,37 @@ const useFeed = () => {
     const [newComment, setNewComment] = useState({});
     const [visibleComments, setVisibleComments] = useState({});
     const [commentLoading, setCommentLoading] = useState({});
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+
+    const fetchPosts = async (currentPage) => {
+        try {
+            const { data } = await axios.get(`http://localhost:5000/posts/getposts?page=${currentPage}&limit=1`);
+            if (data.posts.length > 0) {
+                setPosts((prevPosts) => [...prevPosts, ...data.posts]); // Append new post
+                setHasMore(data.hasMore);
+            } else {
+                setHasMore(false); // No more posts available
+            }
+        } catch (err) {
+            setError('Error fetching posts: ' + err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchPosts = async () => {
-            try {
-                const { data } = await axios.get('http://localhost:5000/posts/getposts');
-                setPosts(data);
-            } catch (err) {
-                setError('Error fetching posts: ' + err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchPosts();
-    }, []);
+        fetchPosts(page);
+    }, [page]);
+
+    const loadMorePosts = () => {
+        if (!loading && hasMore) {
+            setPage((prev) => prev + 1);
+        }
+    }
 
     const handleLike = async (postId) => {
-        setPosts(prevPosts => prevPosts.map(post => {
+        setPosts((prevPosts) => prevPosts.map((post) => {
             if (post._id === postId) {
                 const isLiked = post.likes.includes(authUser);
                 const newLikes = isLiked 
@@ -43,12 +56,12 @@ const useFeed = () => {
             const { data } = await axios.post(`http://localhost:5000/posts/like/${postId}`, {}, {
                 withCredentials: true,
             });
-            setPosts(prevPosts => prevPosts.map(post => 
+            setPosts((prevPosts) => prevPosts.map((post) => 
                 post._id === postId ? { ...post, likes: data.likes } : post
             ));
         } catch (err) {
             console.error('Error liking post:', err);
-            setPosts(prevPosts => prevPosts.map(post => {
+            setPosts((prevPosts) => prevPosts.map((post) => {
                 if (post._id === postId) {
                     const newLikes = post.likes.includes(authUser) 
                         ? post.likes.filter(userId => userId !== authUser) 
@@ -61,7 +74,7 @@ const useFeed = () => {
     };
 
     const handleCommentChange = (postId, value) => {
-        setNewComment(prev => ({ ...prev, [postId]: value }));
+        setNewComment((prev) => ({ ...prev, [postId]: value }));
     };
 
     const handleCommentSubmit = async (postId, e) => {
@@ -69,7 +82,7 @@ const useFeed = () => {
         const commentContent = newComment[postId]?.trim();
         if (!commentContent) return;
 
-        setCommentLoading(prev => ({ ...prev, [postId]: true }));
+        setCommentLoading((prev) => ({ ...prev, [postId]: true }));
 
         try {
             const res = await axios.post(`http://localhost:5000/posts/comment/${postId}`, { content: commentContent }, {
@@ -82,21 +95,22 @@ const useFeed = () => {
                 },
                 content: commentContent,
             };
-            setPosts(prevPosts => prevPosts.map(post => 
+            setPosts((prevPosts) => prevPosts.map((post) => 
                 post._id === postId ? { ...post, comments: [...post.comments, newCommentData] } : post
             ));
-            setNewComment(prev => ({ ...prev, [postId]: '' }));
+            setNewComment((prev) => ({ ...prev, [postId]: '' }));
         } catch (err) {
             console.error('Error adding comment:', err);
             setError('Failed to add comment, please try again.');
         } finally {
-            setCommentLoading(prev => ({ ...prev, [postId]: false }));
+            setCommentLoading((prev) => ({ ...prev, [postId]: false }));
         }
     };
 
     const toggleComments = (postId) => {
-        setVisibleComments(prev => ({ ...prev, [postId]: !prev[postId] }));
+        setVisibleComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
     };
+
 
     return {
         posts,
@@ -110,6 +124,8 @@ const useFeed = () => {
         newComment,
         setNewComment,
         commentLoading,
+        loadMorePosts,
+        hasMore,
     };
 };
 

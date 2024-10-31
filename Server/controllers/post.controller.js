@@ -2,40 +2,56 @@ import Post from "../models/post.model.js";
 import cloudinary from "../utils/cloudinary.js";
 import stream from 'stream';
 
-
 export const createPost = async (req, res) => {
   try {
       console.log("Creating post");
+
+      const { authorId, content } = req.body;
+
       if (!req.file) {
-          return res.status(400).send('Error: Missing file');
-      }
-      const bufferStream = new stream.PassThrough();
-      bufferStream.end(req.file.buffer);
-
-      bufferStream.pipe(cloudinary.uploader.upload_stream({ resource_type: 'image' }, async (error, result) => {
-          if (error) {
-              return res.status(400).send('Error uploading image: ' + error.message);
-          }
-
-          console.log("Uploaded Image");
-          const newPost = new Post({
-              authorId: req.body.authorId,
-              content: req.body.content,
-              image: {
-                  url: result.secure_url,
-                  public_id: result.public_id,
-              },
-          });
+          // Creating a post without an image
+          const newPost = new Post({ authorId, content });
 
           try {
-              await newPost.save(); // Save the new post to the database
-              res.status(201).json({ message: 'Post created successfully', post: newPost });
+              await newPost.save();
+              return res.status(201).json({ message: 'Post created successfully', post: newPost });
           } catch (err) {
-              res.status(400).send('Error saving post: ' + err.message);
+              console.error('Error saving post:', err);
+              return res.status(400).send('Error saving post: ' + err.message);
           }
-      }));
+      } else {
+          const bufferStream = new stream.PassThrough();
+          bufferStream.end(req.file.buffer);
+
+          bufferStream.pipe(cloudinary.uploader.upload_stream({ resource_type: 'image' }, async (error, result) => {
+              if (error) {
+                  console.error('Error uploading image:', error);
+                  return res.status(400).send('Error uploading image: ' + error.message);
+              }
+
+              console.log("Uploaded Image");
+
+              const newPost = new Post({
+                  authorId,
+                  content,
+                  image: {
+                      url: result.secure_url,
+                      public_id: result.public_id,
+                  },
+              });
+
+              try {
+                  await newPost.save();
+                  return res.status(201).json({ message: 'Post created successfully', post: newPost });
+              } catch (err) {
+                  console.error('Error saving post with image:', err);
+                  return res.status(400).send('Error saving post: ' + err.message);
+              }
+          }));
+      }
   } catch (err) {
-      return res.status(400).send('Error: ' + err.message);
+      console.error('Unexpected error:', err);
+      return res.status(500).send('Error: ' + err.message); // 500 for unexpected errors
   }
 };
 
@@ -59,26 +75,36 @@ export const deletePost = async (req, res) => {
   }
 };
 
-// Get all posts
+// controllers/postController.js
 export const getPosts = async (req, res) => {
+  const page = parseInt(req.query.page) || 1; // Get the page number
+  const limit = 1; // Set limit to 1 for one post at a time
+  const skip = (page - 1) * limit; // Calculate the number of documents to skip
+
   try {
+    const totalPosts = await Post.countDocuments(); // Count total posts
     const posts = await Post.find()
-  .populate('authorId') // Populate the author of the post
-  .populate({
-    path: 'comments.userId', // Populate the userId in each comment
-    model: 'User' // Specify the User model to populate
-  });
+      .populate('authorId')
+      .populate({
+        path: 'comments.userId',
+        model: 'Users'
+      })
+      .skip(skip)
+      .limit(limit); // Apply pagination
 
     const postsWithImages = posts.map(post => ({
       ...post.toObject(),
-      image: post.image ? post.image : null, // Directly use the image object
+      image: post.image || null,
     }));
 
-    res.status(200).json(postsWithImages);
+    const hasMore = totalPosts > page * limit; // Check if more posts are available
+
+    res.status(200).json({ posts: postsWithImages, hasMore });
   } catch (err) {
     res.status(400).json({ message: 'Error fetching posts: ' + err.message });
   }
 };
+
 
 export const likePost = async(req, res) =>
 {

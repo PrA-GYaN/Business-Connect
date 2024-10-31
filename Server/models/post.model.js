@@ -14,7 +14,7 @@ const ImageSchema = new mongoose.Schema({
 const CommentSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Users',
     required: true
   },
   content: {
@@ -30,12 +30,12 @@ const CommentSchema = new mongoose.Schema({
 const PostSchema = new mongoose.Schema({
   authorId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Users',
     required: true
   },
   content: {
     type: String,
-    required: true
+    required: false
   },
   image: [ImageSchema],
   createdAt: {
@@ -44,7 +44,7 @@ const PostSchema = new mongoose.Schema({
   },
   likes: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'Users'
   }],
   comments: [CommentSchema]
 });

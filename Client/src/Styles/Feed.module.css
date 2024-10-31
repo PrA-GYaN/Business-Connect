@@ -1,0 +1,151 @@
+.postContainer {
+    width: 40rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.postBox {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #d1e5f7;
+    padding:1rem 0;
+    gap: 0.5rem;
+    border-radius: 1.3vw;
+}
+.author {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 1rem;
+}
+
+.contentBox
+{
+    padding: 0 1rem;
+}
+.commentBox
+{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem;
+}
+.profilePhoto {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.commentPhoto {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: rgb(236, 139, 158);
+}
+.postName {
+    font-size: 1.3vw;
+    font-weight: 700;
+}
+.postImage {
+    width: 40rem;
+    height: 20rem;
+    background-color: crimson;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.interactions {
+    padding: 0.8rem 1rem 0 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.iBtns {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+}
+.interactionBtn {
+    padding: 0.5rem 1rem;
+    border: 1px solid black;
+    transition: all 0.2s linear;
+    border-radius: 1rem;
+}
+.interactionBtn:hover {
+    cursor: pointer;
+    background-color: rgb(161, 198, 230);
+}
+.liked {
+    background-color: rgb(161, 198, 230);
+}
+.input {
+    border: 1px solid black;
+    padding: 1rem;
+    font-size: 1rem;
+    width: 70%;
+    border-radius: 1rem;
+}
+.commentBox {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    padding: 0.5rem;
+}
+.commentBody {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background-color: rgb(161, 198, 230);
+    padding: 0.7rem 1rem;
+    border-radius: 1rem;
+}
+.fullname {
+    font-size: 1rem;
+    font-weight: 700;
+}
+.commentsSection {
+    display: none;
+    padding: 1rem 0rem;
+}
+.active {
+    display: block;
+}
+.postBtn {
+border: none;
+color: #fff;
+background-image: linear-gradient(30deg, #0400ff, #4ce3f7);
+border-radius: 20px;
+background-size: 100% auto;
+font-family: inherit;
+font-size: 17px;
+padding: 0.6em 1.5em;
+}
+
+.postBtn:hover {
+background-position: right center;
+background-size: 200% auto;
+-webkit-animation: pulse 2s infinite;
+animation: pulse512 1.5s infinite;
+}
+
+@keyframes pulse512 {
+0% {
+    box-shadow: 0 0 0 0 #05bada66;
+}
+
+70% {
+    box-shadow: 0 0 0 10px rgb(218 103 68 / 0%);
+}
+
+100% {
+    box-shadow: 0 0 0 0 rgb(218 103 68 / 0%);
+}
+}

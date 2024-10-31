@@ -30,7 +30,7 @@ function App() {
         <>
             <ToastContainer />
             <div>
-                <Suspense fallback={<div>Loading...</div>}>
+                <Suspense fallback={<Loader/>}>
                     <Routes>
                         <Route path='/' element={authUser ? <Home /> : <Navigate to='/login' />} />
                         <Route path='/login' element={authUser ? <Navigate to='/' /> : <Login />} />

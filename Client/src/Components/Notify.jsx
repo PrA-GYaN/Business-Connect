@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import {useNotificationContext} from '../Context/NotificationContext';
-import useListenNotification from '../Hooks/useListenNotification';
+// import useListenNotification from '../Hooks/useListenNotification';
 
 const Notify = () => {
-    const { notifications,playAudio } = useNotificationContext(); // Use the correct variable name
+    const { notifications,playAudio } = useNotificationContext(); 
     useEffect(() => {
         console.log("Notification state updated:", notifications);
     }, [notifications]);
