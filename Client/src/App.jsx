@@ -11,6 +11,7 @@ const Home = lazy(() => import("./Pages/Home"));
 const Login = lazy(() => import("./Pages/Login"));
 const SignUp = lazy(() => import("./Pages/SignUp"));
 const CreatePost = lazy(() => import("./Components/CreatePost"));
+const Messages = lazy(() => import("./Pages/Messages"));
 const ThreadList = lazy(() => import("./Pages/ThreadList"));
 const CommentList = lazy(() => import("./Pages/CommentList"));
 const Meeting = lazy(() => import("./Pages/Meeting"));
@@ -37,6 +38,7 @@ function App() {
                         <Route path='/signup' element={<SignUp />} />
                         <Route path='/setup' element={<Setup fullName={''} />} />
                         <Route path="/connections" element={authUser ? <Connections /> : <Navigate to='/login' />} />
+                        <Route path="/messages" element={authUser ? <Messages /> : <Navigate to='/login' />} />
                         <Route path='/post' element={authUser ? <CreatePost /> : <Navigate to='/login' />} />
                         <Route path="/call" element={<Meeting id={'a'} />} />
                         <Route path="/notifications" element={authUser ? <Notifications /> : <Navigate to='/login' />} />

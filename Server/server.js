@@ -9,6 +9,7 @@ import postRoutes from "./routes/post.route.js";
 import threadRoutes from "./routes/threads.route.js";
 import commentRoutes from "./routes/comment.route.js";
 import cookieParser from 'cookie-parser';
+import messageRoutes from './routes/message.route.js';
 
 dotenv.config();
 
@@ -25,8 +26,9 @@ app.use(express.json());
 const PORT = process.env.PORT || 5000;
 
 app.use("/users", userRoutes);
-app.use("/meetings", meetingRoutes);
 app.use("/posts", postRoutes);
+app.use('/messages', messageRoutes);
+app.use("/meetings", meetingRoutes);
 app.use("/thread", threadRoutes);
 app.use("/comment", commentRoutes);
 

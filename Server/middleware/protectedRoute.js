@@ -3,7 +3,6 @@ import User from "../models/user.model.js";
 
 const protectedRoute = async (req, res, next) => {
 	try {
-		console.log("Cookies: ", req.cookies);
 		const token = req.cookies.User;
 
 		if (!token) {
@@ -24,7 +23,7 @@ const protectedRoute = async (req, res, next) => {
 			console.log("User not found");
 			return res.status(404).json({ error: "User not found" });
 		}
-
+		
 		req.user = user;
 
 		next();

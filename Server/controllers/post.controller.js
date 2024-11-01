@@ -168,8 +168,8 @@ export const getPostById = async (req, res) => {
     .populate('authorId') // Populate the author of the post
     .populate({
       path: 'comments.userId', // Populate the userId in each comment
-      model: 'User' // Specify the User model to populate
-    });;
+      model: 'Users' // Specify the User model to populate
+    });
 
     if (!post) {
       console.error('Post not found');
