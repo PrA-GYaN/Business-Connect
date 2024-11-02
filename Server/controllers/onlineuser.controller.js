@@ -9,7 +9,6 @@ export const getUsersForSidebar = async (req, res) => {
 			path: 'connections.userId',
 			model: 'Users'
 		  });
-		console.log("filteredUsers: ", filteredUsers);
 		res.status(200).json(filteredUsers);
 	} catch (error) {
 		console.error("Error in getUsersForSidebar: ", error.message);

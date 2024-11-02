@@ -8,7 +8,6 @@ import useProfile from '../Hooks/useProfile';
 import Modal from '../Components/Modal';
 
 const Home = () => {
-  // const {loading} = useFeed();
   const {authUser,fullName,profilePic} = useAuthContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
