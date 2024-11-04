@@ -53,11 +53,12 @@ const MeetingScheduler = () => {
         hour = period === 'PM' && hour < 12 ? hour + 12 : hour; // Convert to 24-hour format
         meetingDateTime.setHours(hour, 0); // Set minutes to 0
 
-        const utcDateTime = toZonedTime(meetingDateTime, 'UTC');
-        const formattedDateTimeInUtc = format(utcDateTime, 'yyyy-MM-dd HH:mmXXX', { timeZone: 'UTC' });
-        const formattedDateTimeInLocal = `${startDate.toLocaleDateString()} ${selectedTime}`;
+        const localDateTime = format(meetingDateTime, 'yyyy-MM-dd HH:mmXXX', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
+        const formattedDateTimeInUtc = format(toZonedTime(meetingDateTime, 'UTC'), 'yyyy-MM-dd HH:mmXXX', { timeZone: 'UTC' });
 
-        setMeetingDetails(`Meeting scheduled on ${formattedDateTimeInLocal} in local time.\nIn UTC, that's ${formattedDateTimeInUtc}.`);
+        setMeetingDetails(`Meeting scheduled on ${startDate.toLocaleDateString()} ${selectedTime} in local time.\nIn UTC, that's ${formattedDateTimeInUtc}.`);
+        setStartDate(new Date());
+        setSelectedTime('');
     };
 
     return (
@@ -72,6 +73,7 @@ const MeetingScheduler = () => {
                     filterDate={(date) => !isPastDate(date)}
                     minDate={new Date()}
                     className="date-picker"
+                    aria-label="Select Meeting Date"
                 />
             </div>
             <label htmlFor="time">Select Time: </label>

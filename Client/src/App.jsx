@@ -6,6 +6,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useAuthContext } from "./Context/AuthContext";
 import Loader from './Components/Loader';
 import useListenNotification from './Hooks/useListenNotification';
+import useListenMessages from './Hooks/useListenMessages';
+import MeetingScheduler from './Pages/MeetingScheduler';
+import MeetingList from './Pages/MeetingList';
 
 const Home = lazy(() => import("./Pages/Home"));
 const Login = lazy(() => import("./Pages/Login"));
@@ -23,6 +26,7 @@ const NotFound = lazy(() => import("./Pages/NotFound"));
 function App() {
     const { authUser, loading } = useAuthContext();
     useListenNotification();
+    useListenMessages();
     if (loading) {
         return <Loader/>
     }
@@ -39,7 +43,7 @@ function App() {
                         <Route path='/setup' element={<Setup fullName={''} />} />
                         <Route path="/connections" element={authUser ? <Connections /> : <Navigate to='/login' />} />
                         <Route path="/messages" element={authUser ? <Messages /> : <Navigate to='/login' />} />
-                        <Route path='/post' element={authUser ? <CreatePost /> : <Navigate to='/login' />} />
+                        <Route path="/meeting" element={authUser?<MeetingList/>: <Navigate t='/login'/>} />
                         <Route path="/call" element={<Meeting id={'a'} />} />
                         <Route path="/notifications" element={authUser ? <Notifications /> : <Navigate to='/login' />} />
                         <Route path="/threads" element={<ThreadList />} />

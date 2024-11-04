@@ -1,11 +1,17 @@
 // src/Components/MeetingList.js
 
-import React from 'react';
+import React,{useEffect,useState} from 'react';
 import { format } from 'date-fns-tz';
 import useMeetings from '../Hooks/useMeetings';
+import Loader from '../Components/Loader';
 import './MeetingList.css';
+import MeetingScheduler from '../Components/MeetingScheduler';
+import { useAuthContext } from '../Context/AuthContext';
 
 const MeetingList = () => {
+    const {authUser} = useAuthContext();
+    const [isModalOpen, setModalOpen] = useState(false);
+
     const {
         meetings,
         loading,
@@ -17,7 +23,7 @@ const MeetingList = () => {
         handleReject,
     } = useMeetings();
 
-    if (loading) return <div className="loading">Loading...</div>;
+    if (loading) return <Loader />;
     if (error) return <div className="error">{error}</div>;
 
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -69,6 +75,10 @@ const MeetingList = () => {
                 ) : (
                     <div className="no-meetings">No meetings available</div>
                 )}
+            </div>
+            <div>
+                <button onClick={() => setModalOpen(true)}>Schedule a Meeting</button>
+                <MeetingScheduler isOpen={isModalOpen} onClose={() => setModalOpen(false)}/>
             </div>
         </div>
     );

@@ -13,7 +13,7 @@ const useMeetings = () => {
     useEffect(() => {
         const fetchMeetings = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/meetings/allmeetings', {
+                const response = await axios.get(`http://localhost:5000/meetings/allmeetings/${authUser}`, {
                     withCredentials: true,
                 });
                 setMeetings(response.data);
@@ -83,10 +83,22 @@ const useMeetings = () => {
 
     const meetingsToDisplay = selectedStatus === 'all' ? meetings : groupedMeetings[selectedStatus] || [];
 
+    const meetingRequest = async (meeting) => {
+        try {
+            await axios.post(`http://localhost:5000/meetings/sendmeetingreq`, { meeting }, {
+                withCredentials: true,
+            });
+            setUpdateCount(prev => prev + 1);
+        } catch (err) {
+            setError("Failed to request meeting.");
+        }
+    }
+
     return {
         meetings,
         loading,
         error,
+        meetingRequest,
         selectedStatus,
         setSelectedStatus,
         meetingsToDisplay,

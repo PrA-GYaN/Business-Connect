@@ -1,7 +1,8 @@
 import express from "express";
 import multer from 'multer';
 import protectedRoute from '../middleware/protectedRoute.js';
-import {login,updateUserSelection,Liked_Dislike,getAllUser,sendOTP, getNotification,getProfileById, signup, sendNotification} from "../controllers/user.controller.js";
+import { getNotifications,sendNotification } from "../controllers/notification.controller.js";
+import {login,updateUserSelection,Liked_Dislike,getAllUser,sendOTP,getProfileById, signup} from "../controllers/user.controller.js";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -13,7 +14,7 @@ router.post("/login", login);
 router.get("/getallusers",protectedRoute,getAllUser);
 router.post("/swipe",protectedRoute,Liked_Dislike);
 router.get("/getprofilebyid/:id", getProfileById);
-router.get("/notification/:userId",getNotification);
+router.get("/notification",protectedRoute,getNotifications);
 router.post("/notify",sendNotification);
 router.post("/send-otp",sendOTP);
 

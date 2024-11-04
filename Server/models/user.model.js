@@ -11,18 +11,6 @@ public_id: {
 	required: true,
 }
 });
-const interest = new Schema({
-    name: { type: String, required: true }
-});
-const language = new Schema({
-    name: { type: String, required: true }
-});
-const activity = new Schema({
-    name: { type: String, required: true }
-});
-const skill = new Schema({
-    name: { type: String, required: true }
-});
 const certificate = new Schema({
     name: { type: String, required: true }
 });
@@ -35,8 +23,7 @@ const connection = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'Users' }
 });
 const meeting = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'Users' },
-  date:{type:Date,required:true}
+  meetingId: { type: Schema.Types.ObjectId, ref: 'Meeting' },
 });
 
 

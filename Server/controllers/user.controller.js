@@ -1,8 +1,8 @@
 import bcrypt from "bcryptjs";
-import { getReceiverSocketId, io } from "../socket/socket.js";
 import User from "../models/user.model.js";
 import generateTokenAndSetCookie from "../utils/generateToken.js";
 import cloudinary from "../utils/cloudinary.js";
+import { sendNotification } from "./notification.controller.js";
 import stream from 'stream';
 import qrcode from 'qrcode-terminal';
 import pkg from 'whatsapp-web.js';
@@ -188,34 +188,6 @@ export const login = async (req, res) => {
 	}
 };
 
-export const getNotification = (req, res) => {
-	console.log("GET NOTIFICATION Called");
-    const userId = req.params.userId;
-    let userNotifications = ['Notification 1','Notification 2'];
-    if (userId === '6703c44dfd53728b2ef7a835') {
-        userNotifications.push('Notification 3');
-        // userNotifications.push('Notification 1');
-		
-    } else if (userId) {
-        userNotifications.push('Notification 4');
-    } else {
-        return res.status(400).json({ message: 'Invalid user ID provided.' });
-    }
-    return res.status(200).json(userNotifications);
-};
-
-export const sendNotification = (message,receiverId) => {
-	const newNotification = message;
-	const receiverSocketId = getReceiverSocketId(receiverId);
-    console.log("Receiver Socket ID:",receiverSocketId);
-		if (receiverSocketId) {
-            console.log("Sending Notification to:",receiverSocketId);
-			// io.to(<socket_id>).emit() used to send events to specific client
-			io.to(receiverSocketId).emit("newNotification", newNotification);
-			console.log("Notification sent:",newNotification);
-		}
-};
-
 export const getProfileById = async (req, res) => {
 	const id = req.params.id;
 	try{
@@ -281,17 +253,16 @@ export const Liked_Dislike = async (req, res) => {
 
             if (!likedUser.connections.some(conn => conn.userId.toString() === userId.toString())) {
                 likedUser.connections.push({ userId });
-                await likedUser.save();
-                console.log("Added Connection in Liked User");
-                sendNotification(`${user.fullName} has liked you!`,likedUserId);
                 sendNotification(`${likedUser.fullName} has liked you!`,userId);
+                sendNotification(`${user.fullName} has liked you!`,likedUserId);
+                await likedUser.save();
             }
 
             if (!user.connections.some(conn => conn.userId.toString() === likedUserId.toString())) {
                 user.connections.push({ userId: likedUserId });
+                sendNotification(`${likedUser.fullName} has liked you back!`,userId);
                 await user.save();
                 console.log("Added Connection in User");
-                sendNotification(`${likedUser.fullName} has liked you back!`,userId);
             }
         } else {
             console.log("Reverse swipe not found or conditions not met");

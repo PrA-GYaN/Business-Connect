@@ -18,7 +18,11 @@ const useNotification = () => {
             clearNotifications();
             try {
                 console.log('Calling getNotification');
-                const res = await axios.get(`http://localhost:5000/users/notification/${authUser}`);
+                const res = await axios.get(`http://localhost:5000/users/notification/`,
+                    {
+                        withCredentials: true,
+                    }
+                );
                 const data = res.data;
                 data.forEach(item => {
                     addNotification(item);

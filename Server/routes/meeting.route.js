@@ -4,7 +4,7 @@ import { getAllMeetings,sendMeetingRequest,rejectMeetingRequest, acceptMeetingRe
 
 
 const router = express.Router();
-router.get("/allmeetings", protectedRoute, getAllMeetings);
+router.get("/allmeetings/:id", protectedRoute, getAllMeetings);
 router.post("/sendmeetingreq", protectedRoute,sendMeetingRequest);
 router.post("/confirmmeetings/:id", protectedRoute,acceptMeetingRequest);
 router.post("/rejectmeetings/:id", protectedRoute,rejectMeetingRequest);
