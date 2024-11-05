@@ -28,12 +28,11 @@ export const createComment = async (req, res) => {
     }
 };
 
-// Get all comments for a thread
 export const getCommentsByThreadId = async (req, res) => {
     try {
         const comments = await Comment.find({ thread: req.params.threadId })
-            .populate('author', 'username')
-            .populate('replies'); // Populate replies
+            .populate('author', 'fullName')
+            .populate('replies');
         res.status(200).json(comments);
     } catch (error) {
         res.status(400).json({ error: error.message });

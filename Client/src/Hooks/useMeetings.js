@@ -12,6 +12,7 @@ const useMeetings = () => {
 
     useEffect(() => {
         const fetchMeetings = async () => {
+            console.log('Fetching meetings');
             try {
                 const response = await axios.get(`http://localhost:5000/meetings/allmeetings/${authUser}`, {
                     withCredentials: true,
@@ -23,9 +24,8 @@ const useMeetings = () => {
                 setLoading(false);
             }
         };
-
         fetchMeetings();
-    }, [updateCount]);
+    }, [setUpdateCount, updateCount]);
 
     const updateMeetingStatus = (meetingId, newStatus) => {
         setMeetings(prevMeetings =>
@@ -46,11 +46,11 @@ const useMeetings = () => {
 
     const handleConfirm = async (meetingId) => {
         updateMeetingStatus(meetingId, 'accepted');
-
         try {
             await axios.post(`http://localhost:5000/meetings/confirmmeetings/${meetingId}`, { user: authUser }, {
                 withCredentials: true,
             });
+            setUpdateCount(prev => prev + 1);
         } catch (err) {
             setError("Failed to confirm meeting.");
             updateMeetingStatus(meetingId, 'pending');

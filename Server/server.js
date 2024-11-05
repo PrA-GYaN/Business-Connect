@@ -29,8 +29,8 @@ app.use("/users", userRoutes);
 app.use("/posts", postRoutes);
 app.use('/messages', messageRoutes);
 app.use("/meetings", meetingRoutes);
-app.use("/thread", threadRoutes);
-app.use("/comment", commentRoutes);
+app.use("/threads", threadRoutes);
+app.use("/comments", commentRoutes);
 
 server.listen(PORT, () => {
     connectToMongoDB();

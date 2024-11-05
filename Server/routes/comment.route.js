@@ -4,7 +4,7 @@ import protectedRoute from "../middleware/protectedRoute.js";
 
 const router = express.Router();
 
-router.post("/create", protectedRoute, createComment);
+router.post("/create", createComment);
 router.post("/delete", protectedRoute, deleteComment);
 router.post("/update", protectedRoute, updateComment);
 router.get("/getbyid/:threadId", getCommentsByThreadId);

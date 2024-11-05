@@ -1,5 +1,3 @@
-// src/Components/CommentList.js
-
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuthContext } from '../Context/AuthContext';
@@ -9,7 +7,6 @@ import Loader from '../Components/Loader';
 const CommentList = () => {
     const { authUser, fullName } = useAuthContext();
     const { threadId } = useParams();
-    
     const {
         comments,
         loading,
@@ -28,6 +25,7 @@ const CommentList = () => {
     if (loading) return <Loader />;
     if (error) return <div>{error}</div>;
     if (!comments) return <div>No comments found.</div>;
+    console.log(comments);
 
     return (
         <div>
@@ -40,7 +38,7 @@ const CommentList = () => {
                 {comments.map((comment) => (
                     <li key={comment._id}>
                         <p>{comment.content}</p>
-                        <p>Author: {comment.author.username}</p>
+                        <p>Author: {comment.author.fullName}</p>
                         <p>Votes: {(comment.upvotes?.length || 0) - (comment.downvotes?.length || 0)}</p>
                         <button onClick={() => handleVote(comment._id, 'upvote')}>Upvote</button>
                         <button onClick={() => handleVote(comment._id, 'downvote')}>Downvote</button>

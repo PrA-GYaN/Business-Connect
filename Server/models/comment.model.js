@@ -7,7 +7,7 @@ const CommentSchema = new mongoose.Schema({
     },
     author: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'Users',
         required: true,
     },
     thread: {
@@ -24,11 +24,11 @@ const CommentSchema = new mongoose.Schema({
     },
     upvotes:[{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'Users'
       }],
     downvotes:[{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'Users'
       }],
       replies: [{
         type: mongoose.Schema.Types.ObjectId,

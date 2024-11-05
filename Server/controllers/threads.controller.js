@@ -1,6 +1,6 @@
 import Thread from '../models/thread.model.js'; // Adjust the path as necessary
 import Comment from '../models/comment.model.js'; // Adjust the path as necessary
-
+import timeAgo  from '../utils/timeago.js';
 // Create a new thread
 export const createThread = async (req, res) => {
     try {
@@ -14,11 +14,18 @@ export const createThread = async (req, res) => {
     }
 };
 
-// Get all threads
 export const getAllThreads = async (req, res) => {
+    console.log('Getting all threads');
     try {
-        const threads = await Thread.find().populate('author', 'username').sort({ createdAt: -1 });
-        res.status(200).json(threads);
+        const threads = await Thread.find().populate('author', 'fullName profilePic').sort({ createdAt: -1 })
+        const threadsWithTimeAgo = threads.map(thread => {
+            return {
+                ...thread._doc,
+                timeAgo: timeAgo(thread.createdAt)
+            };
+        });
+
+        res.status(200).json(threadsWithTimeAgo);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

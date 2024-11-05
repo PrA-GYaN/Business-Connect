@@ -11,12 +11,13 @@ const useComments = (threadId, authUser, fullName) => {
     const [openReply, setOpenReply] = useState(null);
     const [visibleReplies, setVisibleReplies] = useState({});
 
+
     useEffect(() => {
         const fetchComments = async () => {
             setLoading(true);
             setError(null);
             try {
-                const response = await axios.get(`http://localhost:5000/comment/getbyid/${threadId}`);
+                const response = await axios.get(`http://localhost:5000/comments/getbyid/${threadId}`);
                 setComments(response.data);
             } catch (err) {
                 console.error('Error fetching comments:', err);
@@ -45,7 +46,7 @@ const useComments = (threadId, authUser, fullName) => {
         setComments([optimisticComment, ...comments]);
 
         try {
-            const response = await axios.post('http://localhost:5000/comment/create', newComment, { withCredentials: true });
+            const response = await axios.post('http://localhost:5000/comments/create', newComment, { withCredentials: true });
             setComments(prevComments =>
                 prevComments.map(comment =>
                     comment._id === optimisticComment._id
@@ -89,7 +90,7 @@ const useComments = (threadId, authUser, fullName) => {
         setOpenReply(null);
 
         try {
-            const response = await axios.post('http://localhost:5000/comment/create', newReply, { withCredentials: true });
+            const response = await axios.post('http://localhost:5000/comments/create', newReply, { withCredentials: true });
             setComments(prevComments =>
                 prevComments.map(comment =>
                     comment._id === parentCommentId
@@ -122,7 +123,7 @@ const useComments = (threadId, authUser, fullName) => {
         const hasDownvoted = comment?.downvotes.includes(authUser);
 
         try {
-            const url = `http://localhost:5000/comment/${isUpvote ? 'upvote' : 'downvote'}/${commentId}`;
+            const url = `http://localhost:5000/comments/${isUpvote ? 'upvote' : 'downvote'}/${commentId}`;
             await axios.post(url, {}, { withCredentials: true });
 
             setComments(prevComments =>

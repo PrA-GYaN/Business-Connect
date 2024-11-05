@@ -46,7 +46,7 @@ function App() {
                         <Route path="/meeting" element={authUser?<MeetingList/>: <Navigate t='/login'/>} />
                         <Route path="/call" element={<Meeting id={'a'} />} />
                         <Route path="/notifications" element={authUser ? <Notifications /> : <Navigate to='/login' />} />
-                        <Route path="/threads" element={<ThreadList />} />
+                        <Route path="/threads" element={authUser?<ThreadList />:<Navigate to='/login'/>} />
                         <Route path="/threads/:threadId" element={<CommentList />} />
                         <Route path="*" element={<NotFound />} />
                     </Routes>

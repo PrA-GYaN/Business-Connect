@@ -1,0 +1,119 @@
+.threadBox
+{
+    height: 100%;
+    margin-top: 13vh;
+    background-color: #98ccfa;
+}
+.threadContainer
+{
+    display: flex;
+    flex-direction: row;
+    gap: 0.7rem;
+}
+.leftPanel
+{
+    flex: 0 0 25%;
+    min-width: 17rem;
+    max-width: 20rem;
+    border-right: 1px solid black;
+}
+.rightPanel
+{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    padding: 1rem;
+    min-width: 35rem;
+}
+.threadsBox
+{
+    padding:0.5rem 0;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+.threadItem
+{
+    border-radius: 1rem;
+    /* background-color: #0c8bfa; */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+}
+.threadItem:hover
+{
+    background-color: #5aaef8;
+    cursor: pointer;
+}
+.title
+{
+    font-size: 1.5rem;
+    font-weight: 700;
+    width: fit-content;
+}
+.title:hover
+{
+    cursor: pointer;
+}
+.links
+{
+    text-decoration: none;
+    color: black;
+    width: fit-content;
+}
+.links:hover
+{
+    color: black;
+}
+.profileinfo
+{
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    align-items: center;
+}
+.profilePic
+{
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 50%;
+    background-color: crimson;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+.fullName
+{
+    color: black;
+}
+.timeAgo,.content
+{
+    color: rgb(78, 78, 78);
+    font-size: 0.8rem;
+}
+.content
+{
+    color: rgb(78, 78, 78);
+    font-size: 1rem;
+}
+.voteButtons
+{
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    padding: 0.3rem 0.6rem;
+    background-color: #67b8ff;
+    align-items: center;
+    width: fit-content;
+    border-radius: 1.5rem;
+}
+.downvoteButton,.upvoteButton
+{
+    font-size: 1.4rem;
+}
+.active
+{
+    font-size: 2rem;
+}

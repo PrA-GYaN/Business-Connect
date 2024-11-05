@@ -1,6 +1,7 @@
 import Meeting from "../models/meeting.model.js";
 import User from "../models/user.model.js";
 import {sendNotification} from "./notification.controller.js";
+import mongoose from "mongoose";
 // Send a meeting request
 export const sendMeetingRequest = async (req, res) => {
     const meetingData = req.body.meeting;
@@ -20,9 +21,13 @@ export const sendMeetingRequest = async (req, res) => {
     }
 };
 
+
 export const acceptMeetingRequest = async (req, res) => {
     const meetingId = req.params.id;
     const UserId = req.user._id;
+    const chkid = req.user._id;
+
+    console.log("User ID:", chkid);
 
     console.log(`Accepting meeting request for meeting ID: ${meetingId} by user ID: ${UserId}`);
 
@@ -31,45 +36,52 @@ export const acceptMeetingRequest = async (req, res) => {
     }
 
     try {
+        // Fetch the meeting by ID
         const meeting = await Meeting.findById(meetingId);
 
         if (!meeting) {
             return res.status(404).json({ message: 'Meeting not found' });
         }
 
+        // Find the participant
         const participant = meeting.participants.find(p => p.userId.toString() === UserId.toString());
         if (!participant) {
             return res.status(404).json({ message: 'Participant not found' });
         }
 
+        // Update the participant's status
         participant.status = "accepted";
+        const createdBy = meeting.createdBy;
+        
+        const user1 = await User.findById(createdBy);
+        const user2 = await User.findById(chkid);
+        const user_name = user2.fullName;
+        
+        if (!user1 || !user2) {
+            throw new Error('One or both users not found.');
+        }
 
-        // Ensure you're updating the users correctly
-        const updateUser1 = User.findByIdAndUpdate(
-            participant.userId, 
-            { $addToSet: { meetings: meetingId } }, 
-            { new: true }
-        );
+        if (!user1.meetings.includes(meetingId)) {
+            user1.meetings.push(meetingId);
+        }
+        if (!user2.meetings.includes(meetingId)) {
+            user2.meetings.push(meetingId);
+        }
 
-        const updateUser2 = User.findByIdAndUpdate(
-            UserId, 
-            { $addToSet: { meetings: meetingId } }, 
-            { new: true }
-        );
-
-        await Promise.all([
-            meeting.save(),
-            updateUser1,
-            updateUser2
-        ]);
-
-        await sendNotification(`Your meeting request has been accepted by ${req.user.name}`, meeting.createdBy);
+        await user1.save();
+        await user2.save();
+        
+        await meeting.save();
+        await sendNotification(`Your meeting request has been accepted by ${user_name}`, createdBy);
+        await sendNotification(`You have accepted the meeting request by ${user1.fullName}`, chkid);
         return res.status(200).json(meeting);
+
     } catch (error) {
         console.error("Error accepting meeting:", error);
         return res.status(500).json({ message: 'Error accepting meeting', error: error.message });
     }
 };
+
 
 // Reject a meeting request
 export const rejectMeetingRequest = async (req, res) => {
@@ -87,7 +99,6 @@ export const rejectMeetingRequest = async (req, res) => {
         if (participant) {
             participant.status = "rejected";
             await meeting.save();
-            await sendNotification(`Your meeting request has been rejected by ${userId}`, meeting.createdBy);
             return res.status(200).json(meeting);
         } else {
             return res.status(404).json({ message: 'Participant not found' });
@@ -109,12 +120,11 @@ export const getAllMeetings = async (req, res) => {
         const meetings = await Meeting.find().populate('participants.userId');
 
         if (meetings.length === 0) {
-            return res.status(200).json("No meetings found");
+            return res.status(200).json(emptyArray);
         }
 
         // Filter meetings that the user created or is a participant
         const filteredMeetings = meetings.filter(meeting => {
-            console.log('Meeting:', meeting);
             return meeting.createdBy.toString() === userId.toString() || 
                    meeting.participants.some(participant => participant.userId._id.toString() === getId.toString());
         });
