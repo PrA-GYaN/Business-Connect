@@ -1,0 +1,250 @@
+.createBox
+{
+    height: 87vh;
+    margin-top: 13vh;
+    background-color: #98ccfa;
+}
+.createContainer
+{
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 0.7rem;
+}
+.leftPanel
+{
+    flex: 0 0 25%;
+    min-width: 17rem;
+    max-width: 20rem;
+    border-right: 1px solid black;
+}
+.rightPanel
+{
+    height: 100%;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    padding: 1rem;
+    min-width: 35rem;
+}
+.titleContainer input,
+.searchBox {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.tagContainer button {
+    padding: 10px;
+    font-size: 16px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 15px;
+}
+
+.bodyContainer textarea {
+    width: 100%;
+    height: 150px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: none;
+}
+
+.submitButton {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #0079d3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+.submitButton:hover {
+    background-color: #005ea2;
+}
+
+/* Dropdown for Community */
+.communityContainer select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Modal Styles */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modalContent {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    text-align: center;
+}
+
+.modalContent h2 {
+    margin-bottom: 15px;
+}
+
+.searchBox {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Container for selected tags */
+.selectedTagsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.selectedTagBox {
+    background-color: #0079d3;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.removeTagButton {
+    margin-left: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Tag List */
+.tagsList {
+    max-height: 200px;
+    overflow-y: auto;
+    margin: 10px 0;
+}
+
+.tagItem {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+.tagItem:hover {
+    background-color: #f0f0f0;
+}
+
+/* Highlight selected tags */
+.selectedTag {
+    background-color: #0079d3;
+    color: white;
+}
+
+.noTagsMessage {
+    font-size: 14px;
+    color: #888;
+    padding: 10px;
+}
+
+.closeButton {
+    padding: 8px 16px;
+    background-color: #0079d3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.closeButton:hover {
+    background-color: #005ea2;
+}
+\/* Body Type Selector */
+.bodyTypeSelector {
+    margin: 15px 0;
+    display: flex;
+    gap: 20px;
+    font-size: 16px;
+}
+
+.bodyTypeSelector label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+/* Upload Container */
+.uploadContainer {
+    border: 2px dashed #ddd;
+    padding: 20px;
+    border-radius: 4px;
+    text-align: center;
+    margin-bottom: 15px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.uploadContainer.dragging {
+    background-color: #e0f7fa;
+    border-color: #00796b;
+}
+
+.dropMessage {
+    font-size: 16px;
+    color: #555;
+}
+
+.dropMessage span {
+    color: #00796b;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Uploaded File Info */
+.uploadedFileInfo {
+    margin-top: 10px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.uploadedFileInfo button {
+    padding: 5px 10px;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.uploadedFileInfo button:hover {
+    background-color: #cc0000;
+}

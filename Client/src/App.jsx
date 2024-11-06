@@ -9,6 +9,7 @@ import useListenNotification from './Hooks/useListenNotification';
 import useListenMessages from './Hooks/useListenMessages';
 import MeetingScheduler from './Pages/MeetingScheduler';
 import MeetingList from './Pages/MeetingList';
+import CreateThread from './Components/CreateThread';
 
 const Home = lazy(() => import("./Pages/Home"));
 const Login = lazy(() => import("./Pages/Login"));
@@ -47,6 +48,7 @@ function App() {
                         <Route path="/call" element={<Meeting id={'a'} />} />
                         <Route path="/notifications" element={authUser ? <Notifications /> : <Navigate to='/login' />} />
                         <Route path="/threads" element={authUser?<ThreadList />:<Navigate to='/login'/>} />
+                        <Route path="/create" element={authUser ? <CreateThread /> : <Navigate to='/login' />} />
                         <Route path="/threads/:threadId" element={<CommentList />} />
                         <Route path="*" element={<NotFound />} />
                     </Routes>
