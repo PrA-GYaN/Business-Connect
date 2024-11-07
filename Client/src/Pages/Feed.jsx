@@ -110,7 +110,6 @@ const Feed = () => {
                     </div>
                 </div>
             ))}
-            {/* {loading && <Loader />} */}
             <div ref={observerRef} style={{ height: '20px' }} /> {/* This is the sentinel for loading more posts */}
         </div>
     );

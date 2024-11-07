@@ -10,6 +10,7 @@ import useListenMessages from './Hooks/useListenMessages';
 import MeetingScheduler from './Pages/MeetingScheduler';
 import MeetingList from './Pages/MeetingList';
 import CreateThread from './Components/CreateThread';
+import Profile from './Pages/Profile';
 
 const Home = lazy(() => import("./Pages/Home"));
 const Login = lazy(() => import("./Pages/Login"));
@@ -50,6 +51,7 @@ function App() {
                         <Route path="/threads" element={authUser?<ThreadList />:<Navigate to='/login'/>} />
                         <Route path="/create" element={authUser ? <CreateThread /> : <Navigate to='/login' />} />
                         <Route path="/threads/:threadId" element={<CommentList />} />
+                        <Route path="/profile" element={authUser?<Profile />:<Navigate to='/login'/>} />
                         <Route path="*" element={<NotFound />} />
                     </Routes>
                 </Suspense>

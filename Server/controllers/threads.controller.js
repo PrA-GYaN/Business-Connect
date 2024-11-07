@@ -33,10 +33,22 @@ export const getAllThreads = async (req, res) => {
 
 // Get thread by ID
 export const getThreadById = async (req, res) => {
+    const userId = req.user._id;
     try {
         const thread = await Thread.findById(req.params.id).populate('author', 'username');
         if (!thread) return res.status(404).json({ message: 'Thread not found' });
         res.status(200).json(thread);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const getThreadByProfile = async (req, res) => {
+    const userId = req.params.id;
+    try {
+        const threads = await Thread.find({ author: userId }).populate('author', 'fullName profilePic').sort({ createdAt: -1 })
+        if (threads.length === 0) return res.status(404).json({ message: 'No threads found for this user' });
+        res.status(200).json(threads);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

@@ -1,4 +1,14 @@
 import mongoose from "mongoose";
+const ImageSchema = new mongoose.Schema({
+    url: {
+        type: String,
+        required: true,
+    },
+    public_id: {
+        type: String,
+        required: true,
+    }
+  });
 
 const ThreadSchema = new mongoose.Schema(
     {
@@ -25,12 +35,13 @@ const ThreadSchema = new mongoose.Schema(
         }],
         tags: [{
             type: String,
-            enum: [
-                'technology', 'healthcare', 'finance', 'education',
-                'retail', 'manufacturing', 'hospitality', 'real estate',
-                'transportation', 'non-profit'
-            ],
-            unique: true,
+            enum:[
+                "Entrepreneurship","Leadership",
+                "Marketing","Sales","Startup","Finance","Growth","Networking",
+                "Strategy","Productivity","Investment","Innovation","Management",
+                "Partnerships","Technology","E-commerce","Social Media","Team Building","Funding",
+                "Customer Service","Discussion","News","Question","Review"
+              ],
         }],
         comments: [{
             type: mongoose.Schema.Types.ObjectId,
@@ -41,6 +52,16 @@ const ThreadSchema = new mongoose.Schema(
             enum: ['active', 'closed', 'deleted'],
             default: 'active',
         },
+        community: {
+            type:String,
+            enum: [
+                'technology', 'healthcare', 'finance', 'education',
+                'retail', 'manufacturing', 'hospitality', 'real estate',
+                'transportation', 'non-profit'
+            ],
+            required: true,
+        },
+        image: [ImageSchema],
     },
     {
         timestamps: true,

@@ -224,7 +224,6 @@ export const Liked_Dislike = async (req, res) => {
         console.log("User ID:", userId);
         const { likedUserId, action: initialAction } = req.body;
 
-        // Validate action
         if (!likedUserId || !['right', 'left'].includes(initialAction)) {
             return res.status(400).json({ message: 'Invalid input' });
         }
@@ -273,5 +272,55 @@ export const Liked_Dislike = async (req, res) => {
     } catch (error) {
         console.error("Error processing swipe:", error);
         return res.status(500).json({ message: 'Server error' });
+    }
+};
+
+export const updateUserProfileField = async (req, res) => {
+    const userId = req.user._id
+    const { field, value } = req.body; 
+    const allowedFields = [
+        'fullName',
+        'email',
+        'businessTitle',
+        'industry',
+        'phoneNumber',
+        'address',
+        'dob',
+        'gender',
+        'bio',
+        'education',
+        'job',
+        'company',
+        'verified',
+        'interests',
+        'languages',
+        'activities',
+        'skills',
+        'profilePic',
+        'certificates',
+        'swipes',
+        'connections',
+        'meetings'
+    ];
+
+    if (!allowedFields.includes(field)) {
+        return res.status(400).json({ message: 'Invalid field specified for update' });
+    }
+
+    try {
+        const updatedUser = await Users.findByIdAndUpdate(
+            userId,
+            { [field]: value },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json(updatedUser);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred while updating the profile', error });
     }
 };

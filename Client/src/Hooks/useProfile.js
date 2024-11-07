@@ -14,7 +14,7 @@ const useProfile = () => {
             return null;
         }
     };
-    const getallusers = async() => {
+    const getAllUsers = async() => {
         try {
             const { data } = await axios.get(`http://localhost:5000/users/getallusers`,
             {
@@ -41,7 +41,21 @@ const useProfile = () => {
             return null;
         }
     };
+ 
+ const updateUserProfile = async ( updates) => {
+    try {
+        const { data } = await axios.put(`http://localhost:5000/users/updateUser`, updates, {
+            withCredentials: true,
+        });
+        setProfile((prevProfile) => ({ ...prevProfile, ...data }));
+        return data;
+    } catch (err) {
+        console.error('Error updating profile:', err);
+        return null;
+    }
+};  
 
-    return { profile,like_dislike,getallusers, getProfileById };
+return { profile, like_dislike, getAllUsers, getProfileById, updateUserProfile };
 };
+
 export default useProfile;

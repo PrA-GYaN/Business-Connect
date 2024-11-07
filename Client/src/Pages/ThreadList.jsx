@@ -1,83 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+// ThreadList.js
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthContext } from '../Context/AuthContext';
 import Loader from '../Components/Loader';
 import styles from '../Styles/Threads.module.css';
 import Navbar from '../Components/Navbar';
 import { TiArrowUpOutline, TiArrowUpThick, TiArrowDownOutline, TiArrowDownThick } from "react-icons/ti";
 import { FaRegComment } from "react-icons/fa";
-import CreateThread from '../Components/CreateThread';
+import useThread from '../Hooks/useThread';
 
 const ThreadList = () => {
-    const [threads, setThreads] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const { authUser } = useAuthContext();
     const navigate = useNavigate();
-
-    useEffect(() => {
-        const fetchThreads = async () => {
-            try {
-                const response = await axios.get('http://localhost:5000/threads/getall');
-                const data = Array.isArray(response.data) ? response.data : [];
-                setThreads(data);
-            } catch (error) {
-                console.error('Error fetching threads:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchThreads();
-    }, []);
-
-    const handleUpvote = async (e, threadId) => {
-        e.stopPropagation();
-        try {
-            const response = await axios.post(`http://localhost:5000/threads/upvote/${threadId}`, {}, {
-                withCredentials: true,
-            });
-            setThreads((prevThreads) =>
-                prevThreads.map((thread) =>
-                    thread._id === threadId
-                        ? { ...thread, upvotes: response.data.upvotes, downvotes: response.data.downvotes }
-                        : thread
-                )
-            );
-        } catch (error) {
-            console.error('Error upvoting thread:', error);
-        }
-    };
-
-    const handleDownvote = async (e, threadId) => {
-        e.stopPropagation();
-        try {
-            const response = await axios.post(`http://localhost:5000/threads/downvote/${threadId}`, {}, {
-                withCredentials: true,
-            });
-            setThreads((prevThreads) =>
-                prevThreads.map((thread) =>
-                    thread._id === threadId
-                        ? { ...thread, upvotes: response.data.upvotes, downvotes: response.data.downvotes }
-                        : thread
-                )
-            );
-        } catch (error) {
-            console.error('Error downvoting thread:', error);
-        }
-    };
-
-    const calculateTotalVotes = (upvotes, downvotes) => {
-        return upvotes.length - downvotes.length;
-    };
-
-    const hasUpvoted = (thread) => {
-        return thread.upvotes.includes(authUser);
-    };
-
-    const hasDownvoted = (thread) => {
-        return thread.downvotes.includes(authUser);
-    };
+    const { threads, loading, handleVote, hasUpvoted, hasDownvoted, calculateTotalVotes } = useThread();
 
     if (loading) { return <Loader />; }
 
@@ -116,13 +49,13 @@ const ThreadList = () => {
                                                 <div className={styles.voteButtons}>
                                                     {hasUpvoted(thread) ? (
                                                         <TiArrowUpThick
-                                                            onClick={(e) => handleUpvote(e, thread._id)}
+                                                            onClick={(e) => e.stopPropagation()}
                                                             className={`${styles.upvoteButton} ${styles.active}`}
                                                             disabled
                                                         />
                                                     ) : (
                                                         <TiArrowUpOutline
-                                                            onClick={(e) => handleUpvote(e, thread._id)}
+                                                            onClick={(e) => { e.stopPropagation(); handleVote(thread._id, 'upvote'); }}
                                                             className={styles.upvoteButton}
                                                         />
                                                     )}
@@ -131,19 +64,19 @@ const ThreadList = () => {
                                                     </p>
                                                     {hasDownvoted(thread) ? (
                                                         <TiArrowDownThick
-                                                            onClick={(e) => handleDownvote(e, thread._id)}
+                                                            onClick={(e) => e.stopPropagation()}
                                                             className={`${styles.downvoteButton} ${styles.active}`}
                                                             disabled
                                                         />
                                                     ) : (
                                                         <TiArrowDownOutline
-                                                            onClick={(e) => handleDownvote(e, thread._id)}
+                                                            onClick={(e) => { e.stopPropagation(); handleVote(thread._id, 'downvote'); }}
                                                             className={styles.downvoteButton}
                                                         />
                                                     )}
                                                 </div>
                                                 <div className={styles.comment}>
-                                                    <FaRegComment className={styles.commentBtn}/>
+                                                    <FaRegComment className={styles.commentBtn} />
                                                     <p className={styles.commentCount}>{thread.comments.length}</p>
                                                 </div>
                                             </div>

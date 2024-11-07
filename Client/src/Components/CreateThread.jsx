@@ -38,11 +38,11 @@ const CreateThread = () => {
         try {
             const newThread = {
                 title,
-                content: bodyType === 'text' ? content : uploadedFile,
+                content:content,
+                author: authUser,
                 tags: selectedTags,
                 community: selectedCommunity,
-                author: authUser,
-                bodyType
+                image:uploadedFile
             };
             await axios.post('http://localhost:5000/threads/create', newThread, { withCredentials: true });
             setTitle('');
