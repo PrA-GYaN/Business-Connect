@@ -1,4 +1,4 @@
-import React, { useState,useEffect,useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import useGetConversations from '../Hooks/useGetConversations';
 import Navbar from '../Components/Navbar';
 import styles from '../Styles/Messages.module.css';
@@ -8,14 +8,27 @@ import useConversation from '../Hooks/useConversation';
 import useSendMessage from '../Hooks/useSendMessage';
 import useGetMessages from '../Hooks/useGetMessages';
 import { useAuthContext } from '../Context/AuthContext';
+import { FaVideo } from "react-icons/fa";
+import { RiCalendarScheduleFill } from "react-icons/ri";
+import MeetingScheduler from '../Components/MeetingScheduler';
+import { useNavigate } from 'react-router-dom';
 
 const Messages = () => {
-    const {authUser} = useAuthContext();
+    const { authUser } = useAuthContext();
     const { selectedConversation, setSelectedConversation } = useConversation();
     const { loading, conversations, error } = useGetConversations();
     const { sendMessage } = useSendMessage();
     const { messages } = useGetMessages();
     const [message, setMessage] = useState('');
+    const [isModalOpen, setModalOpen] = useState(false);
+
+    const navigate = useNavigate();
+
+    const openVideoCall = () => {
+        if (selectedConversation) {
+            navigate('/meeting', { state: { selectedConversationId: selectedConversation._id } });
+        }
+    };
 
     const handleUserClick = (user) => {
         setSelectedConversation(user);
@@ -39,21 +52,24 @@ const Messages = () => {
         <div className={styles.messagesBox}>
             <Navbar />
             <div className={styles.messagesContainer}>
-                <Sidebar 
+                <Sidebar
                     loading={loading}
                     error={error}
-                    conversations={conversations} 
-                    selectedConversation={selectedConversation} 
-                    onUserClick={handleUserClick} 
+                    conversations={conversations}
+                    selectedConversation={selectedConversation}
+                    onUserClick={handleUserClick}
                 />
-                <ChatBox 
-                    selectedConversation={selectedConversation} 
-                    messages={messages} 
-                    message={message} 
-                    setMessage={setMessage} 
-                    handleSend={handleSend} 
-                    handleKeyDown={handleKeyDown} 
+                <ChatBox
+                    selectedConversation={selectedConversation}
+                    messages={messages}
+                    message={message}
+                    setMessage={setMessage}
+                    handleSend={handleSend}
+                    handleKeyDown={handleKeyDown}
                     authUser={authUser}
+                    isModalOpen={isModalOpen}
+                    setModalOpen={setModalOpen}
+                    openVideoCall={openVideoCall}
                 />
             </div>
         </div>
@@ -76,11 +92,11 @@ const Sidebar = ({ loading, error, conversations, selectedConversation, onUserCl
             </div>
             <div className={styles.usersBox}>
                 {conversations.map(conversation => (
-                    <UserItem 
-                        key={conversation._id} 
-                        conversation={conversation} 
-                        isSelected={selectedConversation && selectedConversation._id === conversation.userId._id} 
-                        onClick={() => onUserClick(conversation.userId)} 
+                    <UserItem
+                        key={conversation._id}
+                        conversation={conversation}
+                        isSelected={selectedConversation && selectedConversation._id === conversation.userId._id}
+                        onClick={() => onUserClick(conversation.userId)}
                     />
                 ))}
             </div>
@@ -89,11 +105,11 @@ const Sidebar = ({ loading, error, conversations, selectedConversation, onUserCl
 };
 
 const UserItem = ({ conversation, isSelected, onClick }) => (
-    <div 
-        className={`${styles.user} ${isSelected ? styles.selected : ''}`} 
-        onClick={onClick} 
-        role="button" 
-        tabIndex={0} 
+    <div
+        className={`${styles.user} ${isSelected ? styles.selected : ''}`}
+        onClick={onClick}
+        role="button"
+        tabIndex={0}
         onKeyDown={(e) => e.key === 'Enter' && onClick()}
         aria-label={`Chat with ${conversation.userId.fullName}`}
     >
@@ -105,15 +121,24 @@ const UserItem = ({ conversation, isSelected, onClick }) => (
     </div>
 );
 
-const ChatBox = ({ selectedConversation, messages,authUser, message, setMessage, handleSend, handleKeyDown }) => {
+const ChatBox = ({ selectedConversation, messages, authUser, message, setMessage, handleSend, handleKeyDown, isModalOpen, setModalOpen, openVideoCall }) => {
     const messagesContainerRef = useRef(null);
+
     useEffect(() => {
         if (messagesContainerRef.current) {
             messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
         }
     }, [messages, selectedConversation]);
 
-    if (!selectedConversation) return(
+    const openModal = () => {
+        setModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setModalOpen(false);
+    };
+
+    if (!selectedConversation) return (
         <div className={styles.emptyBox}>
             <h3>Select a user to chat</h3>
         </div>
@@ -123,14 +148,30 @@ const ChatBox = ({ selectedConversation, messages,authUser, message, setMessage,
 
     return (
         <div className={styles.chatBox}>
-            <div className={styles.profileInfo}>
-                <div className={styles.profilePicsm} style={{ backgroundImage: `url(${selectedConversation.profilePic[0].url})` }} />
-                <div className={styles.profileName}>{selectedConversation.fullName}</div>
+            <div className={styles.profileInteractions}>
+                <div className={styles.profileInfo}>
+                    <div className={styles.profilePicsm} style={{ backgroundImage: `url(${selectedConversation.profilePic[0].url})` }} />
+                    <div className={styles.profileName}>{selectedConversation.fullName}</div>
+                </div>
+                <div className={styles.interactions}>
+                    <span className={styles.interactionBtn}>
+                        <FaVideo 
+                            className={styles.videoCall} 
+                            onClick={openVideoCall}  // This now works as expected
+                        />
+                    </span>
+                    <span
+                        className={styles.interactionBtn}
+                        onClick={openModal}
+                    >
+                        <RiCalendarScheduleFill className={styles.schedule} />
+                    </span>
+                </div>
             </div>
             <hr />
-            <div 
-                className={styles.messages} 
-                ref={messagesContainerRef} 
+            <div
+                className={styles.messages}
+                ref={messagesContainerRef}
                 style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 200px)' }}
             >
                 {groupedMessages.map((group, groupIndex) => (
@@ -139,12 +180,12 @@ const ChatBox = ({ selectedConversation, messages,authUser, message, setMessage,
                             {new Date(group[0].createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
                         {group.map((msg, msgIndex) => (
-                            <div key={msgIndex} className={`${styles.message} ${(authUser===msg.senderId)? styles.sender:styles.receiver}`}>
-                            <div
-                                className={styles.profilePicsm}
-                                style={{
-                                    backgroundImage: authUser === msg.senderId ? 'none' : `url(${selectedConversation.profilePic[0].url})`,
-                                }}
+                            <div key={msgIndex} className={`${styles.message} ${(authUser === msg.senderId) ? styles.sender : styles.receiver}`}>
+                                <div
+                                    className={styles.profilePicsm}
+                                    style={{
+                                        backgroundImage: authUser === msg.senderId ? 'none' : `url(${selectedConversation.profilePic[0].url})`,
+                                    }}
                                 />
                                 <div className={styles.messageContent}>
                                     {msg.message}
@@ -164,19 +205,27 @@ const ChatBox = ({ selectedConversation, messages,authUser, message, setMessage,
                     onKeyDown={handleKeyDown}
                     aria-label="Type a message"
                 />
-                <BsSendFill 
-                    className={styles.sendBtn} 
-                    onClick={handleSend} 
-                    role="button" 
-                    tabIndex={0} 
+                <BsSendFill
+                    className={styles.sendBtn}
+                    onClick={handleSend}
+                    role="button"
+                    tabIndex={0}
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                     aria-label="Send message"
                 />
             </div>
+
+            {/* Conditionally render MeetingScheduler modal */}
+            {isModalOpen && (
+                <MeetingScheduler
+                    isOpen={isModalOpen}
+                    onClose={closeModal}
+                    participants={[{ userId: selectedConversation._id, status: 'pending' }]}
+                />
+            )}
         </div>
     );
 };
-
 
 const groupMessages = (messages) => {
     const grouped = [];
@@ -188,7 +237,7 @@ const groupMessages = (messages) => {
             currentGroup.push(msg);
         } else {
             const lastMsgTime = new Date(currentGroup[currentGroup.length - 1].createdAt);
-            const timeDiff = (msgTime - lastMsgTime) / 1000; // difference in seconds
+            const timeDiff = (msgTime - lastMsgTime) / 1000;
 
             if (timeDiff <= 60 && msg.senderId === currentGroup[0].senderId) {
                 currentGroup.push(msg);
@@ -205,6 +254,5 @@ const groupMessages = (messages) => {
 
     return grouped;
 };
-
 
 export default Messages;

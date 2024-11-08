@@ -169,6 +169,34 @@
     padding: 0;
       border: 1px solid #7e7e7e;
   }
+  .profileInteractions
+  {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .interactions
+  {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    font-size:1.5rem;
+    color: #213547;
+  }
+  .interactionBtn
+  {
+    display: grid;
+    place-items: center;
+    padding:1rem;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  .interactionBtn:hover
+  {
+    background-color: #98ccfa;
+    border-radius: 1rem;
+  }
   .profileInfo
   {
         display: flex;
