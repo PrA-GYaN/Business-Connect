@@ -9,6 +9,9 @@ import useListenNotification from './Hooks/useListenNotification';
 import useListenMessages from './Hooks/useListenMessages';
 import useListenCall from './Hooks/useListenCall';
 import CallModal from './Components/CallModal';
+import MeetingList from './Pages/MeetingList';
+import { useNavigate } from 'react-router-dom';
+
 
 const Home = lazy(() => import("./Pages/Home"));
 const Login = lazy(() => import("./Pages/Login"));
@@ -25,6 +28,7 @@ const Notifications = lazy(() => import("./Pages/Notification"));
 const NotFound = lazy(() => import("./Pages/NotFound"));
 
 function App() {
+    const navigate = useNavigate();
     const { authUser, loading } = useAuthContext();
     const [isCallModalOpen, setIsCallModalOpen] = useState(false);
     const [caller, setCaller] = useState(''); 
@@ -33,6 +37,15 @@ function App() {
         setCaller(data);
         setIsCallModalOpen(true);
     };
+
+    const acceptCall = () => {
+        setIsCallModalOpen(false);
+        navigate('/call');
+      };
+    
+      const rejectCall = () => {
+        setIsCallModalOpen(false)
+      };
 
     useListenNotification();
     useListenMessages();
@@ -57,8 +70,8 @@ function App() {
                         <Route path="/connections" element={authUser ? <Connections /> : <Navigate to='/login' />} />
                         <Route path="/messages" element={authUser ? <Messages /> : <Navigate to='/login' />} />
                         
-                        <Route path="/meeting" element={authUser ? <Meeting /> : <Navigate to='/login' />} />
-                        {/* <Route path="/meeting" element={<Meeting />} /> */}
+                        <Route path="/meeting" element={authUser ? <MeetingList /> : <Navigate to='/login' />} />
+                        <Route path="/call" element={<Meeting />} />
                         
                         <Route path="/notifications" element={authUser ? <Notifications /> : <Navigate to='/login' />} />
                         <Route path="/threads" element={authUser ? <ThreadList /> : <Navigate to='/login' />} />
@@ -72,8 +85,8 @@ function App() {
             <CallModal
                 isOpen={isCallModalOpen}
                 caller={caller}
-                onAccept={() => setIsCallModalOpen(false)}
-                onReject={() => setIsCallModalOpen(false)}
+                onAccept={acceptCall}
+                onReject={rejectCall}
             />
         </>
     );

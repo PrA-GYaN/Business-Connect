@@ -8,8 +8,8 @@ import { useAuthContext } from '../Context/AuthContext';
 import useMeetings from '../Hooks/useMeetings';
 
 const MeetingScheduler = ({ isOpen, onClose, participants = [] }) => {
-  const {meetingRequest} = useMeetings();
-  const { authUser } = useAuthContext(); // Get the authenticated user
+  const { meetingRequest } = useMeetings();
+  const { authUser } = useAuthContext();
   const { getProfileById } = useProfile();
   const [users, setUsers] = useState([]);
   const [startDate, setStartDate] = useState(new Date());
@@ -83,8 +83,8 @@ const MeetingScheduler = ({ isOpen, onClose, participants = [] }) => {
 
   const handleSubmit = async () => {
     if (!selectedTime || !meetingTitle || !meetingLink || (participants.length === 0 && !selectedUser)) {
-        setErrorMessage('Please fill out all fields: title, time, link, and user (if applicable).');
-        return;
+      setErrorMessage('Please fill out all fields: title, time, link, and user (if applicable).');
+      return;
     }
 
     setErrorMessage('');
@@ -99,21 +99,20 @@ const MeetingScheduler = ({ isOpen, onClose, participants = [] }) => {
 
     // Create the meeting data with only hour and minute
     const meetingData = {
-        title: meetingTitle,
-        startTime: meetingDateTime.toISOString(), // Keep this as ISO for storage
-        endTime: endTime.toISOString(), // Keep this as ISO for storage
-        link: meetingLink, // Meeting link
-        participants: participants.length 
-            ? participants 
-            : [{ userId: selectedUser, status: 'pending' }], // Default status if no participants provided
-        createdBy: authUser // Set createdBy to the authenticated user's ID
+      title: meetingTitle,
+      startTime: meetingDateTime.toISOString(), // Keep this as ISO for storage
+      endTime: endTime.toISOString(), // Keep this as ISO for storage
+      link: meetingLink, // Meeting link
+      participants: participants.length
+        ? participants
+        : [{ userId: selectedUser, status: 'pending' }], // Default status if no participants provided
+      createdBy: authUser, // Set createdBy to the authenticated user's ID
     };
     console.log(meetingData);
     meetingRequest(meetingData);
     setMeetingDetails(`Meeting "${meetingTitle}" scheduled on ${startDate.toLocaleDateString()} ${selectedTime}.\nIn UTC, that's ${meetingData.startTime}.`);
     resetForm();
-};
-
+  };
 
   const confirmClose = () => {
     if (changesMade) {
@@ -132,7 +131,7 @@ const MeetingScheduler = ({ isOpen, onClose, participants = [] }) => {
     setStartDate(new Date());
     setSelectedTime('');
     setMeetingTitle('');
-    setMeetingLink(''); // Reset meeting link
+    setMeetingLink('');
     setSelectedUser('');
     setErrorMessage('');
     setMeetingDetails('');
@@ -159,8 +158,10 @@ const MeetingScheduler = ({ isOpen, onClose, participants = [] }) => {
     <div className={styles.modalOverlay}>
       <div className={styles.modalOverFlow}>
         <div className={styles.modalContent}>
-          <button className={styles.closeButton} onClick={confirmClose}>×</button>
-          <h2>Schedule a Meeting</h2>
+          <div className={styles.closeIcon}>
+            <button className={styles.closeButton} onClick={confirmClose}>×</button>
+          </div>
+          <div className={styles.heading}>Schedule a Meeting</div>
           {errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}
 
           <input
@@ -171,21 +172,10 @@ const MeetingScheduler = ({ isOpen, onClose, participants = [] }) => {
             aria-label="Meeting Title"
             className={styles.inputField}
           />
-
-          <input
-            type="text"
-            value={meetingLink}
-            onChange={handleLinkChange}
-            placeholder="Meeting Link"
-            aria-label="Meeting Link"
-            className={styles.inputField}
-          />
-
-          {/* Conditionally render the user selection dropdown */}
           {!participants.length && (
             <div>
-              <label htmlFor="user">Select User: </label>
-              <select id="user" value={selectedUser} onChange={handleUserChange} aria-label="Select User">
+              {/* <label htmlFor="user">Select User: </label> */}
+              <select className={styles.customselect} id="user" value={selectedUser} onChange={handleUserChange} aria-label="Select User">
                 <option value="">--Select User--</option>
                 {users.map(user => (
                   <option key={user._id} value={user._id}>{user.fullName}</option>
@@ -194,35 +184,35 @@ const MeetingScheduler = ({ isOpen, onClose, participants = [] }) => {
             </div>
           )}
 
-          <div className="date-picker-container">
+          <div className={styles.datePickerContainer}>
             <DatePicker
               selected={startDate}
               onChange={handleDateChange}
               inline
               filterDate={(date) => !isPastDate(date)}
               minDate={new Date()}
-              className="date-picker"
+              className={styles.datePicker}
               aria-label="Select Meeting Date"
             />
           </div>
-          <label htmlFor="time">Select Time: </label>
-          <select id="time" value={selectedTime} onChange={handleTimeChange} aria-label="Select Meeting Time">
+          <label htmlFor="time" className={styles.timeLabel}>Select Time: </label>
+          <select id="time" value={selectedTime} onChange={handleTimeChange} aria-label="Select Meeting Time" className={styles.timeSelect}>
             <option value="">--Select Time--</option>
             {timeOptions.map((time) => (
               <option key={time} value={time}>{time}</option>
             ))}
           </select>
           {selectedTime && (
-            <p className='scheduled'>
+            <p className={styles.scheduled}>
               <b>Scheduled Meeting</b>
               <br />
               Date: {startDate.toLocaleDateString()}<br />
               Time: {selectedTime}
             </p>
           )}
-          <button className="submit-button" onClick={handleSubmit}>Schedule Meeting</button>
+          <button className={styles.submitButton} onClick={handleSubmit}>Schedule Meeting</button>
           {meetingDetails && (
-            <div className='meeting-details'>
+            <div className={styles.meetingDetails}>
               <p><b>{meetingDetails}</b></p>
             </div>
           )}

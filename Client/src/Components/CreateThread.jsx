@@ -3,20 +3,21 @@ import axios from 'axios';
 import { useAuthContext } from '../Context/AuthContext';
 import Navbar from './Navbar';
 import styles from '../Styles/CreateThreads.module.css';
+import { useNavigate } from 'react-router-dom';
 
 const tagsList = [
-    "Entrepreneurship","Leadership",
-    "Marketing","Sales","Startup","Finance","Growth","Networking",
-    "Strategy","Productivity","Investment","Innovation","Management",
-    "Partnerships","Technology","E-commerce","Social Media","Team Building","Funding",
-    "Customer Service","Discussion","News","Question","Review"
-  ];
-  const communityOptions = [
+    "Entrepreneurship", "Leadership", "Marketing", "Sales", "Startup", "Finance", "Growth", "Networking",
+    "Strategy", "Productivity", "Investment", "Innovation", "Management", "Partnerships", "Technology", 
+    "E-commerce", "Social Media", "Team Building", "Funding", "Customer Service", "Discussion", "News", "Question", "Review"
+];
+
+const communityOptions = [
     'technology', 'healthcare', 'finance', 'education', 'retail', 'manufacturing',
     'hospitality', 'real estate', 'transportation', 'non-profit'
 ];
 
 const CreateThread = () => {
+    const navigate = useNavigate();
     const { authUser } = useAuthContext();
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
@@ -24,42 +25,77 @@ const CreateThread = () => {
     const [selectedCommunity, setSelectedCommunity] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchText, setSearchText] = useState('');
-    const [bodyType, setBodyType] = useState('image');
+    const [bodyType, setBodyType] = useState('text');
     const [uploadedFile, setUploadedFile] = useState(null);
     const [isDragging, setIsDragging] = useState(false);
 
+    // Handle submitting the form
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
         if (!authUser) {
             console.error('User is not authenticated');
             return;
         }
 
+        // Check if either content or uploadedFile is present
+        if (bodyType === 'text' && !content) {
+            alert('Content is required for the thread!');
+            return;
+        }
+
+        if (bodyType === 'image' && !uploadedFile) {
+            alert('An image is required for the thread!');
+            return;
+        }
+
         try {
+            // Create a thread object with other data
             const newThread = {
                 title,
-                content:content,
+                content,
                 author: authUser,
                 tags: selectedTags,
                 community: selectedCommunity,
-                image:uploadedFile
             };
-            await axios.post('http://localhost:5000/threads/create', newThread, { withCredentials: true });
+
+            // Create FormData instance
+            const formDataToSubmit = new FormData();
+
+            // Append all thread data to FormData
+            for (const key in newThread) {
+                formDataToSubmit.append(key, newThread[key]);
+            }
+
+            // Append the uploaded file (if any)
+            if (uploadedFile) {
+                formDataToSubmit.append('image', uploadedFile); // Make sure the backend expects 'image'
+            }
+
+            // Log formData (optional, for debugging)
+            console.log('Form data to submit:', formDataToSubmit);
+
+            // Send the POST request with FormData
+            await axios.post('http://localhost:5000/threads/create', formDataToSubmit, { withCredentials: true });
+
+            // Reset form after successful submission
             setTitle('');
             setContent('');
             setSelectedTags([]);
             setSelectedCommunity('');
             setUploadedFile(null);
+
         } catch (error) {
             console.error('Error creating thread:', error);
         }
     };
 
-    // Handle file upload through input or drag-and-drop
+    // Handle file upload
     const handleFileUpload = (file) => {
         setUploadedFile(file);
     };
 
+    // Drag events for file upload
     const handleDragOver = (e) => {
         e.preventDefault();
         setIsDragging(true);
@@ -78,12 +114,14 @@ const CreateThread = () => {
         }
     };
 
+    // Handle tag selection
     const handleTagClick = (tag) => {
         if (!selectedTags.includes(tag)) {
             setSelectedTags([...selectedTags, tag]);
         }
     };
 
+    // Remove tag from selected tags
     const handleRemoveTag = (tagToRemove) => {
         setSelectedTags(selectedTags.filter(tag => tag !== tagToRemove));
     };
@@ -93,7 +131,14 @@ const CreateThread = () => {
             <Navbar />
             <div className={styles.createBox}>
                 <div className={styles.createContainer}>
-                    <div className={styles.leftPanel}>r/anime</div>
+                    <div className={styles.leftPanel}>
+                        <div className={styles.panelHome} onClick={() => navigate('/threads')}>
+                            Home
+                        </div>
+                        <div className={styles.createThread} onClick={() => navigate('/create')}>
+                            Create
+                        </div>
+                    </div>
                     <div className={styles.rightPanel}>
                         <form onSubmit={handleSubmit}>
                             <div className={styles.titleContainer}>
@@ -157,7 +202,6 @@ const CreateThread = () => {
                                         placeholder="Body"
                                         value={content}
                                         onChange={(e) => setContent(e.target.value)}
-                                        required
                                     />
                                 </div>
                             ) : (
@@ -194,7 +238,7 @@ const CreateThread = () => {
                 </div>
             </div>
 
-            {/* Modal */}
+            {/* Modal for selecting tags */}
             {isModalOpen && (
                 <div className={styles.modalOverlay}>
                     <div className={styles.modalContent}>

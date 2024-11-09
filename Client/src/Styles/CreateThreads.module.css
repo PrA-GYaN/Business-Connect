@@ -29,6 +29,25 @@
     padding: 1rem;
     min-width: 35rem;
 }
+.leftPanel
+{
+    flex: 0 0 25%;
+    min-width: 17rem;
+    max-width: 20rem;
+    border-right: 1px solid black;
+    display:flex ;
+    flex-direction: column;
+}
+.leftPanel>div
+{
+    padding: 1rem;
+    border-bottom: 1px solid black;
+}
+.leftPanel>div:hover
+{
+    background-color: #5aaef8;
+    cursor: pointer;
+}
 .titleContainer input,
 .searchBox {
     width: 100%;

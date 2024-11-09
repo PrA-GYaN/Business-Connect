@@ -9,6 +9,13 @@
   justify-content: center;
   align-items: center;
 }
+.heading
+{
+  margin: 0.5rem 0;
+  font-size: 2rem;
+  color: #333;
+  font-weight: 500;
+}
 .modalOverFlow
 {
   padding: 0.5rem;
@@ -31,7 +38,7 @@
 .modalContent {
   min-width: 22rem;
   max-width: 22rem;
-  background: white;
+  background: #d1e5f7;
   border-radius: 1rem;
   padding: 1rem;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -39,18 +46,194 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap:1rem;
 }
-
+.closeIcon
+{
+  width: 100%;
+}
 .closeButton {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: -2%;
+  right: -2%;
   background: transparent;
   border: none;
-  font-size: 20px;
+  font-size:1.5rem;
   cursor: pointer;
 }
 
 .errorMessage {
   color: red;
+}
+.inputField
+{
+  width: 100%;
+  padding:0.75rem;
+  border-radius: 1.5rem;
+  background-color: transparent;
+  border: 1px solid #333;
+  outline: none;
+  color: #333;
+  font-size: 1.2rem;
+}
+.datePicker {
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  padding: 10px;
+  width: 100%;
+  transition: border-color 0.3s;
+}
+
+.customselect {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  transition: border-color 0.3s;
+}
+
+.customselect:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.datePicker {
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  padding: 10px;
+  width: 100%;
+  transition: border-color 0.3s;
+}
+
+.datePicker:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.timeLabel {
+  display: block;
+  margin-top: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Time Select */
+.timeSelect {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+  background-color: #f9f9f9;
+}
+
+.timeSelect:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.scheduled {
+  font-size: 1rem;
+  color: #666;
+  margin: 5px 0;
+}
+
+/* Submit Button */
+.submitButton {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+  font-weight: bold;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.submitButton:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+/* Meeting Details */
+.meetingDetails {
+  margin-top: 20px;
+  font-size: 1rem;
+  color: #333;
+}
+
+/* Date Picker (datePicker specific styles) */
+.datePicker {
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  height: 350px; /* Fixed height for the calendar */
+  overflow: hidden;
+}
+
+.datePicker__header {
+  background-color: #007bff;
+  color: white;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.datePicker__current-month {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.datePicker__day {
+  width: 2rem;
+  height: 2rem;
+  line-height: 2rem;
+  margin: 5px;
+  border-radius: 50%;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.datePicker__day:hover {
+  background-color: #e0f7fa;
+  cursor: pointer;
+}
+
+/* Highlight the selected day */
+.datePicker__day--selected {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Additional styles for the date picker arrows */
+.datePicker__navigation {
+  background-color: #007bff;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.datePicker__navigation:hover {
+  transform: scale(1.1);
+}
+
+/* Animation on click */
+.datePicker__navigation:active {
+  transform: scale(0.95);
+}
+
+.datePicker__navigation:focus {
+  outline: none; /* Ensure no outline appears on focus */
+}
+
+/* Arrow styles */
+.datePicker__navigation-icon {
+  color: white;
+  font-size: 1.7rem; /* Increase arrow size */
 }

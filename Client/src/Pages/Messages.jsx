@@ -26,7 +26,7 @@ const Messages = () => {
 
     const openVideoCall = () => {
         if (selectedConversation) {
-            navigate('/meeting', { state: { selectedConversationId: selectedConversation._id } });
+            navigate('/call', { state: { selectedConversationId: selectedConversation._id } });
         }
     };
 

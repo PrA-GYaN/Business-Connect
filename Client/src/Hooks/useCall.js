@@ -8,7 +8,7 @@ const useCall = (socketId, stream, me, name) => {
   const [callEnded, setCallEnded] = useState(false);
   const [caller, setCaller] = useState("");
   const [idToCall, setIdToCall] = useState(null);
-  const userVideo = useRef(null);
+  const remoteVideoRef = useRef(null);
   const connectionRef = useRef();
   const socket = useSocketContext().socket;
 
@@ -54,8 +54,8 @@ const useCall = (socketId, stream, me, name) => {
     };
 
     peer.ontrack = (event) => {
-      if (userVideo.current) {
-        userVideo.current.srcObject = event.streams[0];
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = event.streams[0];
       }
     };
 
@@ -63,9 +63,9 @@ const useCall = (socketId, stream, me, name) => {
       .then((offer) => peer.setLocalDescription(offer))
       .catch((error) => console.error("Error creating or sending offer:", error));
 
-    socket.on("callAccepted", (signal) => {
+    socket.on("answerCall", (signal) => {
       peer.setRemoteDescription(new RTCSessionDescription(signal));
-      setCallAccepted(true);  // Call is accepted
+      setCallAccepted(true);
     });
 
     connectionRef.current = peer;
@@ -78,18 +78,20 @@ const useCall = (socketId, stream, me, name) => {
     }
 
     const peer = new RTCPeerConnection();
-
     stream.getTracks().forEach((track) => peer.addTrack(track, stream));
-
+    console.log(callerSignal);
     peer.onicecandidate = (event) => {
       if (event.candidate) {
-        socket.emit("answerCall", { signal: { type: peer.localDescription.type, sdp: peer.localDescription.sdp }, to: caller });
+        socket.emit("answerCall", {
+          signal: { type: peer.localDescription.type, sdp: peer.localDescription.sdp },
+          to: caller,
+        });
       }
     };
 
     peer.ontrack = (event) => {
-      if (userVideo.current) {
-        userVideo.current.srcObject = event.streams[0];
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = event.streams[0];
       }
     };
 
@@ -97,11 +99,11 @@ const useCall = (socketId, stream, me, name) => {
       peer.setRemoteDescription(new RTCSessionDescription(callerSignal))
         .then(() => peer.createAnswer())
         .then((answer) => peer.setLocalDescription(answer))
-        .catch((error) => console.error("Error while answering call:", error));
+        .catch((error) => console.error("Error while answering the call:", error));
     }
 
     connectionRef.current = peer;
-    setCallAccepted(true);  // Call is accepted
+    setCallAccepted(true);
   };
 
   const leaveCall = () => {
@@ -119,13 +121,12 @@ const useCall = (socketId, stream, me, name) => {
     callAccepted,
     callEnded,
     caller,
-    userVideo,
+    remoteVideoRef,
     connectionRef,
     callUser,
     answerCall,
     leaveCall,
     idToCall,
-    stopCalling: callAccepted ? () => {} : callUser,
   };
 };
 

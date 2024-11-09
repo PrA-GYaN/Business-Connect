@@ -1,16 +1,65 @@
 import Thread from '../models/thread.model.js'; // Adjust the path as necessary
 import Comment from '../models/comment.model.js'; // Adjust the path as necessary
 import timeAgo  from '../utils/timeago.js';
+import stream from 'stream';
+import cloudinary from '../utils/cloudinary.js';
+
 // Create a new thread
 export const createThread = async (req, res) => {
     try {
-        const { title, content, author } = req.body;
-        const newThread = new Thread({ title, content, author });
+
+        // Destructuring data from the request body
+        const { title, content, author, tags, community } = req.body;
+        const image = req.file;
+
+        // Basic validation of required fields
+        if (!title || !author) {
+            return res.status(400).json({ error: 'Title and author are required fields.' });
+        }
+        // Prepare image data if an image is provided
+        let imageData = null;
+        if (image) {
+            const bufferStream = new stream.PassThrough();
+            bufferStream.end(image.buffer);
+
+            // Upload image to Cloudinary
+            const uploadResult = await new Promise((resolve, reject) => {
+                bufferStream.pipe(cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(result);
+                    }
+                }));
+            });
+
+            // Set image data (url and public_id)
+            imageData = {
+                url: uploadResult.secure_url,
+                public_id: uploadResult.public_id,
+            };
+        }
+
+        // Create a new thread object with the provided data
+        const newThread = new Thread({
+            title,
+            content: content || null,  // If no content, set to null
+            author,
+            tags: tags || [],  // Default to an empty array if no tags are provided
+            community,  // Community field
+            image: imageData || [],  // Add image data if available, otherwise null
+            createdAt: new Date(),  // Add a timestamp for when the thread is created
+        });
+
+        // Save the new thread to the database
         await newThread.save();
-        console.log(newThread);
-        res.status(201).json(newThread);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
+
+        // Return a success response with the new thread data
+        res.status(201).json({ message: 'Thread created successfully', thread: newThread });
+    } catch (err) {
+        // Handle any errors (e.g., database issues, image upload errors)
+        console.error('Unexpected error:', err);
+        res.status(500).json({ error: 'Internal server error.' });
     }
 };
 

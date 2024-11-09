@@ -17,8 +17,7 @@ const ThreadSchema = new mongoose.Schema(
             required: true,
         },
         content: {
-            type: String,
-            required: true,
+            type: String
         },
         author: {
             type: mongoose.Schema.Types.ObjectId,

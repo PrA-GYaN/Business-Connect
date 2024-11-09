@@ -1,4 +1,3 @@
-// ThreadList.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Loader from '../Components/Loader';
@@ -12,7 +11,9 @@ const ThreadList = () => {
     const navigate = useNavigate();
     const { threads, loading, handleVote, hasUpvoted, hasDownvoted, calculateTotalVotes } = useThread();
 
-    if (loading) { return <Loader />; }
+    if (loading) {
+        return <Loader />;
+    }
 
     return (
         <>
@@ -20,7 +21,12 @@ const ThreadList = () => {
             <div className={styles.threadBox}>
                 <div className={styles.threadContainer}>
                     <div className={styles.leftPanel}>
-                        Home
+                        <div className={styles.panelHome} onClick={() => navigate('/threads')}>
+                            Home
+                        </div>
+                        <div className={styles.createThread} onClick={() => navigate('/create')}>
+                            Create
+                        </div>
                     </div>
                     <div className={styles.rightPanel}>
                         {threads.length === 0 ? (
@@ -37,21 +43,31 @@ const ThreadList = () => {
                                                 <div
                                                     className={styles.profilePic}
                                                     style={{
-                                                        backgroundImage: `url(${thread.author.profilePic[0].url})`
+                                                        backgroundImage: `url(${thread.author.profilePic[0]?.url})`
                                                     }}
                                                 ></div>
                                                 <p className={styles.fullName}>{thread.author.fullName}</p>
                                                 <p className={styles.timeAgo}>{thread.timeAgo}</p>
                                             </div>
                                             <div className={styles.title}>{thread.title}</div>
-                                            <p className={styles.content}>{thread.content}</p>
+                                            {thread.content ? (
+                                                <div className={styles.content}>{thread.content}</div>
+                                            ) :null}
+
+                                            {thread.image && thread.image.length > 0 && (
+                                                <div
+                                                    className={styles.image}
+                                                    style={{ backgroundImage: `url(${thread.image[0]?.url})` }}
+                                                />
+                                            )}
+
                                             <div className={styles.interactions}>
                                                 <div className={styles.voteButtons}>
                                                     {hasUpvoted(thread) ? (
                                                         <TiArrowUpThick
                                                             onClick={(e) => e.stopPropagation()}
                                                             className={`${styles.upvoteButton} ${styles.active}`}
-                                                            disabled
+                                                            
                                                         />
                                                     ) : (
                                                         <TiArrowUpOutline
@@ -66,7 +82,7 @@ const ThreadList = () => {
                                                         <TiArrowDownThick
                                                             onClick={(e) => e.stopPropagation()}
                                                             className={`${styles.downvoteButton} ${styles.active}`}
-                                                            disabled
+                                                        
                                                         />
                                                     ) : (
                                                         <TiArrowDownOutline

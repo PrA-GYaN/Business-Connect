@@ -13,19 +13,16 @@ function Meeting() {
   const [me, setMe] = useState("");
   const [stream, setStream] = useState();
   const myVideo = useRef(null);
+  const remoteVideo = useRef(null); // Renamed userVideo to remoteVideo to avoid conflict
 
-  const socketId = onlineUsers[id];
+  const socketId = onlineUsers[id]; // This assumes onlineUsers is an object where the key is userId
 
-  useEffect(() => {
-    if (stream && myVideo.current) {
-      myVideo.current.srcObject = stream;
-    }
-  }, [stream]);
-
+  // Set the user's socket ID
   useEffect(() => {
     setMe(socket.id);
   }, [socket]);
 
+  // Set up the local media stream (audio/video)
   useEffect(() => {
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
@@ -41,31 +38,60 @@ function Meeting() {
       });
   }, []);
 
+  // Whenever the stream changes, update the myVideo element
+  useEffect(() => {
+    if (stream && myVideo.current) {
+      myVideo.current.srcObject = stream;
+    }
+  }, [stream]);
+
+  // Use the custom hook for managing call logic
   const {
     receivingCall,
     callAccepted,
     callEnded,
     caller,
-    userVideo,
+    remoteVideoRef,
     connectionRef,
     callUser,
     answerCall,
     leaveCall,
     idToCall,
-    stopCalling,  // Get stopCalling function
   } = useCall(socketId, stream, me, fullName);
 
+  // Call the user when socketId is available
   useEffect(() => {
     if (socketId && !callAccepted) {
-      stopCalling(socketId);  // Ensure the calling user stops calling if the call is accepted
+      callUser(socketId);
     }
-  }, [callAccepted, socketId, stopCalling]);
+  }, [callAccepted, socketId, callUser]);
+
+  // Function to render call button based on call state
+  const handleCallButton = () => {
+    if (callAccepted && !callEnded) {
+      return (
+        <button onClick={leaveCall}>End Call</button>
+      );
+    } else if (receivingCall && !callAccepted) {
+      return (
+        <>
+          <h1>{caller} is calling...</h1>
+          <button onClick={answerCall}>Answer</button>
+        </>
+      );
+    } else {
+      return (
+        <button onClick={() => callUser(socketId)}>Call</button>
+      );
+    }
+  };
 
   return (
     <>
       <h1 style={{ textAlign: "center", color: "#fff" }}>Zoomish</h1>
       <div className="container">
         <div className="video-container">
+          {/* My video */}
           <div className="video">
             {stream ? (
               <video
@@ -79,11 +105,13 @@ function Meeting() {
               <p>Loading video...</p>
             )}
           </div>
+
+          {/* Remote video */}
           <div className="video">
             {callAccepted && !callEnded ? (
               <video
                 playsInline
-                ref={userVideo}
+                ref={remoteVideo}  // Referencing the renamed video element
                 autoPlay
                 style={{ width: "300px", border: "1px solid #fff" }}
               />
@@ -92,22 +120,13 @@ function Meeting() {
             )}
           </div>
         </div>
+
+        {/* Call control section */}
         <div className="myId">
           <div className="call-button">
-            {callAccepted && !callEnded ? (
-              <button onClick={leaveCall}>End Call</button>
-            ) : (
-              <button onClick={() => callUser(idToCall)}>Call</button>
-            )}
-            {idToCall}
+            {handleCallButton()}
           </div>
         </div>
-        {receivingCall && !callAccepted && (
-          <div className="caller">
-            <h1>{caller} is calling...</h1>
-            <button onClick={answerCall}>Answer</button>
-          </div>
-        )}
       </div>
     </>
   );

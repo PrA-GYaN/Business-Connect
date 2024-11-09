@@ -5,4 +5,116 @@
     background-color: #007C7A;
     position: fixed;
     top: 0;
+    padding: 0.751rem 1rem 0 1rem;
 }
+.profilePic
+{
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-color: #d1e5f7;
+}
+.navbarContainer
+{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+.navbarLeft
+{
+    width: fit-content;
+    display: grid;
+    place-content: center;
+}
+.navbarRight
+{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10rem;
+}
+.navbarLinks
+{
+    display: flex;
+    flex-direction: row;
+    gap:2rem;
+}
+.nonActiveLink
+{
+    display: grid;
+    place-content: center;
+    padding: 0.7rem 2.5rem;
+    border-radius: 0.5rem;
+}
+.icons
+{
+    font-size: 2.2rem;
+    color: #C0C0C0  ;
+}
+.nonActiveLink:hover
+{
+    cursor: pointer;
+    background-color: #005F5D;
+    border-radius: 0.5rem;
+}
+.activeLink{
+    display: grid;
+    place-content: center;
+    padding: 0.7rem 2.5rem;
+    border-bottom: 3px solid #3888f0;
+}
+.navbarProfileDropdown
+{
+    display: flex;
+    flex-direction: row;
+    gap:0.5rem;
+    padding: 0.7rem 1rem;
+    align-items: center;
+}
+.navbarProfileDropdown {
+    position: relative;
+    cursor: pointer;
+  }
+
+.navbarProfileDropdown {
+    position: relative;
+    cursor: pointer;
+  }
+  
+  .navbarProfileDropdownContent {
+    display: none;
+    position: absolute;
+    top: 115%;
+    right: 0;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 150px;
+    z-index: 10;
+  }
+  
+  .navbarProfileDropdownItem {
+    padding: 1rem;
+    border-bottom: 1px solid #ddd;
+  }
+  .navbarProfileDropdownItem:hover {
+    background-color: #bebdbd;
+  }
+  
+  .navbarProfileDropdownItem:last-child {
+    border-bottom: none;
+  }
+  
+  .navbarProfileDropdownContent .dropdownLink{
+    text-decoration: none; 
+  }
+
+  
+  .navbarProfileDropdown.open .navbarProfileDropdownContent {
+    display: block;
+  }
+  

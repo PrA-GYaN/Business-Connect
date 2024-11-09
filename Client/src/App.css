@@ -8,6 +8,10 @@ body
   overflow-x: hidden;
   font-family: sans-serif;
 }
+a:visited
+{
+  color: #213547;
+}
 
 .logo {
   height: 6em;

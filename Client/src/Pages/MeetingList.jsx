@@ -1,12 +1,12 @@
-// src/Components/MeetingList.js
-
 import React,{useEffect,useState} from 'react';
 import { format } from 'date-fns-tz';
 import useMeetings from '../Hooks/useMeetings';
 import Loader from '../Components/Loader';
-import './MeetingList.css';
+import styles from '../Styles/MeetingList.module.css';
 import MeetingScheduler from '../Components/MeetingScheduler';
 import { useAuthContext } from '../Context/AuthContext';
+import Navbar from '../Components/Navbar';
+import { IoIosAddCircle } from "react-icons/io";
 
 const MeetingList = () => {
     const {authUser} = useAuthContext();
@@ -35,17 +35,19 @@ const MeetingList = () => {
         const isCreatedByUser = createdBy === authUser;
 
         return (
-            <li key={_id} className={`meeting-item ${isAccepted ? 'accepted' : isPending ? 'pending' : 'rejected'}`}>
+            <li key={_id}
+                className={`${styles.meetingItem} ${isAccepted ? styles.accepted : isPending ? styles.pending : styles.rejected}`}
+                >
                 <strong>{title}</strong> <br />
                 {format(new Date(startTime), 'Pp', { timeZone })} - 
                 {format(new Date(endTime), 'Pp', { timeZone })} <br />
                 {link && isAccepted && (
-                    <a href={link} target="_blank" rel="noopener noreferrer" className="join-link">Join Meeting</a>
+                    <a href={link} target="_blank" rel="noopener noreferrer" className={styles.joinLink}>Join Meeting</a>
                 )}
                 {isPending && !isCreatedByUser && (
-                    <div className="button-group">
-                        <button onClick={() => handleConfirm(_id)} className="confirm-button">Confirm</button>
-                        <button onClick={() => handleReject(_id)} className="reject-button">Reject</button>
+                    <div className={styles.buttonGroup}>
+                        <button onClick={() => handleConfirm(_id)} className={styles.confirmButton}>Confirm</button>
+                        <button onClick={() => handleReject(_id)} className={styles.rejectButton}>Reject</button>
                     </div>
                 )}
             </li>
@@ -53,34 +55,41 @@ const MeetingList = () => {
     };
 
     return (
-        <div className="meeting-list">
-            <h2>Meetings</h2>
-            <div className="button-group">
-                {['all', 'pending', 'accepted'].map(status => (
-                    <button
-                        key={status}
-                        onClick={() => setSelectedStatus(status)}
-                        className={`status-button ${selectedStatus === status ? 'active' : ''}`}
-                    >
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </button>
-                ))}
-            </div>
+        <>
+        <Navbar />
+        <div className={styles.meetingBox}>
+            <div className={styles.meetingContainer}>
+                <div className={styles.List}>
+                    <div className={styles.heading}>Meetings</div>
+                    <div className={styles.buttonGroup}>
+                        {['all', 'pending', 'accepted'].map(status => (
+                            <button
+                                key={status}
+                                onClick={() => setSelectedStatus(status)}
+                                className={`${styles.statusButton} ${selectedStatus === status ? styles.active : ''}`}
+                            >
+                                {status.charAt(0).toUpperCase() + status.slice(1)}
+                            </button>
+                        ))}
+                    </div>
 
-            <div className="meeting-container">
-                {meetingsToDisplay.length > 0 ? (
-                    <ul className="meeting-list-ul">
-                        {meetingsToDisplay.map(renderMeetingItem)}
-                    </ul>
-                ) : (
-                    <div className="no-meetings">No meetings available</div>
-                )}
-            </div>
-            <div>
-                <button onClick={() => setModalOpen(true)}>Schedule a Meeting</button>
-                <MeetingScheduler isOpen={isModalOpen} onClose={() => setModalOpen(false)}/>
+                    <div className={styles.meetingGroup}>
+                        {meetingsToDisplay.length > 0 ? (
+                            <ul className={styles.meetingList}>
+                                {meetingsToDisplay.map(renderMeetingItem)}
+                            </ul>
+                        ) : (
+                            <div className={styles.noMeetings}>No meetings available</div>
+                        )}
+                    </div>
+                    <div>
+                        <MeetingScheduler isOpen={isModalOpen} onClose={() => setModalOpen(false)}/>
+                    </div>
+                <IoIosAddCircle className={styles.addIcon}  onClick={() => setModalOpen(true)}/>
+                </div>
             </div>
         </div>
+        </>
     );
 };
 
