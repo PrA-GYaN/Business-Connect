@@ -97,7 +97,7 @@ const Feed = () => {
                                     <div key={index} className={styles.commentBox}>
                                         <div 
                                             className={styles.commentPhoto} 
-                                            style={{ backgroundImage: `url(${comment.userId.profilePic})`, marginTop: '0.5rem' }} 
+                                            style={{ backgroundImage: `url(${comment.userId.profilePic[0].url})`, marginTop: '0.5rem' }} 
                                         />
                                         <div className={styles.commentBody}>
                                             <span className={styles.fullname}>{comment.userId.fullName}</span>

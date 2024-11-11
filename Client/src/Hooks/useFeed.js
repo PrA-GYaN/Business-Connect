@@ -90,7 +90,7 @@ const useFeed = () => {
             });
             const newCommentData = {
                 userId: {
-                    profilePic,
+                    profilePic:[{url:profilePic}],
                     fullName,
                 },
                 content: commentContent,

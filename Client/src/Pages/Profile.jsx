@@ -9,11 +9,13 @@ import useThread from "../Hooks/useThread";
 import { TiArrowUpOutline, TiArrowUpThick, TiArrowDownOutline, TiArrowDownThick } from "react-icons/ti";
 import { FaRegComment } from "react-icons/fa";
 import { MdVerified,MdEdit} from "react-icons/md";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useLocation } from "react-router-dom";
 import EditProfileModal from "../Components/EditProfileModal";
 
 const Profile = ({ id }) => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const { pid } = location.state || {};
     const { profile, getProfileById,updateUserProfile, loading: profileLoading, error: profileError } = useProfile();
     const { posts, getPostById, loading: postsLoading, error: postsError, handleLike, handleCommentSubmit, handleCommentChange, toggleComments, visibleComments, newComment, commentLoading } = usePost();
     const { authUser, profilePic } = useAuthContext();
@@ -21,11 +23,12 @@ const Profile = ({ id }) => {
     const [threads, setThreads] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState({});
     const { getThreadByProfile, handleVote, hasUpvoted, hasDownvoted, calculateTotalVotes } = useThread();
-    
+
+    id = pid;
+
     if (!id) {
         id = authUser;
     }
-
     // Fetch profile and posts by id
     useEffect(() => {
         if (id) {

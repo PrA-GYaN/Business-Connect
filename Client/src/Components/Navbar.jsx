@@ -1,26 +1,22 @@
 import styles from '../Styles/Navbar.module.css';
 import { useAuthContext } from '../Context/AuthContext';
-import { NavLink } from 'react-router-dom';  // Import Link for navigation
+import { NavLink } from 'react-router-dom';
 import { FaHome, FaUserFriends, FaSortDown } from "react-icons/fa";
 import { TiMessages } from "react-icons/ti";
 import { IoNotifications, IoCalendarNumber,IoPeopleSharp } from "react-icons/io5";
-import { useState } from 'react'; // Import useState
+import { useState } from 'react';
 import Loader from './Loader';
 
 const Navbar = () => {
   const { authUser, fullName, profilePic, logout } = useAuthContext();
-  
-  // State to manage dropdown visibility
   const [isDropdownOpen, setDropdownOpen] = useState(false);
-
-  // Check if the necessary data is available
   if (!authUser || !fullName || !profilePic) {
     return (
       <Loader />
     );
   }
-
   const handleLogout = () => {
+    console.log("Logging out...");
     logout();
   };
 
@@ -119,8 +115,8 @@ const Navbar = () => {
                   <div className={styles.navbarProfileDropdownItem}>
                     <NavLink to="/profile" className={styles.dropdownLink}>Profile</NavLink>
                   </div>
-                  <div className={styles.navbarProfileDropdownItem} >
-                    <div onClick={handleLogout} className={styles.dropdownButton}>Logout</div>
+                  <div onClick={handleLogout} className={styles.navbarProfileDropdownItem}>
+                    <div className={styles.dropdownButton}>Logout</div>
                   </div>
                 </div>
               )}

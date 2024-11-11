@@ -96,7 +96,7 @@ export const getThreadByProfile = async (req, res) => {
     const userId = req.params.id;
     try {
         const threads = await Thread.find({ author: userId }).populate('author', 'fullName profilePic').sort({ createdAt: -1 })
-        if (threads.length === 0) return res.status(404).json({ message: 'No threads found for this user' });
+        if (threads.length === 0) return res.status(200).json({ message: 'No threads found for this user' });
         res.status(200).json(threads);
     } catch (error) {
         res.status(400).json({ error: error.message });

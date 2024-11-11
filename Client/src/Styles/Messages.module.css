@@ -209,6 +209,11 @@
         font-size: 1.2rem;
         font-weight: 600;
   }
+  .profileName:hover
+  {
+    cursor: pointer;
+    text-decoration: underline;
+  }
   .messages
     {
         flex: 1;

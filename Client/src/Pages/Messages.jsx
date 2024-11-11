@@ -14,7 +14,7 @@ import MeetingScheduler from '../Components/MeetingScheduler';
 import { useNavigate } from 'react-router-dom';
 
 const Messages = () => {
-    const { authUser } = useAuthContext();
+    const { authUser,openProfile } = useAuthContext();
     const { selectedConversation, setSelectedConversation } = useConversation();
     const { loading, conversations, error } = useGetConversations();
     const { sendMessage } = useSendMessage();
@@ -26,6 +26,7 @@ const Messages = () => {
 
     const openVideoCall = () => {
         if (selectedConversation) {
+            // console.log("Opening video call with:", selectedConversation._id);
             navigate('/call', { state: { selectedConversationId: selectedConversation._id } });
         }
     };
@@ -70,6 +71,7 @@ const Messages = () => {
                     isModalOpen={isModalOpen}
                     setModalOpen={setModalOpen}
                     openVideoCall={openVideoCall}
+                    open={openProfile}
                 />
             </div>
         </div>
@@ -121,7 +123,7 @@ const UserItem = ({ conversation, isSelected, onClick }) => (
     </div>
 );
 
-const ChatBox = ({ selectedConversation, messages, authUser, message, setMessage, handleSend, handleKeyDown, isModalOpen, setModalOpen, openVideoCall }) => {
+const ChatBox = ({ selectedConversation, messages, authUser, message, setMessage, handleSend, handleKeyDown, isModalOpen,open, setModalOpen, openVideoCall }) => {
     const messagesContainerRef = useRef(null);
 
     useEffect(() => {
@@ -151,13 +153,13 @@ const ChatBox = ({ selectedConversation, messages, authUser, message, setMessage
             <div className={styles.profileInteractions}>
                 <div className={styles.profileInfo}>
                     <div className={styles.profilePicsm} style={{ backgroundImage: `url(${selectedConversation.profilePic[0].url})` }} />
-                    <div className={styles.profileName}>{selectedConversation.fullName}</div>
+                    <div className={styles.profileName} onClick={()=>open({id:selectedConversation._id})}>{selectedConversation.fullName}</div>
                 </div>
                 <div className={styles.interactions}>
                     <span className={styles.interactionBtn}>
                         <FaVideo 
                             className={styles.videoCall} 
-                            onClick={openVideoCall}  // This now works as expected
+                            onClick={openVideoCall}
                         />
                     </span>
                     <span

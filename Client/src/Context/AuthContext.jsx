@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { jwtDecode } from 'jwt-decode';
+import { useNavigate } from "react-router-dom"; 
 
 export const AuthContext = createContext();
 export const useAuthContext = () => {
@@ -8,6 +9,7 @@ export const useAuthContext = () => {
 };
 
 export const AuthContextProvider = ({ children }) => {
+    const navigate = useNavigate();
     const [authUser, setAuthUser] = useState(null);
     const [fullName, setName] = useState(null);
     const [profilePic, setProfile] = useState(null);
@@ -31,13 +33,20 @@ export const AuthContextProvider = ({ children }) => {
         setLoading(false); // Set loading to false after checking cookie
     }, []);
 
+    const openProfile = ({id}) => {
+        if (id) {
+            navigate('/profile', { state: { pid: id } });
+        }
+    };
+
     const logout = () => {
+        console.log("Logging out...");
         Cookies.remove('User');
         setAuthUser(null);
     };
 
     return (
-        <AuthContext.Provider value={{ authUser, fullName, profilePic, loading, setAuthUser, logout }}>
+        <AuthContext.Provider value={{ authUser, fullName, profilePic, loading, setAuthUser,openProfile, logout }}>
             {children}
         </AuthContext.Provider>
     );

@@ -1,135 +1,162 @@
-import React, { useEffect, useState, useRef } from "react";
-import { useSocketContext } from "../Context/SocketContext";
-import { useAuthContext } from "../Context/AuthContext";
-import { useLocation } from "react-router-dom";
-import useCall from "../Hooks/useCall";
+import React, { useState, useEffect, useRef } from 'react';
+import { io } from 'socket.io-client'; // Assuming you're using Socket.IO for signaling
 
-function Meeting() {
-  const location = useLocation();
-  const { selectedConversationId } = location.state || {};
-  const id = selectedConversationId;
-  const { socket, onlineUsers } = useSocketContext();
-  const { fullName } = useAuthContext();
-  const [me, setMe] = useState("");
-  const [stream, setStream] = useState();
-  const myVideo = useRef(null);
-  const remoteVideo = useRef(null); // Renamed userVideo to remoteVideo to avoid conflict
+const Meeting = () => {
+  const [localStream, setLocalStream] = useState(null);
+  const [peerConnection, setPeerConnection] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
 
-  const socketId = onlineUsers[id]; // This assumes onlineUsers is an object where the key is userId
+  const socket = useRef(null); // Reference to socket instance
 
-  // Set the user's socket ID
+  // Create a reference for the video element (for local and remote display)
+  const localVideoRef = useRef(null);
+  const remoteVideoRef = useRef(null);
+
   useEffect(() => {
-    setMe(socket.id);
-  }, [socket]);
+    // Initialize the socket connection
+    socket.current = io('http://localhost:5000');
 
-  // Set up the local media stream (audio/video)
-  useEffect(() => {
+    // Initialize local media stream (getUserMedia)
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
-        setStream(stream);
-        if (myVideo.current) {
-          myVideo.current.srcObject = stream;
+        setLocalStream(stream);
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = stream;
         }
       })
-      .catch((error) => {
-        console.error("Error accessing media devices:", error);
-        alert("Please allow camera and microphone access.");
+      .catch((err) => {
+        console.error('Error accessing media devices.', err);
       });
+
+    // Handle signaling events from the server
+    socket.current.on('offer', handleOffer);
+    socket.current.on('answer', handleAnswer);
+    socket.current.on('ice-candidate', handleICECandidate);
+
+    return () => {
+      // Cleanup socket listeners when component unmounts
+      socket.current.off('offer');
+      socket.current.off('answer');
+      socket.current.off('ice-candidate');
+    };
   }, []);
 
-  // Whenever the stream changes, update the myVideo element
-  useEffect(() => {
-    if (stream && myVideo.current) {
-      myVideo.current.srcObject = stream;
+  // Create PeerConnection
+  const createPeerConnection = () => {
+    const pc = new RTCPeerConnection();
+
+    // Add local tracks to the peer connection only if localStream exists
+    if (localStream) {
+      localStream.getTracks().forEach((track) => {
+        pc.addTrack(track, localStream);
+      });
     }
-  }, [stream]);
 
-  // Use the custom hook for managing call logic
-  const {
-    receivingCall,
-    callAccepted,
-    callEnded,
-    caller,
-    remoteVideoRef,
-    connectionRef,
-    callUser,
-    answerCall,
-    leaveCall,
-    idToCall,
-  } = useCall(socketId, stream, me, fullName);
+    // Handle remote stream when it's added to the connection
+    pc.ontrack = (event) => {
+      if (remoteVideoRef.current && event.streams[0]) {
+        remoteVideoRef.current.srcObject = event.streams[0];
+      }
+    };
 
-  // Call the user when socketId is available
-  useEffect(() => {
-    if (socketId && !callAccepted) {
-      callUser(socketId);
-    }
-  }, [callAccepted, socketId, callUser]);
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        // Send ICE candidate to the remote peer
+        socket.current.emit('ice-candidate', event.candidate);
+      }
+    };
 
-  // Function to render call button based on call state
-  const handleCallButton = () => {
-    if (callAccepted && !callEnded) {
-      return (
-        <button onClick={leaveCall}>End Call</button>
-      );
-    } else if (receivingCall && !callAccepted) {
-      return (
-        <>
-          <h1>{caller} is calling...</h1>
-          <button onClick={answerCall}>Answer</button>
-        </>
-      );
-    } else {
-      return (
-        <button onClick={() => callUser(socketId)}>Call</button>
-      );
+    return pc;
+  };
+
+  // Handle the offer from the remote peer
+  const handleOffer = (offer) => {
+    const pc = createPeerConnection();
+    setPeerConnection(pc);
+
+    // Set remote description (the offer from the other peer)
+    pc.setRemoteDescription(new RTCSessionDescription(offer))
+      .then(() => {
+        // Create an answer and send it back to the remote peer
+        return pc.createAnswer();
+      })
+      .then((answer) => {
+        return pc.setLocalDescription(answer);
+      })
+      .then(() => {
+        // Send the answer back to the remote peer
+        socket.current.emit('answer', pc.localDescription);
+      })
+      .catch((error) => {
+        console.error('Error handling offer: ', error);
+      });
+  };
+
+  // Handle the answer from the remote peer
+  const handleAnswer = (answer) => {
+    console.log('Answer received');
+    if (peerConnection) {
+      peerConnection.setRemoteDescription(new RTCSessionDescription(answer))
+        .catch((error) => {
+          console.error('Error setting remote description: ', error);
+        });
     }
   };
 
+  // Handle incoming ICE candidates
+  const handleICECandidate = (candidate) => {
+    if (peerConnection) {
+      peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+        .catch((error) => {
+          console.error('Error adding ICE candidate: ', error);
+        });
+    }
+  };
+
+  // Create and send the offer to start the connection
+  const createOffer = () => {
+    const pc = createPeerConnection();
+    setPeerConnection(pc);
+
+    pc.createOffer()
+      .then((offer) => {
+        return pc.setLocalDescription(offer);
+      })
+      .then(() => {
+        // Send the offer to the remote peer
+        socket.current.emit('offer', pc.localDescription);
+      })
+      .catch((error) => {
+        console.error('Error creating offer: ', error);
+      });
+  };
+
+  // Handle connection state
+  useEffect(() => {
+    if (peerConnection && peerConnection.iceConnectionState === 'connected') {
+      setIsConnected(true);
+    } else {
+      setIsConnected(false);
+    }
+  }, [peerConnection]);
+
+  // UI for the meeting component
   return (
-    <>
-      <h1 style={{ textAlign: "center", color: "#fff" }}>Zoomish</h1>
-      <div className="container">
-        <div className="video-container">
-          {/* My video */}
-          <div className="video">
-            {stream ? (
-              <video
-                playsInline
-                muted
-                ref={myVideo}
-                autoPlay
-                style={{ width: "300px", border: "1px solid #fff" }}
-              />
-            ) : (
-              <p>Loading video...</p>
-            )}
-          </div>
+    <div>
+      <h1>WebRTC Meeting</h1>
 
-          {/* Remote video */}
-          <div className="video">
-            {callAccepted && !callEnded ? (
-              <video
-                playsInline
-                ref={remoteVideo}  // Referencing the renamed video element
-                autoPlay
-                style={{ width: "300px", border: "1px solid #fff" }}
-              />
-            ) : (
-              <p>Waiting for user...</p>
-            )}
-          </div>
-        </div>
-
-        {/* Call control section */}
-        <div className="myId">
-          <div className="call-button">
-            {handleCallButton()}
-          </div>
-        </div>
+      <div>
+        <video ref={localVideoRef} autoPlay muted width="300" />
+        <video ref={remoteVideoRef} autoPlay width="300" />
       </div>
-    </>
+
+      <div>
+        {!isConnected && <button onClick={createOffer}>Start Call</button>}
+        {isConnected && <button onClick={() => peerConnection.close()}>End Call</button>}
+      </div>
+    </div>
   );
-}
+};
 
 export default Meeting;
