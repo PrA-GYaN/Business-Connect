@@ -1,6 +1,6 @@
 import Notification from '../models/notification.model.js';
 import { getReceiverSocketId, io } from "../socket/socket.js";
-import timeAgo from '../utils/timeago.js';
+import {timeAgo} from '../utils/timeago.js';
 
 export const getNotifications = async (req, res) => {
     const userId = req.user.id;

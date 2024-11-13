@@ -3,31 +3,58 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 const useGetConversations = () => {
-	const [loading, setLoading] = useState(false);
-	const [conversations, setConversations] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [finalConversations, setFinalConversations] = useState([]);
+  const [middlewareConversations, setMiddlewareConversations] = useState([]);
+  const [lastMessage, setLastMessage] = useState([]);
 
-	useEffect(() => {
-		const getConversations = async () => {
-			setLoading(true);
-			try {
-				const res = await axios.get("http://localhost:5000/messages/getusersforsidebar",
-					{
-						withCredentials:true,
-					}
-				);
-				setConversations(res.data.connections);
-			} catch (error) {
-				const errorMessage = error.response?.data?.error || error.message;
-				toast.error(errorMessage);
-			} finally {
-				setLoading(false);
-			}
-		};
+  useEffect(() => {
+    const getConversations = async () => {
+      setLoading(true);
+      try {
+        // Fetch the conversation data
+        const res = await axios.get("http://localhost:5000/messages/getusersforsidebar", {
+          withCredentials: true,
+        });
+        setMiddlewareConversations(res.data.connections);
+        // console.log("Middleware Conversations:", res.data.connections);
 
-		getConversations();
-	}, []);
+        // Fetch the last message data
+        const resLastMessage = await axios.get("http://localhost:5000/messages/getLastMessage", {
+          withCredentials: true,
+        });
+        // console.log("Last Messages:", resLastMessage.data);
+        setLastMessage(resLastMessage.data);
 
-	return { loading, conversations };
+      } catch (error) {
+        const errorMessage = error.response?.data?.error || error.message;
+        toast.error(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getConversations();
+  }, []);
+
+  useEffect(() => {
+    const combinedConversations = middlewareConversations.map(conversation => {
+      const lastMsg = lastMessage.find(msg => 
+        msg.participants.some(p => p._id === conversation.userId._id)
+      );
+
+      return {
+        ...conversation,
+        lastMessage: lastMsg ? lastMsg.messages[0]?.message : "",
+        timeAgo: lastMsg ? lastMsg.timeAgo : "",
+      };
+    });
+
+    setFinalConversations(combinedConversations);
+    // console.log("Final Conversations:", combinedConversations);
+  }, [middlewareConversations, lastMessage]);
+
+  return { loading, finalConversations };
 };
 
 export default useGetConversations;

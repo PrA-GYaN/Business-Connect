@@ -1,6 +1,6 @@
 import Thread from '../models/thread.model.js'; // Adjust the path as necessary
 import Comment from '../models/comment.model.js'; // Adjust the path as necessary
-import timeAgo  from '../utils/timeago.js';
+import {timeAgo}  from '../utils/timeago.js';
 import stream from 'stream';
 import cloudinary from '../utils/cloudinary.js';
 

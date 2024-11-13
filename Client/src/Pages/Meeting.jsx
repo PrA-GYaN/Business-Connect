@@ -1,159 +1,225 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { io } from 'socket.io-client'; // Assuming you're using Socket.IO for signaling
+import { useSocketContext } from '../Context/SocketContext';
+import { useLocation } from 'react-router-dom';
 
 const Meeting = () => {
-  const [localStream, setLocalStream] = useState(null);
-  const [peerConnection, setPeerConnection] = useState(null);
-  const [isConnected, setIsConnected] = useState(false);
-
-  const socket = useRef(null); // Reference to socket instance
-
-  // Create a reference for the video element (for local and remote display)
+  const { socket,onlineUsers } = useSocketContext();
+  const location = useLocation();
+    const { selectedConversationId } = location.state || {};
+  const [isCallActive, setIsCallActive] = useState(false);
+  const [remoteStream, setRemoteStream] = useState(null);
+  const [peerId, setPeerId] = useState(onlineUsers[selectedConversationId]);
+  const [connectionState, setConnectionState] = useState('disconnected'); // Track connection state
+  const [isCalling, setIsCalling] = useState(false); // To track if the user is in the process of calling
+  const [hasAnswered, setHasAnswered] = useState(false); // Track if the peer has answered the call
   const localVideoRef = useRef(null);
-  const remoteVideoRef = useRef(null);
+  const remoteVideoRef = useRef(null); // Ref for the remote video
+  const peerRef = useRef(null);
+  const localStreamRef = useRef(null); // To keep track of the local stream
+
+  // setPeerId(onlineUsers[selectedConversation]);
+  console.log('peerId:', peerId);
 
   useEffect(() => {
-    // Initialize the socket connection
-    socket.current = io('http://localhost:5000');
+    const initializeMedia = async () => {
+      try {
+        // Get local media stream (video + audio)
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        localStreamRef.current = stream; // Store local stream reference
+        localVideoRef.current.srcObject = stream; // Attach to local video element
 
-    // Initialize local media stream (getUserMedia)
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
-      .then((stream) => {
-        setLocalStream(stream);
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = stream;
-        }
+        // Initialize peer connection
+        peerRef.current = new RTCPeerConnection();
+
+        // Add local tracks to peer connection
+        stream.getTracks().forEach((track) => {
+          peerRef.current.addTrack(track, stream);
+        });
+
+        peerRef.current.onicecandidate = handleICECandidateEvent;
+
+        peerRef.current.ontrack = (event) => {
+          // Handle remote stream
+          if (event.streams && event.streams[0]) {
+            setRemoteStream(event.streams[0]);
+
+            if (remoteVideoRef.current) {
+              remoteVideoRef.current.srcObject = event.streams[0];
+              console.log('Remote video set.');
+            } else {
+              console.error('Remote video element not available.');
+            }
+          } else {
+            console.error('No remote streams received in the ontrack event.');
+          }
+        };
+
+        // Connection state change listener
+        peerRef.current.oniceconnectionstatechange = () => {
+          const iceConnectionState = peerRef.current.iceConnectionState;
+          console.log('ICE Connection State Changed:', iceConnectionState);
+          setConnectionState(iceConnectionState);
+
+          // Handle unexpected disconnection
+          if (iceConnectionState === 'failed') {
+            console.error('ICE connection failed. Attempting to restart...');
+            peerRef.current.restartIce(); // Attempt to restart ICE if connection fails
+          }
+        };
+
+        // Peer connection state change listener
+        peerRef.current.onconnectionstatechange = () => {
+          const connectionState = peerRef.current.connectionState;
+          console.log('Connection State Changed:', connectionState);
+          setConnectionState(connectionState);
+        };
+      } catch (err) {
+        console.error('Error accessing media devices: ', err);
+      }
+    };
+
+    // Initialize media when component mounts
+    if (socket) {
+      socket.on('offer', handleOffer);
+      socket.on('answer', handleAnswer);
+      socket.on('ice-candidate', handleNewICECandidate);
+    }
+
+    // Initialize media stream
+    initializeMedia();
+
+    // Cleanup function
+    return () => {
+      if (localStreamRef.current) {
+        const tracks = localStreamRef.current.getTracks();
+        tracks.forEach(track => track.stop()); // Stop all tracks
+      }
+
+      if (peerRef.current) {
+        peerRef.current.close(); // Close peer connection
+      }
+
+      if (socket) {
+        socket.off('offer', handleOffer);
+        socket.off('answer', handleAnswer);
+        socket.off('ice-candidate', handleNewICECandidate);
+      }
+    };
+  }, [socket]);
+
+  const handleOffer = (offer, from) => {
+    console.log('Offer received:', offer);
+    peerRef.current.setRemoteDescription(new RTCSessionDescription(offer))
+      .then(() => peerRef.current.createAnswer())
+      .then((answer) => {
+        return peerRef.current.setLocalDescription(answer);
+      })
+      .then(() => {
+        console.log('Answer sent to server');
+        socket.emit('answer', peerRef.current.localDescription, from);
+        setHasAnswered(true); // Set state after answering the call
       })
       .catch((err) => {
-        console.error('Error accessing media devices.', err);
-      });
-
-    // Handle signaling events from the server
-    socket.current.on('offer', handleOffer);
-    socket.current.on('answer', handleAnswer);
-    socket.current.on('ice-candidate', handleICECandidate);
-
-    return () => {
-      // Cleanup socket listeners when component unmounts
-      socket.current.off('offer');
-      socket.current.off('answer');
-      socket.current.off('ice-candidate');
-    };
-  }, []);
-
-  // Create PeerConnection
-  const createPeerConnection = () => {
-    const pc = new RTCPeerConnection();
-
-    // Add local tracks to the peer connection only if localStream exists
-    if (localStream) {
-      localStream.getTracks().forEach((track) => {
-        pc.addTrack(track, localStream);
-      });
-    }
-
-    // Handle remote stream when it's added to the connection
-    pc.ontrack = (event) => {
-      if (remoteVideoRef.current && event.streams[0]) {
-        remoteVideoRef.current.srcObject = event.streams[0];
-      }
-    };
-
-    pc.onicecandidate = (event) => {
-      if (event.candidate) {
-        // Send ICE candidate to the remote peer
-        socket.current.emit('ice-candidate', event.candidate);
-      }
-    };
-
-    return pc;
-  };
-
-  // Handle the offer from the remote peer
-  const handleOffer = (offer) => {
-    const pc = createPeerConnection();
-    setPeerConnection(pc);
-
-    // Set remote description (the offer from the other peer)
-    pc.setRemoteDescription(new RTCSessionDescription(offer))
-      .then(() => {
-        // Create an answer and send it back to the remote peer
-        return pc.createAnswer();
-      })
-      .then((answer) => {
-        return pc.setLocalDescription(answer);
-      })
-      .then(() => {
-        // Send the answer back to the remote peer
-        socket.current.emit('answer', pc.localDescription);
-      })
-      .catch((error) => {
-        console.error('Error handling offer: ', error);
+        console.error('Error handling offer:', err);
       });
   };
 
-  // Handle the answer from the remote peer
   const handleAnswer = (answer) => {
-    console.log('Answer received');
-    if (peerConnection) {
-      peerConnection.setRemoteDescription(new RTCSessionDescription(answer))
-        .catch((error) => {
-          console.error('Error setting remote description: ', error);
-        });
-    }
-  };
-
-  // Handle incoming ICE candidates
-  const handleICECandidate = (candidate) => {
-    if (peerConnection) {
-      peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
-        .catch((error) => {
-          console.error('Error adding ICE candidate: ', error);
-        });
-    }
-  };
-
-  // Create and send the offer to start the connection
-  const createOffer = () => {
-    const pc = createPeerConnection();
-    setPeerConnection(pc);
-
-    pc.createOffer()
-      .then((offer) => {
-        return pc.setLocalDescription(offer);
-      })
+    console.log('Answer received:', answer);
+    peerRef.current.setRemoteDescription(new RTCSessionDescription(answer))
       .then(() => {
-        // Send the offer to the remote peer
-        socket.current.emit('offer', pc.localDescription);
+        console.log('Remote description set after answer');
+        setHasAnswered(true); // Update state to reflect that the call has been answered
       })
-      .catch((error) => {
-        console.error('Error creating offer: ', error);
+      .catch((err) => {
+        console.error('Error setting remote description after answer:', err);
       });
   };
 
-  // Handle connection state
-  useEffect(() => {
-    if (peerConnection && peerConnection.iceConnectionState === 'connected') {
-      setIsConnected(true);
+  const handleICECandidateEvent = (event) => {
+    if (event.candidate) {
+      console.log('Sending ICE candidate:', event.candidate);
+      socket.emit('ice-candidate', event.candidate, peerId);
     } else {
-      setIsConnected(false);
+      console.log('All ICE candidates have been sent.');
     }
-  }, [peerConnection]);
+  };
 
-  // UI for the meeting component
+  const handleNewICECandidate = (candidate) => {
+    console.log('Received new ICE candidate:', candidate);
+    peerRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+  };
+
+  const handleCall = () => {
+    if (!peerId) {
+      alert('Please enter a valid peer ID');
+      return;
+    }
+
+    setIsCalling(true);
+
+    peerRef.current
+      .createOffer()
+      .then((offer) => peerRef.current.setLocalDescription(offer))
+      .then(() => {
+        socket.emit('offer', peerRef.current.localDescription, peerId);
+        setIsCallActive(true);
+      })
+      .catch((err) => {
+        console.error('Error creating offer: ', err);
+        setIsCalling(false);
+      });
+  };
+
+  const handlePeerIdChange = (e) => {
+    setPeerId(e.target.value);
+  };
+
+  // Update remote video element if remote stream changes
+  useEffect(() => {
+    if (remoteStream && remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStream;
+      console.log('Remote video stream set after update.');
+    }
+  }, [remoteStream]);
+
   return (
     <div>
-      <h1>WebRTC Meeting</h1>
+      <div className="video-container">
+        <div>
+          <h3>Your Video</h3>
+          <video ref={localVideoRef} autoPlay muted width="300" height="200" />
+        </div>
 
-      <div>
-        <video ref={localVideoRef} autoPlay muted width="300" />
-        <video ref={remoteVideoRef} autoPlay width="300" />
+        {remoteStream ? (
+          <div>
+            <h3>Remote Video</h3>
+            <video ref={remoteVideoRef} autoPlay width="300" height="200" />
+          </div>
+        ) : (
+          <p>Waiting for remote peer...</p>
+        )}
       </div>
 
       <div>
-        {!isConnected && <button onClick={createOffer}>Start Call</button>}
-        {isConnected && <button onClick={() => peerConnection.close()}>End Call</button>}
+        <input
+          type="text"
+          placeholder="Enter peer ID"
+          value={peerId}
+          onChange={handlePeerIdChange}
+        />
+        <button onClick={handleCall} disabled={!peerId || isCallActive || isCalling}>
+          {isCalling ? 'Calling...' : 'Start Call'}
+        </button>
+      </div>
+
+      {isCallActive && <p>Call in progress...</p>}
+      
+      {hasAnswered && <p>Call Answered</p>}
+      
+      <div>
+        <p>Connection State: {connectionState}</p>
+        {connectionState === 'connected' && <p>Connection successfully established!</p>}
       </div>
     </div>
   );

@@ -16,12 +16,12 @@ import { useNavigate } from 'react-router-dom';
 const Messages = () => {
     const { authUser,openProfile } = useAuthContext();
     const { selectedConversation, setSelectedConversation } = useConversation();
-    const { loading, conversations, error } = useGetConversations();
+    const { loading, finalConversations, error } = useGetConversations();
     const { sendMessage } = useSendMessage();
     const { messages } = useGetMessages();
     const [message, setMessage] = useState('');
     const [isModalOpen, setModalOpen] = useState(false);
-
+    const conversations = finalConversations;
     const navigate = useNavigate();
 
     const openVideoCall = () => {
@@ -118,7 +118,7 @@ const UserItem = ({ conversation, isSelected, onClick }) => (
         <div className={styles.profilePic} style={{ backgroundImage: `url(${conversation.userId.profilePic[0].url})` }} />
         <div className={styles.userInfo}>
             <div className={styles.userName}>{conversation.userId.fullName}</div>
-            <div className={styles.lastMessage}>Test Message</div>
+            <div className={styles.lastMessage}>{conversation.lastMessage}{"\u00A0\u00A0\u00A0"}{conversation.timeAgo}</div>
         </div>
     </div>
 );

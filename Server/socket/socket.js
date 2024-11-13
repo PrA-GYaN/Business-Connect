@@ -32,21 +32,25 @@ export const getReceiverSocketId = (receiverId) => {
 
 io.on("connection", (socket) => {
 
-  socket.on('offer', (offer) => {
+  socket.on('offer', (offer, to) => {
     console.log('Offer received');
-    socket.broadcast.emit('offer', offer);
+    // to = getReceiverSocketId(to); // Get the socket ID of the target user
+    socket.to(to).emit('offer', offer, socket.id); // Send offer to the target user
   });
 
-  socket.on('answer', (answer) => {
-    socket.broadcast.emit('answer', answer);
+  // Handle incoming answer
+  socket.on('answer', (answer, to) => {
+    console.log('Answer received');
+    // to = getReceiverSocketId(to); 
+    socket.to(to).emit('answer', answer); // Send answer to the target user
   });
 
-  socket.on('ice-candidate', (candidate) => {
-    socket.broadcast.emit('ice-candidate', candidate);
+  // Handle ICE candidates
+  socket.on('ice-candidate', (candidate, to) => {
+    // to = getReceiverSocketId(to); 
+    console.log('ICE candidate received by:', to);
+    socket.to(to).emit('ice-candidate', candidate); // Send candidate to the target user
   });
-
-  // Send the current socket id to the client
-  socket.emit("me", socket.id);
 
   // Register the user by userId (sent from the client)
   const userId = socket.handshake.query.userId;
