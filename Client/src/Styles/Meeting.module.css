@@ -1,0 +1,20 @@
+.videoContainer
+{
+    width: 100%;
+    padding: 1rem;
+}
+.localVideo
+{
+    flex:1;
+}
+.remoteVideo
+{
+    flex:1;
+}
+.videoBox
+{
+    padding: 0.5rem;
+    gap: 1rem;
+    display: flex;
+    flex-direction: row;
+}

@@ -17,6 +17,7 @@ const meetingSchema = new mongoose.Schema(
         link:
         {
             type: String,
+			default:"http://localhost:5173/call"
         },
 		participants: [
 			{

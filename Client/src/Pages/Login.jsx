@@ -14,7 +14,7 @@ const Login = () => {
     const data = { phoneNumber, password };
 
     try {
-      const response = await axios.post('http://localhost:5000/users/login', data, {
+      const response = await axios.post('https://business-connect-m6mk.onrender.com//users/login', data, {
         withCredentials: true,
       });
       console.log(response.data);
@@ -24,7 +24,7 @@ const Login = () => {
       }, 2000);
     } catch (error) {
       console.error('Error:', error);
-      toast.error('Failed to log in. Please try again later.');
+      toast.error('An error occurred. Please try again.');
     }
   };
 
