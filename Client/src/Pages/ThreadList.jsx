@@ -65,7 +65,7 @@ const ThreadList = () => {
                                                 <div className={styles.voteButtons}>
                                                     {hasUpvoted(thread) ? (
                                                         <TiArrowUpThick
-                                                            onClick={(e) => e.stopPropagation()}
+                                                            onClick={(e) =>{ e.stopPropagation(); handleVote(thread._id, 'upvote'); }}
                                                             className={`${styles.upvoteButton} ${styles.active}`}
                                                             
                                                         />
@@ -80,7 +80,7 @@ const ThreadList = () => {
                                                     </p>
                                                     {hasDownvoted(thread) ? (
                                                         <TiArrowDownThick
-                                                            onClick={(e) => e.stopPropagation()}
+                                                            onClick={(e) =>  { e.stopPropagation(); handleVote(thread._id, 'downvote'); }}
                                                             className={`${styles.downvoteButton} ${styles.active}`}
                                                         
                                                         />

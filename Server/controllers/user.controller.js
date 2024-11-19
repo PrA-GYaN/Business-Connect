@@ -166,6 +166,7 @@ export const updateUserSelection = async (req, res) => {
   };
   
 export const login = async (req, res) => {
+    console.log("Login Request Received");
 	try {
 		const { phoneNumber, password } = req.body;
 		const user = await User.findOne({ phoneNumber });

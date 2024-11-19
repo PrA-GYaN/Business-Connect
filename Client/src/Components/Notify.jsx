@@ -1,29 +1,32 @@
 import React, { useEffect } from 'react';
 import {useNotificationContext} from '../Context/NotificationContext';
-// import useListenNotification from '../Hooks/useListenNotification';
+import styles from '../Styles/Notify.module.css';
 
 const Notify = () => {
-    const { notifications,playAudio } = useNotificationContext(); 
+    const { notifications } = useNotificationContext(); 
     useEffect(() => {
         console.log("Notification state updated:", notifications);
     }, [notifications]);
 
     return (
-        <>
+        <div className={styles.notifyContainer}>
             {(!notifications || notifications.length === 0) ? (
                 <p>No notifications available. Check back later!</p>
             ) : (
-                <ul>
+                <div className={styles.notifyList}>
                     {notifications.map((notif) => (
-                        <li key={notif.id || notif.timestamp}>
-                            {notif.message || notif} {/* Adjust based on your notification structure */}
-                            {/* Uncomment if you want to show the timestamp */}
-                            {/* <span className="notification-time">{notif.timestamp}</span> */}
-                        </li>
+                        <div key={notif.id || notif.timestamp} className={styles.notifyItem}>
+                            {notif.message || notif}
+                            {
+                                notif.createdAt && (
+                                    <div className={styles.timeAgo}>{notif.createdAt}</div>
+                                )
+                            }
+                        </div>
                     ))}
-                </ul>
+                </div>
             )}
-        </>
+        </div>
     );
 };
 

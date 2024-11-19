@@ -24,7 +24,7 @@ const Login = () => {
       }, 2000);
     } catch (error) {
       console.error('Error:', error);
-      toast.error('Failed to log in. Please try again later.');
+      toast.error('An error occurred. Please try again.');
     }
   };
 

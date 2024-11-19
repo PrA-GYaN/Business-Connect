@@ -1,37 +1,43 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSocketContext } from '../Context/SocketContext';
 import { useLocation } from 'react-router-dom';
+import styles from '../Styles/Meeting.module.css';
+import { FaMicrophone } from "react-icons/fa6";
+import { FaMicrophoneSlash } from "react-icons/fa";
+import { FaVideo } from "react-icons/fa";
+import { FaVideoSlash } from "react-icons/fa";
+import { MdCallEnd } from "react-icons/md";
+import Navbar from '../Components/Navbar';
 
 const Meeting = () => {
-  const { socket,onlineUsers } = useSocketContext();
+  const { socket, onlineUsers } = useSocketContext();
   const location = useLocation();
-    const { selectedConversationId } = location.state || {};
+  const { selectedConversationId } = location.state || {};
   const [isCallActive, setIsCallActive] = useState(false);
   const [remoteStream, setRemoteStream] = useState(null);
   const [peerId, setPeerId] = useState(onlineUsers[selectedConversationId]);
-  const [connectionState, setConnectionState] = useState('disconnected'); // Track connection state
-  const [isCalling, setIsCalling] = useState(false); // To track if the user is in the process of calling
-  const [hasAnswered, setHasAnswered] = useState(false); // Track if the peer has answered the call
+  const [connectionState, setConnectionState] = useState('disconnected');
+  const [isCalling, setIsCalling] = useState(false);
+  const [hasAnswered, setHasAnswered] = useState(false);
+  const [isMuted, setIsMuted] = useState(false); // Track mute state
+  const [isVideoDisabled, setIsVideoDisabled] = useState(false); // Track video state
   const localVideoRef = useRef(null);
-  const remoteVideoRef = useRef(null); // Ref for the remote video
+  const remoteVideoRef = useRef(null);
   const peerRef = useRef(null);
-  const localStreamRef = useRef(null); // To keep track of the local stream
+  const localStreamRef = useRef(null);
 
-  // setPeerId(onlineUsers[selectedConversation]);
+  console.log('selectedConversationId:', selectedConversationId);
   console.log('peerId:', peerId);
 
   useEffect(() => {
     const initializeMedia = async () => {
       try {
-        // Get local media stream (video + audio)
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        localStreamRef.current = stream; // Store local stream reference
-        localVideoRef.current.srcObject = stream; // Attach to local video element
+        localStreamRef.current = stream;
+        localVideoRef.current.srcObject = stream;
 
-        // Initialize peer connection
         peerRef.current = new RTCPeerConnection();
 
-        // Add local tracks to peer connection
         stream.getTracks().forEach((track) => {
           peerRef.current.addTrack(track, stream);
         });
@@ -39,7 +45,6 @@ const Meeting = () => {
         peerRef.current.onicecandidate = handleICECandidateEvent;
 
         peerRef.current.ontrack = (event) => {
-          // Handle remote stream
           if (event.streams && event.streams[0]) {
             setRemoteStream(event.streams[0]);
 
@@ -54,20 +59,17 @@ const Meeting = () => {
           }
         };
 
-        // Connection state change listener
         peerRef.current.oniceconnectionstatechange = () => {
           const iceConnectionState = peerRef.current.iceConnectionState;
           console.log('ICE Connection State Changed:', iceConnectionState);
           setConnectionState(iceConnectionState);
 
-          // Handle unexpected disconnection
           if (iceConnectionState === 'failed') {
             console.error('ICE connection failed. Attempting to restart...');
-            peerRef.current.restartIce(); // Attempt to restart ICE if connection fails
+            peerRef.current.restartIce();
           }
         };
 
-        // Peer connection state change listener
         peerRef.current.onconnectionstatechange = () => {
           const connectionState = peerRef.current.connectionState;
           console.log('Connection State Changed:', connectionState);
@@ -78,25 +80,22 @@ const Meeting = () => {
       }
     };
 
-    // Initialize media when component mounts
     if (socket) {
       socket.on('offer', handleOffer);
       socket.on('answer', handleAnswer);
       socket.on('ice-candidate', handleNewICECandidate);
     }
 
-    // Initialize media stream
     initializeMedia();
 
-    // Cleanup function
     return () => {
       if (localStreamRef.current) {
         const tracks = localStreamRef.current.getTracks();
-        tracks.forEach(track => track.stop()); // Stop all tracks
+        tracks.forEach(track => track.stop());
       }
 
       if (peerRef.current) {
-        peerRef.current.close(); // Close peer connection
+        peerRef.current.close();
       }
 
       if (socket) {
@@ -117,7 +116,7 @@ const Meeting = () => {
       .then(() => {
         console.log('Answer sent to server');
         socket.emit('answer', peerRef.current.localDescription, from);
-        setHasAnswered(true); // Set state after answering the call
+        setHasAnswered(true);
       })
       .catch((err) => {
         console.error('Error handling offer:', err);
@@ -129,7 +128,7 @@ const Meeting = () => {
     peerRef.current.setRemoteDescription(new RTCSessionDescription(answer))
       .then(() => {
         console.log('Remote description set after answer');
-        setHasAnswered(true); // Update state to reflect that the call has been answered
+        setHasAnswered(true);
       })
       .catch((err) => {
         console.error('Error setting remote description after answer:', err);
@@ -175,7 +174,39 @@ const Meeting = () => {
     setPeerId(e.target.value);
   };
 
-  // Update remote video element if remote stream changes
+  const toggleMute = () => {
+    if (localStreamRef.current) {
+      const audioTrack = localStreamRef.current.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.enabled = !audioTrack.enabled; // Toggle mute
+        setIsMuted(!isMuted);
+      }
+    }
+  };
+
+  const toggleVideo = () => {
+    if (localStreamRef.current) {
+      const videoTrack = localStreamRef.current.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.enabled = !videoTrack.enabled; // Toggle video track
+        setIsVideoDisabled(!isVideoDisabled); // Update state
+      }
+    }
+  };
+
+  const endCall = () => {
+    if (peerRef.current) {
+      peerRef.current.close();
+      setIsCallActive(false);
+      setIsCalling(false);
+      setRemoteStream(null);
+      if (localStreamRef.current) {
+        const tracks = localStreamRef.current.getTracks();
+        tracks.forEach(track => track.stop());
+      }
+    }
+  };
+
   useEffect(() => {
     if (remoteStream && remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = remoteStream;
@@ -184,44 +215,49 @@ const Meeting = () => {
   }, [remoteStream]);
 
   return (
-    <div>
-      <div className="video-container">
-        <div>
-          <h3>Your Video</h3>
-          <video ref={localVideoRef} autoPlay muted width="300" height="200" />
-        </div>
-
-        {remoteStream ? (
+    <>
+    <div className={styles.VideoCall}>
+      <Navbar/>
+      <div className={styles.videoContainer}>
+        <div className={styles.videoBox}>
           <div>
-            <h3>Remote Video</h3>
-            <video ref={remoteVideoRef} autoPlay width="300" height="200" />
+            <video ref={localVideoRef} autoPlay muted className={styles.localVideo} />
           </div>
-        ) : (
-          <p>Waiting for remote peer...</p>
-        )}
+
+          {remoteStream ? (
+            <div>
+              <video ref={remoteVideoRef} autoPlay className={styles.remoteVideo} />
+            </div>
+          ) : (
+            <p>Waiting for remote peer...</p>
+          )}
+        </div>
       </div>
 
-      <div>
-        <input
-          type="text"
-          placeholder="Enter peer ID"
-          value={peerId}
-          onChange={handlePeerIdChange}
-        />
+      <div className={styles.controls}>
         <button onClick={handleCall} disabled={!peerId || isCallActive || isCalling}>
-          {isCalling ? 'Calling...' : 'Start Call'}
+          {isCalling ? 'Joined' : 'Join Meeting'}
+        </button>
+
+        <button onClick={toggleMute} disabled={!isCallActive} className={styles.mic}>
+          {isMuted ? <FaMicrophoneSlash /> : <FaMicrophone />}
+        </button>
+
+        <button onClick={toggleVideo} disabled={!isCallActive}>
+          {isVideoDisabled ? <FaVideoSlash /> : <FaVideo />}
+        </button>
+
+        <button onClick={endCall} disabled={!isCallActive}>
+          <MdCallEnd />
         </button>
       </div>
 
-      {isCallActive && <p>Call in progress...</p>}
-      
-      {hasAnswered && <p>Call Answered</p>}
-      
       <div>
         <p>Connection State: {connectionState}</p>
         {connectionState === 'connected' && <p>Connection successfully established!</p>}
       </div>
     </div>
+    </>
   );
 };
 

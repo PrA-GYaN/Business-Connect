@@ -15,7 +15,6 @@ const MeetingScheduler = ({ isOpen, onClose, participants = [] }) => {
   const [startDate, setStartDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState('');
   const [meetingTitle, setMeetingTitle] = useState('');
-  const [meetingLink, setMeetingLink] = useState(''); // New state for meeting link
   const [selectedUser, setSelectedUser] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [meetingDetails, setMeetingDetails] = useState('');
@@ -50,11 +49,6 @@ const MeetingScheduler = ({ isOpen, onClose, participants = [] }) => {
     setChangesMade(true);
   };
 
-  const handleLinkChange = (event) => {
-    setMeetingLink(event.target.value);
-    setChangesMade(true);
-  };
-
   const handleUserChange = (event) => {
     setSelectedUser(event.target.value);
     setChangesMade(true);
@@ -82,7 +76,7 @@ const MeetingScheduler = ({ isOpen, onClose, participants = [] }) => {
   };
 
   const handleSubmit = async () => {
-    if (!selectedTime || !meetingTitle || !meetingLink || (participants.length === 0 && !selectedUser)) {
+    if (!selectedTime || !meetingTitle || (participants.length === 0 && !selectedUser)) {
       setErrorMessage('Please fill out all fields: title, time, link, and user (if applicable).');
       return;
     }
@@ -102,7 +96,6 @@ const MeetingScheduler = ({ isOpen, onClose, participants = [] }) => {
       title: meetingTitle,
       startTime: meetingDateTime.toISOString(), // Keep this as ISO for storage
       endTime: endTime.toISOString(), // Keep this as ISO for storage
-      link: meetingLink, // Meeting link
       participants: participants.length
         ? participants
         : [{ userId: selectedUser, status: 'pending' }], // Default status if no participants provided
@@ -131,7 +124,6 @@ const MeetingScheduler = ({ isOpen, onClose, participants = [] }) => {
     setStartDate(new Date());
     setSelectedTime('');
     setMeetingTitle('');
-    setMeetingLink('');
     setSelectedUser('');
     setErrorMessage('');
     setMeetingDetails('');

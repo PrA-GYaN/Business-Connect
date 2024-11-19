@@ -11,6 +11,18 @@ const Home = () => {
   const {authUser,fullName,profilePic} = useAuthContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
   const { getProfileById } = useProfile();
