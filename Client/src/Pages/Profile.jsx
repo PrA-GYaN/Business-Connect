@@ -8,19 +8,19 @@ import styles from '../Styles/Profile.module.css';
 import useThread from "../Hooks/useThread";
 import { TiArrowUpOutline, TiArrowUpThick, TiArrowDownOutline, TiArrowDownThick } from "react-icons/ti";
 import { FaRegComment } from "react-icons/fa";
-import { MdVerified,MdEdit} from "react-icons/md";
-import { useNavigate,useLocation } from "react-router-dom";
+import { MdVerified, MdEdit } from "react-icons/md";
+import { useNavigate, useLocation } from "react-router-dom";
 import EditProfileModal from "../Components/EditProfileModal";
 
 const Profile = ({ id }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { pid } = location.state || {};
-    const { profile, getProfileById,updateUserProfile, loading: profileLoading, error: profileError } = useProfile();
+    const { profile, getProfileById, updateUserProfile, loading: profileLoading, error: profileError } = useProfile();
     const { posts, getPostById, loading: postsLoading, error: postsError, handleLike, handleCommentSubmit, handleCommentChange, toggleComments, visibleComments, newComment, commentLoading } = usePost();
     const { authUser, profilePic } = useAuthContext();
     const [bodyType, setBodyType] = useState('posts');
-    const [threads, setThreads] = useState([]);
+    const [threads, setThreads] = useState([]); // Ensuring threads is an array
     const [isModalOpen, setIsModalOpen] = useState({});
     const { getThreadByProfile, handleVote, hasUpvoted, hasDownvoted, calculateTotalVotes } = useThread();
 
@@ -29,12 +29,16 @@ const Profile = ({ id }) => {
     if (!id) {
         id = authUser;
     }
+
     // Fetch profile and posts by id
     useEffect(() => {
         if (id) {
             getProfileById(id);
             getPostById(id);
-            getThreadByProfile(id).then(data => setThreads(data || []));
+            getThreadByProfile(id).then(data => {
+                // Ensure threads is an array
+                setThreads(Array.isArray(data) ? data : []);
+            });
         }
     }, [id]);
 
@@ -69,12 +73,12 @@ const Profile = ({ id }) => {
                                 <div className={styles.profileMore}>
                                     <div className={styles.profilefullName}>
                                         <span>{profile.fullName}</span>
-                                        {profile.verified?
-                                        <span className={styles.verified}><MdVerified /></span>
-                                        :
-                                        <span className={styles.verifyNow}>Verify Now</span>
+                                        {profile.verified ?
+                                            <span className={styles.verified}><MdVerified /></span>
+                                            :
+                                            <span className={styles.verifyNow}>Verify Now</span>
                                         }
-                                        </div>
+                                    </div>
                                     <div className={styles.profileCount}>
                                         <div><strong>{Array.isArray(profile.connections) ? profile.connections.length : 0}</strong> connections</div>
                                         <div><strong>{Array.isArray(posts) ? posts.length : 0}</strong> posts</div>
@@ -91,7 +95,7 @@ const Profile = ({ id }) => {
                                         <p>{profile.address}</p>
                                     </div>
                                     <div className={styles.editProfile}>
-                                            <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, email: true }))}/>
+                                        <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, email: true }))} />
                                     </div>
                                 </div>
                             </div>
@@ -102,7 +106,7 @@ const Profile = ({ id }) => {
                                         <p>{profile.bio}</p>
                                     </div>
                                     <div className={styles.editProfile}>
-                                            <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, bio: true }))}/>
+                                        <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, bio: true }))} />
                                     </div>
                                 </div>
                             </div>
@@ -115,7 +119,7 @@ const Profile = ({ id }) => {
                                         ))}
                                     </div>
                                     <div className={styles.editProfile}>
-                                            <MdEdit />
+                                        <MdEdit />
                                     </div>
                                 </div>
                             </div>
@@ -128,7 +132,7 @@ const Profile = ({ id }) => {
                                         ))}
                                     </div>
                                     <div className={styles.editProfile}>
-                                            <MdEdit />
+                                        <MdEdit />
                                     </div>
                                 </div>
                             </div>
@@ -148,15 +152,15 @@ const Profile = ({ id }) => {
                         </>
                     )}
                     {Object.keys(isModalOpen).map((field) => (
-                    <EditProfileModal
-                        key={field}
-                        isOpen={isModalOpen[field]}
-                        onClose={() => setIsModalOpen((prev) => ({ ...prev, [field]: false }))}
-                        profile={profile}
-                        field={field}
-                        onUpdate={updateUserProfile}
-                    />
-                ))}
+                        <EditProfileModal
+                            key={field}
+                            isOpen={isModalOpen[field]}
+                            onClose={() => setIsModalOpen((prev) => ({ ...prev, [field]: false }))}
+                            profile={profile}
+                            field={field}
+                            onUpdate={updateUserProfile}
+                        />
+                    ))}
                 </div>
                 <div className={styles.bodyType}>
                     <div 

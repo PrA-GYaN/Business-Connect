@@ -83,6 +83,7 @@
 .navbarProfileDropdown {
     position: relative;
     cursor: pointer;
+    z-index: 10;
   }
   
   .navbarProfileDropdownContent {
@@ -98,6 +99,8 @@
   }
   
   .navbarProfileDropdownItem {
+    position: relative;
+    z-index: 10;
     padding: 1rem;
     border-bottom: 1px solid #ddd;
   }
@@ -110,11 +113,13 @@
   }
   
   .navbarProfileDropdownContent .dropdownLink{
+    z-index: 10;
     text-decoration: none; 
   }
 
   
   .navbarProfileDropdown.open .navbarProfileDropdownContent {
+    z-index: 10;  
     display: block;
   }
   

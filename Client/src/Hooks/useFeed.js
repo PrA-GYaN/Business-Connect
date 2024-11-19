@@ -16,7 +16,7 @@ const useFeed = () => {
 
     const fetchPosts = async (currentPage) => {
         try {
-            const { data } = await axios.get(`https://business-connect-m6mk.onrender.com/posts/getposts?page=${currentPage}&limit=1`);
+            const { data } = await axios.get(`http://localhost:5000/posts/getposts?page=${currentPage}&limit=1`);
             if (data.posts.length > 0) {
                 setPosts((prevPosts) => [...prevPosts, ...data.posts]); // Append new post
                 setHasMore(data.hasMore);
@@ -53,7 +53,7 @@ const useFeed = () => {
         }));
 
         try {
-            const { data } = await axios.post(`https://business-connect-m6mk.onrender.com/posts/like/${postId}`, {}, {
+            const { data } = await axios.post(`http://localhost:5000/posts/like/${postId}`, {}, {
                 withCredentials: true,
             });
             setPosts((prevPosts) => prevPosts.map((post) => 
@@ -85,7 +85,7 @@ const useFeed = () => {
         setCommentLoading((prev) => ({ ...prev, [postId]: true }));
 
         try {
-            const res = await axios.post(`https://business-connect-m6mk.onrender.com/posts/comment/${postId}`, { content: commentContent }, {
+            const res = await axios.post(`http://localhost:5000/posts/comment/${postId}`, { content: commentContent }, {
                 withCredentials: true,
             });
             const newCommentData = {

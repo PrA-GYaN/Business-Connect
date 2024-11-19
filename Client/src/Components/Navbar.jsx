@@ -1,6 +1,6 @@
 import styles from '../Styles/Navbar.module.css';
 import { useAuthContext } from '../Context/AuthContext';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { FaHome, FaUserFriends, FaSortDown } from "react-icons/fa";
 import { TiMessages } from "react-icons/ti";
 import { IoNotifications, IoCalendarNumber,IoPeopleSharp } from "react-icons/io5";
@@ -8,6 +8,7 @@ import { useState } from 'react';
 import Loader from './Loader';
 
 const Navbar = () => {
+  const navigate = useNavigate();
   const { authUser, fullName, profilePic, logout } = useAuthContext();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   if (!authUser || !fullName || !profilePic) {
@@ -112,8 +113,8 @@ const Navbar = () => {
               <FaSortDown />
               {isDropdownOpen && (
                 <div className={styles.navbarProfileDropdownContent}>
-                  <div className={styles.navbarProfileDropdownItem}>
-                    <NavLink to="/profile" className={styles.dropdownLink}>Profile</NavLink>
+                  <div className={styles.navbarProfileDropdownItem} onClick={()=>navigate('/profile')}>
+                    <div className={styles.dropdownLink}>Profile</div>
                   </div>
                   <div onClick={handleLogout} className={styles.navbarProfileDropdownItem}>
                     <div className={styles.dropdownButton}>Logout</div>

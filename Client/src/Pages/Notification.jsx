@@ -8,7 +8,7 @@ const Notification = () => {
     <>
     <Navabar/>
         <div className={styles.notificationContainer}>
-            <h2>Your Notifications</h2>
+            <h2>Notifications</h2>
             <Notify/>
         </div>
     </>

@@ -1,4 +1,9 @@
 .notificationContainer
 {
+    width: 100%;
+    height: 87vh;
     margin-top: 13vh;
+    padding: 1rem;
+    overflow-y: auto;
+    background-color: #F2F2F2;
 }

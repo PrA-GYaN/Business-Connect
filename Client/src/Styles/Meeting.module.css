@@ -1,3 +1,7 @@
+.VideoCall
+{
+    margin-top: 13vh;
+}
 .videoContainer
 {
     width: 100%;
@@ -17,4 +21,10 @@
     gap: 1rem;
     display: flex;
     flex-direction: row;
+}
+.controls
+{
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
 }

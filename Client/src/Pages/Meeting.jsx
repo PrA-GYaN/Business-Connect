@@ -2,6 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSocketContext } from '../Context/SocketContext';
 import { useLocation } from 'react-router-dom';
 import styles from '../Styles/Meeting.module.css';
+import { FaMicrophone } from "react-icons/fa6";
+import { FaMicrophoneSlash } from "react-icons/fa";
+import { FaVideo } from "react-icons/fa";
+import { FaVideoSlash } from "react-icons/fa";
+import { MdCallEnd } from "react-icons/md";
+import Navbar from '../Components/Navbar';
 
 const Meeting = () => {
   const { socket, onlineUsers } = useSocketContext();
@@ -13,6 +19,8 @@ const Meeting = () => {
   const [connectionState, setConnectionState] = useState('disconnected');
   const [isCalling, setIsCalling] = useState(false);
   const [hasAnswered, setHasAnswered] = useState(false);
+  const [isMuted, setIsMuted] = useState(false); // Track mute state
+  const [isVideoDisabled, setIsVideoDisabled] = useState(false); // Track video state
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const peerRef = useRef(null);
@@ -166,6 +174,39 @@ const Meeting = () => {
     setPeerId(e.target.value);
   };
 
+  const toggleMute = () => {
+    if (localStreamRef.current) {
+      const audioTrack = localStreamRef.current.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.enabled = !audioTrack.enabled; // Toggle mute
+        setIsMuted(!isMuted);
+      }
+    }
+  };
+
+  const toggleVideo = () => {
+    if (localStreamRef.current) {
+      const videoTrack = localStreamRef.current.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.enabled = !videoTrack.enabled; // Toggle video track
+        setIsVideoDisabled(!isVideoDisabled); // Update state
+      }
+    }
+  };
+
+  const endCall = () => {
+    if (peerRef.current) {
+      peerRef.current.close();
+      setIsCallActive(false);
+      setIsCalling(false);
+      setRemoteStream(null);
+      if (localStreamRef.current) {
+        const tracks = localStreamRef.current.getTracks();
+        tracks.forEach(track => track.stop());
+      }
+    }
+  };
+
   useEffect(() => {
     if (remoteStream && remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = remoteStream;
@@ -174,45 +215,49 @@ const Meeting = () => {
   }, [remoteStream]);
 
   return (
-    <div>
+    <>
+    <div className={styles.VideoCall}>
+      <Navbar/>
       <div className={styles.videoContainer}>
         <div className={styles.videoBox}>
-        <div>
-          <video ref={localVideoRef} autoPlay muted className={styles.localVideo}/>
-        </div>
-
-        {remoteStream ? (
           <div>
-            <h3>Remote Video</h3>
-            <video ref={remoteVideoRef} autoPlay width="300" height="200" className={styles.remoteVideo}/>
+            <video ref={localVideoRef} autoPlay muted className={styles.localVideo} />
           </div>
-        ) : (
-          <p>Waiting for remote peer...</p>
-        )}
+
+          {remoteStream ? (
+            <div>
+              <video ref={remoteVideoRef} autoPlay className={styles.remoteVideo} />
+            </div>
+          ) : (
+            <p>Waiting for remote peer...</p>
+          )}
         </div>
       </div>
 
-      <div>
-        <input
-          type="text"
-          placeholder="Enter peer ID"
-          value={peerId}
-          onChange={handlePeerIdChange}
-        />
+      <div className={styles.controls}>
         <button onClick={handleCall} disabled={!peerId || isCallActive || isCalling}>
-          {isCalling ? 'Calling...' : 'Start Call'}
+          {isCalling ? 'Joined' : 'Join Meeting'}
+        </button>
+
+        <button onClick={toggleMute} disabled={!isCallActive} className={styles.mic}>
+          {isMuted ? <FaMicrophoneSlash /> : <FaMicrophone />}
+        </button>
+
+        <button onClick={toggleVideo} disabled={!isCallActive}>
+          {isVideoDisabled ? <FaVideoSlash /> : <FaVideo />}
+        </button>
+
+        <button onClick={endCall} disabled={!isCallActive}>
+          <MdCallEnd />
         </button>
       </div>
 
-      {isCallActive && <p>Call in progress...</p>}
-      
-      {hasAnswered && <p>Call Answered</p>}
-      
       <div>
         <p>Connection State: {connectionState}</p>
         {connectionState === 'connected' && <p>Connection successfully established!</p>}
       </div>
     </div>
+    </>
   );
 };
 

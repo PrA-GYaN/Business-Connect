@@ -1,0 +1,18 @@
+.notifyContainer
+{
+    position: relative;
+}
+.notifyList
+{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.notifyItem
+{
+    padding: 1rem;
+    background-color: #d1e5f7;
+    display: flex;
+    gap: 1rem;
+    flex-direction: column;
+}
