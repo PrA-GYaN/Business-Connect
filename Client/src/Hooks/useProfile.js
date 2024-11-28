@@ -14,12 +14,17 @@ const useProfile = () => {
             return null;
         }
     };
-    const getAllUsers = async() => {
+    const getAllUsers = async(user_interests,user_skills) => {
+        const user_data = {
+            user_interests,
+            user_skills
+        };
         try {
-            const { data } = await axios.get(`http://localhost:5000/users/getallusers`,
+            const { data } = await axios.post(`http://localhost:5000/users/getrecommened`,user_data,
             {
                 withCredentials: true,
             });
+            console.log("Recommended Profiles:", data);
             return data;
         } catch (err) {
             console.error('Error fetching profile:', err);

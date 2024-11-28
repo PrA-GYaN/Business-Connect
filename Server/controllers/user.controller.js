@@ -222,7 +222,7 @@ export const getAllUser = async (req, res) => {
 export const Liked_Dislike = async (req, res) => {
     const userId = req.user._id;
     try {
-        console.log("User ID:", userId);
+        // console.log("User ID:", userId);
         const { likedUserId, action: initialAction } = req.body;
 
         if (!likedUserId || !['right', 'left'].includes(initialAction)) {
@@ -265,7 +265,8 @@ export const Liked_Dislike = async (req, res) => {
                 console.log("Added Connection in User");
             }
         } else {
-            console.log("Reverse swipe not found or conditions not met");
+            // console.log("Reverse swipe not found or conditions not met");
+
         }
 
         return res.status(200).json({ message: 'Swipe processed successfully' });

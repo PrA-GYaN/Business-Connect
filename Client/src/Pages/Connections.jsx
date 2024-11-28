@@ -27,7 +27,7 @@ const Connections = () => {
             try {
                 const profile = await getProfileById(authUser);
                 setConnections(profile.connections || []);
-                const usersData = await getAllUsers();
+                const usersData = await getAllUsers(profile.interests, profile.skills);
                 setUsers(usersData || []);
             } catch (error) {
                 console.error("Error fetching data:", error);
