@@ -1,114 +1,102 @@
 import pandas as pd
+import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# Sample posts dataset (items)
-posts_data = {
-    'item_id': [1, 2, 3, 4, 5],
-    'title': [
-        'Machine Learning in Healthcare',
-        'Artificial Intelligence for Beginners',
-        'Deep Learning and Neural Networks',
-        'The Future of AI in Automation',
-        'AI and Data Science: An Overview'
-    ],
-    'description': [
-        'This article discusses how machine learning is revolutionizing the healthcare industry.',
-        'Introduction to AI concepts, including algorithms and applications.',
-        'Deep dive into neural networks and deep learning models.',
-        'Exploring the future role of AI in various industries like automation.',
-        'A beginner-friendly guide to AI, machine learning, and data science.'
-    ],
-    'tags': [
-        'machine learning, healthcare, AI',
-        'artificial intelligence, beginner, AI concepts',
-        'deep learning, neural networks, AI',
-        'AI, automation, future',
-        'data science, AI, machine learning'
-    ]
-}
+# Function to load threads from CSV
+def load_threads_from_csv(filename):
+    threads_df = pd.read_csv(filename)
+    threads = {
+        'threadId': threads_df['threadId'].tolist(),
+        'title': threads_df['title'].tolist(),
+        'description': threads_df['description'].tolist(),
+        'tags': threads_df['tags'].tolist()
+    }
+    return threads
 
-# Sample user interaction data (user actions on posts)
-user_interactions = {
-    'item_id': [1, 3, 2, 4, 5],
-    'interaction': ['upvote', 'comment', 'upvote', 'downvote', 'upvote']
-}
+# Function to create combined text for each thread (description + tags)
+def create_thread_texts(threads):
+    return [f"{desc} {tag}" for desc, tag in zip(threads['description'], threads['tags'])]
 
-# Create DataFrames for posts and interactions
-posts_df = pd.DataFrame(posts_data)
-interactions_df = pd.DataFrame(user_interactions)
+# Function to create the TF-IDF matrix
+def create_tfidf_matrix(post_texts):
+    tfidf_vectorizer = TfidfVectorizer(stop_words='english')
+    return tfidf_vectorizer.fit_transform(post_texts), tfidf_vectorizer
 
-# Step 1: Combine the title, description, and tags to form a content-based profile for each item
-posts_df['content'] = posts_df['title'] + " " + posts_df['description'] + " " + posts_df['tags']
+# Function to compute cosine similarity matrix
+def compute_cosine_similarity(tfidf_matrix):
+    return cosine_similarity(tfidf_matrix, tfidf_matrix)
 
-# Step 2: Convert the text content to a numerical representation using TF-IDF Vectorizer
-tfidf_vectorizer = TfidfVectorizer(stop_words='english')
-tfidf_matrix = tfidf_vectorizer.fit_transform(posts_df['content'])
+# Function to calculate interaction strength
+def calculate_interaction_strength(user_interactions, threads):
+    interaction_strength = {post_id: 0 for post_id in threads['threadId']}
+    for post_id, interaction in zip(user_interactions['postid'], user_interactions['interactions']):
+        post_id = int(post_id)
+        if interaction == 'upvote':
+            interaction_strength[post_id] += 2
+        elif interaction == 'comment':
+            interaction_strength[post_id] += 1
+    return interaction_strength
 
-# Step 3: Calculate cosine similarity between posts based on their content
-cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
+# Function to calculate user similarity with threads based on interests and skills
+def calculate_user_similarity(user_data, tfidf_vectorizer, threads):
+    user_query = " ".join(user_data['interests'] + user_data['skills'])
+    user_tfidf_vector = tfidf_vectorizer.transform([user_query])
+    user_sim_scores = cosine_similarity(user_tfidf_vector, tfidf_matrix).flatten()
+    sorted_posts_by_interests = sorted(
+        zip(threads['threadId'], user_sim_scores), key=lambda x: x[1], reverse=True
+    )
+    return sorted_posts_by_interests
 
-# Step 4: Define the recommendation function based on user interactions (handling new users)
-def recommend_based_on_interactions(user_id, interactions_df, cosine_sim, posts_df, top_n=3):
-    # Step 1: Check if the user has any interaction data
-    interacted_posts = interactions_df[interactions_df['user_id'] == user_id]['item_id'].tolist()
+# Function to generate final post recommendations based on similarity and interactions
+def generate_recommendations(sorted_posts_by_interests, interaction_strength):
+    adjusted_recommendations = sorted(
+        sorted_posts_by_interests, key=lambda x: (interaction_strength[x[0]], x[1]), reverse=True
+    )
+    recommended_posts = [post[0] for post in adjusted_recommendations]
+    return recommended_posts
 
-    if not interacted_posts:
-        # If no interactions, recommend posts based on content similarity (cold start)
-        sim_scores = []
-        for idx in range(len(posts_df)):
-            sim_scores.extend(list(enumerate(cosine_sim[idx])))
-        
-        # Step 2: Sort the similarity scores in descending order
-        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-
-        # Step 3: Get the top N recommended posts (exclude duplicates)
-        recommended_posts = []
-        seen_items = set()
-        
-        for score in sim_scores:
-            item_idx = score[0]
-            item_id = posts_df.iloc[item_idx]['item_id']
-            
-            # Exclude duplicates
-            if item_id not in seen_items:
-                recommended_posts.append(posts_df.iloc[item_idx])
-                seen_items.add(item_id)
-            
-            if len(recommended_posts) >= top_n:
-                break
-
-        return pd.DataFrame(recommended_posts)[['item_id', 'title', 'description', 'tags']]
+# Main recommendation function
+def recommend_for_user(user_data, user_interactions, threads_filename=r'E:\Final-Year-Project\Algorithm\threads.csv'):
+    # Load the threads data from CSV
+    threads = load_threads_from_csv(threads_filename)
     
-    else:
-        # If user has interacted with posts, proceed with the normal recommendation logic
-        sim_scores = []
-        for item_id in interacted_posts:
-            idx = posts_df.index[posts_df['item_id'] == item_id].tolist()[0]
-            sim_scores.extend(list(enumerate(cosine_sim[idx])))
+    # Create the combined text for threads (description + tags)
+    post_texts = create_thread_texts(threads)
+    
+    # Create the TF-IDF matrix for the threads
+    tfidf_matrix, tfidf_vectorizer = create_tfidf_matrix(post_texts)
+    
+    # Calculate the cosine similarity between threads
+    cosine_sim = compute_cosine_similarity(tfidf_matrix)
+    
+    # Calculate the interaction strength based on user actions
+    interaction_strength = calculate_interaction_strength(user_interactions, threads)
+    
+    # Calculate the similarity between user query (interests + skills) and threads
+    sorted_posts_by_interests = calculate_user_similarity(user_data, tfidf_vectorizer, threads)
+    
+    # Generate the final recommendations based on similarity and interactions
+    recommended_posts = generate_recommendations(sorted_posts_by_interests, interaction_strength)
+    
+    return recommended_posts, threads
 
-        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+# Define user data and interactions (this can also be loaded from a CSV if needed)
+user_data = {
+    'interests': ['Music', 'Entrepreneurship', 'Leadership', 'Marketing Trends'],
+    'skills': ['Marketing', 'SEO', 'UX/UI Design', 'Networking']
+}
 
-        recommended_posts = []
-        seen_items = set()
+user_interactions = {
+    'postid': ['1', '3', '5'],
+    'interactions': ['upvote', 'comment', 'upvote']
+}
 
-        for score in sim_scores:
-            item_idx = score[0]
-            item_id = posts_df.iloc[item_idx]['item_id']
-            
-            # Exclude the posts the user has already interacted with and avoid duplicates
-            if item_id not in interacted_posts and item_id not in seen_items:
-                recommended_posts.append(posts_df.iloc[item_idx])
-                seen_items.add(item_id)
-            
-            if len(recommended_posts) >= top_n:
-                break
+# Get the recommended posts
+recommended_posts, threads = recommend_for_user(user_data, user_interactions)
 
-        return pd.DataFrame(recommended_posts)[['item_id', 'title', 'description', 'tags']]
-
-# Example: Recommend posts for a new user (user 4) with no interactions
-recommended_items_new_user = recommend_based_on_interactions( interactions_df, cosine_sim, posts_df, top_n=3)
-
-# Display the recommended items for the new user
-print("Recommended Posts for User:")
-print(recommended_items_new_user)
+# Print the recommended posts for the user
+print("Recommended posts for the user based on interests, skills, and interactions:")
+for post_id in recommended_posts:
+    post_title = threads['title'][threads['threadId'].index(post_id)]
+    print(f"- {post_title}")

@@ -2,7 +2,7 @@ import { spawn } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
-const getAllProfiles = async () => {
+export const getAllProfiles = async (req, res) => {
     try {
         const result = await new Promise((resolve, reject) => {
             const __filename = fileURLToPath(import.meta.url);
@@ -34,5 +34,3 @@ const getAllProfiles = async () => {
         console.error('Error running Python script:', error);
     }
 };
-
-getAllProfiles();

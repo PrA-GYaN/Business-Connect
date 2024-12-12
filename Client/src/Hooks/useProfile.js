@@ -48,8 +48,9 @@ const useProfile = () => {
     };
  
  const updateUserProfile = async ( updates) => {
+    console.log("Updates:", updates);
     try {
-        const { data } = await axios.put(`http://localhost:5000/users/updateUser`, updates, {
+        const { data } = await axios.post(`http://localhost:5000/users/updateUser`, updates, {
             withCredentials: true,
         });
         setProfile((prevProfile) => ({ ...prevProfile, ...data }));

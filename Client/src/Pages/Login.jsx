@@ -31,7 +31,7 @@ const Login = () => {
   return (
     <div className={styles.loginBox}>
       <div className={styles.formContainer}>
-        <p className={styles.title}>Welcome back</p>
+        <p className={styles.title}>Login</p>
         <form className={styles.form} onSubmit={handleSubmit}>
           <label htmlFor="phoneNumber" className={styles.label}>Phone Number</label>
           <input

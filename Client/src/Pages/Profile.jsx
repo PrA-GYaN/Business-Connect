@@ -30,27 +30,20 @@ const Profile = ({ id }) => {
         id = authUser;
     }
 
-    // Fetch profile and posts by id
     useEffect(() => {
         if (id) {
             getProfileById(id);
             getPostById(id);
             getThreadByProfile(id).then(data => {
-                // Ensure threads is an array
                 setThreads(Array.isArray(data) ? data : []);
             });
         }
     }, [id]);
 
-    // Combine loading states
     const isLoading = profileLoading || postsLoading;
-
-    // Display loader if loading
     if (isLoading) {
         return <Loader />;
     }
-
-    // Error handling for profile and posts
     if (profileError) {
         console.error(profileError);
         return <p>Error loading profile data. Please try again later.</p>;
@@ -179,21 +172,21 @@ const Profile = ({ id }) => {
                 {bodyType === 'posts' ? (
                     <>
                         {Array.isArray(posts) && posts.length > 0 ? (
-                            <div>
+                            <div className={styles.authorPosts}>
                                 {posts.map(post => (
                                     <div key={post._id} className={styles.postBox}>
                                         <div className={styles.author}>
                                             <div 
                                                 className={styles.profilePhoto} 
-                                                style={{ backgroundImage: `url(${post.image?.[0]?.url })` }} 
+                                                style={{ backgroundImage: `url(${post.authorId?.profilePic?.[0]?.url })` }} 
                                             />
                                             <span className={styles.fullname}>{post.authorId?.fullName}</span>
                                         </div>
                                         <p className={styles.contentBox}>{post.content}</p>
-                                        {post.image && (
+                                        {post.image && post.image.length > 0 && (
                                             <div 
                                                 className={styles.postImage} 
-                                                style={{ backgroundImage: `url(${post.image?.[0]?.url})` }} 
+                                                style={{ backgroundImage: `url(${post.image[0].url})` }} 
                                             />
                                         )}
                                         <div className={styles.interactionsPost}>

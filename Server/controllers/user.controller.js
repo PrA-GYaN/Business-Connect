@@ -222,7 +222,6 @@ export const getAllUser = async (req, res) => {
 export const Liked_Dislike = async (req, res) => {
     const userId = req.user._id;
     try {
-        // console.log("User ID:", userId);
         const { likedUserId, action: initialAction } = req.body;
 
         if (!likedUserId || !['right', 'left'].includes(initialAction)) {
@@ -280,6 +279,7 @@ export const Liked_Dislike = async (req, res) => {
 export const updateUserProfileField = async (req, res) => {
     const userId = req.user._id
     const { field, value } = req.body; 
+    console.log('Received data:', field, value);
     const allowedFields = [
         'fullName',
         'email',
@@ -310,7 +310,7 @@ export const updateUserProfileField = async (req, res) => {
     }
 
     try {
-        const updatedUser = await Users.findByIdAndUpdate(
+        const updatedUser = await User.findByIdAndUpdate(
             userId,
             { [field]: value },
             { new: true, runValidators: true }

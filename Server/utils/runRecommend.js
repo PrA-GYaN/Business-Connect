@@ -6,8 +6,10 @@ import User from "../models/user.model.js";
 export const runRecommend = async (req, res) => {
     // console.log("Requesting Recommendations for User");
 
-    const { user_interests, user_skills } = req.body;
-    const current = String(req.user._id);
+    // const { user_interests, user_skills } = req.body;
+    const user_interests = "['Music', 'Entrepreneurship', 'Leadership', 'Marketing Trends']";
+    const  user_skills = "['Marketing', 'SEO', 'UX/UI Design', 'Networking']";
+    const current = String('s');
 
     try {
         const result = await new Promise((resolve, reject) => {
@@ -62,3 +64,5 @@ export const runRecommend = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+runRecommend();

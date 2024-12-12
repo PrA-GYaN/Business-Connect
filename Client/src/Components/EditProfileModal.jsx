@@ -17,7 +17,8 @@ const EditProfileModal = ({ isOpen, onClose, profile, field, onUpdate }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onUpdate(field, value); // Pass the field and updated value to the parent
+        onUpdate({value,field});
+        onClose();
     };
 
     if (!isOpen) return null;

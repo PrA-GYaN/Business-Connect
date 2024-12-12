@@ -35,6 +35,13 @@
     max-width: 70%;
     flex-wrap: wrap;
 }
+.authorPosts
+{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+}
 .profileEdit
 {
     display: flex;

@@ -158,7 +158,7 @@ const ChatBox = ({ selectedConversation, messages, authUser, message, setMessage
                 <div className={styles.interactions}>
                     <span className={styles.interactionBtn}>
                         <FaVideo 
-                            className={styles.videoCall} 
+                            className={styles.videoCall}
                             onClick={openVideoCall}
                         />
                     </span>
