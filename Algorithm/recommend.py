@@ -78,8 +78,6 @@ def main(profiles_file, user_interests, user_skills):
     recommended_indices = svd.recommend(0, n_recommendations=10)
     
     recommended_profiles = [profiles[i]['Profile ID'] for i in recommended_indices]
-    
-    # Ensure only the JSON result is printed
     return json.dumps(recommended_profiles)
 
 # Example usage

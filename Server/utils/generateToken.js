@@ -10,17 +10,18 @@ const generateTokenAndSetCookie = (userId,fullName,profilePic,res) => {
             throw new Error("Invalid userId");
         }
 
-        // console.log("Generating token for userId:", userId);
+        console.log("Generating token for userId:", userId);
         const token = jwt.sign({ userId,fullName,profilePic }, process.env.JWT_SECRET, {
             expiresIn: "1d",
         });
-        // console.log("Token generated:", token);
+        console.log("Token generated:", token);
 
         res.cookie("User", token, {
             maxAge: 1 * 24 * 60 * 60 * 1000,
-            sameSite: "Lax",
-            secure: false,
+            sameSite: "None", // Allows cross-site usage
+            secure: true, // Ensures the cookie is only sent over HTTPS)
         });
+
     } catch (error) {
         console.error("Error generating token:", error.message);
     }
