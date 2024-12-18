@@ -26,6 +26,7 @@ const Connections = lazy(() => import("./Pages/Connections"));
 const Profile = lazy(() => import("./Pages/Profile"));
 const Notifications = lazy(() => import("./Pages/Notification"));
 const NotFound = lazy(() => import("./Pages/NotFound"));
+const UserAdmin = lazy(() => import("./Pages/UserAdmin"));
 
 function App() {
     const navigate = useNavigate();
@@ -78,6 +79,7 @@ function App() {
                         <Route path="/create" element={authUser ? <CreateThread /> : <Navigate to='/login' />} />
                         <Route path="/threads/:threadId" element={<CommentList />} />
                         <Route path="/profile" element={authUser ? <Profile /> : <Navigate to='/login' />} />
+                        <Route path = '/admin' element={ <UserAdmin /> } />
                         <Route path="*" element={<NotFound />} />
                     </Routes>
                 </Suspense>
