@@ -4,6 +4,7 @@ import styles from '../Styles/Login.module.css';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
+const url = import.meta.env.VITE_Backend_Url;
 const Login = () => {
   const navigate = useNavigate();
   const [phoneNumber, setPhoneNumber] = useState('');
