@@ -4,18 +4,21 @@ import { dirname, join } from 'path';
 import User from "../models/user.model.js";
 
 export const runRecommend = async (req, res) => {
-    // console.log("Requesting Recommendations for User");
-
-    // const { user_interests, user_skills } = req.body;
+    // const {type,user_interests, user_skills,} = req.body;
     const user_interests = "['Music', 'Entrepreneurship', 'Leadership', 'Marketing Trends']";
     const  user_skills = "['Marketing', 'SEO', 'UX/UI Design', 'Networking']";
-    const current = String('s');
-
+    const type = 'house';
     try {
         const result = await new Promise((resolve, reject) => {
             const __filename = fileURLToPath(import.meta.url);
             const __dirname = dirname(__filename);
-            const pythonScriptPath = join(__dirname, '..', '..', 'Algorithm', 'recommend.py');
+            let pythonScriptPath;
+            if(type == 'individual') {
+            pythonScriptPath = join(__dirname, '..', '..', 'Algorithm', 'recommend.py');
+            }
+            else {
+            pythonScriptPath = join(__dirname, '..', '..', 'Algorithm', 'business_rec.py');
+            }
 
             // Ensure correct arguments are passed as JSON strings
             const pythonProcess = spawn('python', [

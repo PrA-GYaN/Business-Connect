@@ -9,10 +9,10 @@ export default defineConfig({
     cssMinify: false,
   },
   server: {
-    https: {
-      key: fs.readFileSync('./src/assets/private.pem'),
-      cert: fs.readFileSync('./src/assets/certificate.pem'),
-    },
+    // https: {
+    //   key: fs.readFileSync('./src/assets/private.pem'),
+    //   cert: fs.readFileSync('./src/assets/certificate.pem'),
+    // },
     host:'0.0.0.0',
     port: 5173,  // Adjust port if necessary
   },

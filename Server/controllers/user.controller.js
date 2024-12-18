@@ -56,10 +56,11 @@ export const signup = async (req, res) => {
             address,
             dob,
             industry,
+            businessType,
         } = req.body;
 
-        console.log("Received data:", fullName, email, password, gender, businessTitle, phoneNumber, address, dob, industry);
-        if (!fullName || !email || !password || !gender || !businessTitle || !phoneNumber || !address || !dob || !industry) {
+        console.log("Received data:", fullName, email, password, gender, businessTitle, phoneNumber, address, dob, industry,businessType);
+        if (!fullName || !email || !password || !gender || !businessTitle || !phoneNumber || !address || !dob || !industry || !businessType) {
             return res.status(400).json({ error: "All fields are required." });
         }
 
@@ -105,6 +106,7 @@ export const signup = async (req, res) => {
                     address,
                     dob,
                     industry,
+                    businessType,
                     profilePic: {
                         url: result.secure_url,
                         public_id: result.public_id,
@@ -122,6 +124,7 @@ export const signup = async (req, res) => {
                     address: newUser.address,
                     dob: newUser.dob,
                     industry: newUser.industry,
+                    businessType: newUser.businessType,
                     profilePic: newUser.profilePic,
                 });
                 console.log("User created successfully:");
@@ -135,35 +138,71 @@ export const signup = async (req, res) => {
 
 
 export const updateUserSelection = async (req, res) => {
-    const { fullName, interests, skills, languages, education } = req.body;
-  
-    console.log('Received data:', fullName, skills, languages, education, interests);
-    
+    const { 
+        fullName, 
+        interests, 
+        skills, 
+        languages, 
+        education, 
+        operationalFocus, 
+        technologies, 
+        businessModels, 
+        strategicGoals, 
+        performanceMetrics, 
+        industryFocus 
+    } = req.body;
+
+    console.log('Received data:', fullName, skills, languages, education, interests, operationalFocus, technologies, businessModels, strategicGoals, performanceMetrics, industryFocus);
+
     try {
-      const user = await User.findOneAndUpdate(
-        { fullName },
-        {
-          $addToSet: {  
-            skills: { $each: skills },
-            languages: { $each: languages },
-            interests: { $each: interests }
-          },
-          education
-        },
-        { new: true }
-      );
-  
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-  
-      console.log('Updated User:', user);
-      return res.status(200).json({ message: 'User updated successfully', user });
+        // Find the user and update their information
+        const user = await User.findOneAndUpdate(
+            { fullName },
+            {
+                $addToSet: {
+                    skills: { $each: skills },
+                    languages: { $each: languages },
+                    interests: { $each: interests },
+                    operationalFocus: { $each: operationalFocus },
+                    technologies: { $each: technologies },
+                    businessModels: { $each: businessModels },
+                    strategicGoals: { $each: strategicGoals },
+                    performanceMetrics: { $each: performanceMetrics },
+                    industryFocus: { $each: industryFocus }
+                },
+                education  // Directly assign education (only one allowed)
+            },
+            { new: true }  // Returns the modified document
+        );
+
+        // Check if the user was found and updated
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Only return the relevant data (for example, excluding sensitive info like passwords)
+        const updatedUser = {
+            fullName: user.fullName,
+            skills: user.skills,
+            languages: user.languages,
+            interests: user.interests,
+            education: user.education,
+            operationalFocus: user.operationalFocus,
+            technologies: user.technologies,
+            businessModels: user.businessModels,
+            strategicGoals: user.strategicGoals,
+            performanceMetrics: user.performanceMetrics,
+            industryFocus: user.industryFocus,
+        };
+
+        console.log('Updated User:', updatedUser);
+        return res.status(200).json({ message: 'User updated successfully', user: updatedUser });
     } catch (error) {
-      console.error('Error updating user:', error);
-      return res.status(500).json({ message: 'Internal server error', error: error.message });
+        console.error('Error updating user:', error);
+        return res.status(500).json({ message: 'Internal server error', error: error.message });
     }
-  };
+};
+
   
 export const login = async (req, res) => {
     console.log("Login Request Received");

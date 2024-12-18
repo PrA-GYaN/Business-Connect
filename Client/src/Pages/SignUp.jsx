@@ -28,6 +28,7 @@ const Signup = () => {
         address: '',
         dob: '',
         gender: '',
+        businessType: '',
         image: null,
     });
     const [image, setImage] = useState(null);
@@ -69,6 +70,7 @@ const Signup = () => {
         if (!formData.dob) newErrors.dob = "Date of Birth is required.";
         if (!formData.gender) newErrors.gender = "Gender is required.";
         if (!formData.industry) newErrors.industry = "Industry is required.";
+        if (!formData.businessType) newErrors.businessType = "Business Type is required.";
         return newErrors;
     };
 
@@ -287,6 +289,22 @@ const Signup = () => {
                                         <option value="non-profit">Non-Profit</option>
                                     </select>
                                     {errors.industry && <span className={styles.error}>{errors.industry}</span>}
+                                </div>
+                            </div>
+                            <label className={styles.inputLabel} htmlFor="businessType">Business Type:</label>
+                            <div className={styles.grp}>
+                                <div>
+                                    <select
+                                        className={styles.input}
+                                        name="businessType"
+                                        value={formData.businessType}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="">Select Business Type</option>
+                                        <option value="individual">Business Individual</option>
+                                        <option value="house">Business House</option>
+                                    </select>
+                                    {errors.businessType && <span className={styles.error}>{errors.businessType}</span>}
                                 </div>
                             </div>
                         </div>

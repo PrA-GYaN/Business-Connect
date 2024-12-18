@@ -94,7 +94,7 @@ const PhoneVerification = ({ data, sentOtp }) => {
   return (
     <>
       {
-        verified ? (<Setup fullName={data.fullName}/>):
+        verified ? (<Setup fullName={data.fullName} businessType={data.businessType}/>):
         (
           <div className={styles.otpbox}>
             <form className={styles.form} onSubmit={handleSubmit}>

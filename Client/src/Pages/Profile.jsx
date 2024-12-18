@@ -103,45 +103,145 @@ const Profile = ({ id }) => {
                                     </div>
                                 </div>
                             </div>
-                            <div className={styles.profileEdit}>
-                                <div className={styles.editTitle}>Interests</div>
-                                <div className={styles.editBox}>
-                                    <div className={styles.profileInterests}>
-                                        {profile.interests?.map((interest, index) => (
-                                            <span key={index} className={styles.interests}>{interest}</span>
-                                        ))}
+                            {
+                                profile.businessType === 'individual'?
+                                (
+                                    <>
+                                    <div className={styles.profileEdit}>
+                                        <div className={styles.editTitle}>Interests</div>
+                                        <div className={styles.editBox}>
+                                            <div className={styles.profileInterests}>
+                                                {profile.interests?.map((interest, index) => (
+                                                    <span key={index} className={styles.interests}>{interest}</span>
+                                                ))}
+                                            </div>
+                                            <div className={styles.editProfile}>
+                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, interests: true }))} />
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className={styles.editProfile}>
-                                        <MdEdit />
+                                    <div className={styles.profileEdit}>
+                                        <div className={styles.editTitle}>Languages</div>
+                                        <div className={styles.editBox}>
+                                            <div className={styles.profileLanguages}>
+                                                {profile.languages?.map((language, index) => (
+                                                    <span key={index} className={styles.languages}>{language}</span>
+                                                ))}
+                                            </div>
+                                            <div className={styles.editProfile}>
+                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, languages: true }))} />
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div className={styles.profileEdit}>
-                                <div className={styles.editTitle}>Languages</div>
-                                <div className={styles.editBox}>
-                                    <div className={styles.profileLanguages}>
-                                        {profile.languages?.map((language, index) => (
-                                            <span key={index} className={styles.languages}>{language}</span>
-                                        ))}
+                                    <div className={styles.profileEdit}>
+                                        <div className={styles.editTitle}>Skills</div>
+                                        <div className={styles.editBox}>
+                                            <div className={styles.profileSkills}>
+                                                {profile.skills?.map((skill, index) => (
+                                                    <span key={index} className={styles.skill}>{skill}</span>
+                                                ))}
+                                            </div>
+                                            <div className={styles.editProfile}>
+                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, skills: true }))} />
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className={styles.editProfile}>
-                                        <MdEdit />
+                                    </>
+                                ):(
+                                    <>
+                                    {/* Operational Focus */}
+                                    <div className={styles.profileEdit}>
+                                        <div className={styles.editTitle}>Operational Focus</div>
+                                        <div className={styles.editBox}>
+                                            <div className={styles.profileDetails}>
+                                                {profile.operationalFocus?.map((focus, index) => (
+                                                    <span key={index} className={styles.interests}>{focus}</span>
+                                                ))}
+                                            </div>
+                                            <div className={styles.editProfile}>
+                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, operationalFocus: true }))} />
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div className={styles.profileEdit}>
-                                <div className={styles.editTitle}>Skills</div>
-                                <div className={styles.editBox}>
-                                    <div className={styles.profileSkills}>
-                                        {profile.skills?.map((skill, index) => (
-                                            <span key={index} className={styles.skill}>{skill}</span>
-                                        ))}
+
+                                    {/* Technologies */}
+                                    <div className={styles.profileEdit}>
+                                        <div className={styles.editTitle}>Technologies</div>
+                                        <div className={styles.editBox}>
+                                            <div className={styles.profileDetails}>
+                                                {profile.technologies?.map((tech, index) => (
+                                                    <span key={index} className={styles.interests}>{tech}</span>
+                                                ))}
+                                            </div>
+                                            <div className={styles.editProfile}>
+                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, operationalFocus: true }))} />
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className={styles.editProfile}>
-                                        <MdEdit />
+
+                                    {/* Business Models */}
+                                    <div className={styles.profileEdit}>
+                                        <div className={styles.editTitle}>Business Model</div>
+                                        <div className={styles.editBox}>
+                                            <div className={styles.profileDetails}>
+                                                {profile.businessModels?.map((model, index) => (
+                                                    <span key={index} className={styles.interests}>{model}</span>
+                                                ))}
+                                            </div>
+                                            <div className={styles.editProfile}>
+                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, operationalFocus: true }))} />
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
+
+                                    {/* Strategic Goals */}
+                                    <div className={styles.profileEdit}>
+                                        <div className={styles.editTitle}>Strategic Goals</div>
+                                        <div className={styles.editBox}>
+                                            <div className={styles.profileDetails}>
+                                                {profile.strategicGoals?.map((goal, index) => (
+                                                    <span key={index} className={styles.interests}>{goal}</span>
+                                                ))}
+                                            </div>
+                                            <div className={styles.editProfile}>
+                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, operationalFocus: true }))} />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Performance Metrics */}
+                                    <div className={styles.profileEdit}>
+                                        <div className={styles.editTitle}>Performance Metrics</div>
+                                        <div className={styles.editBox}>
+                                            <div className={styles.profileDetails}>
+                                                {profile.performanceMetrics?.map((metric, index) => (
+                                                    <span key={index} className={styles.interests}>{metric}</span>
+                                                ))}
+                                            </div>
+                                            <div className={styles.editProfile}>
+                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, operationalFocus: true }))} />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Industry Focus */}
+                                    <div className={styles.profileEdit}>
+                                        <div className={styles.editTitle}>Industry</div>
+                                        <div className={styles.editBox}>
+                                            <div className={styles.profileDetails}>
+                                                {profile.industryFocus?.map((indust, index) => (
+                                                    <span key={index} className={styles.interests}>{indust}</span>
+                                                ))}
+                                            </div>
+                                            <div className={styles.editProfile}>
+                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, operationalFocus: true }))} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </>
+                                )
+                            }
+                            
                         </>
                     )}
                     {Object.keys(isModalOpen).map((field) => (

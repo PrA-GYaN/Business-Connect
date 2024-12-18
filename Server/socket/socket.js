@@ -1,29 +1,29 @@
 import { Server } from "socket.io";
-import https from "https";
+import http from "http";
 import express from "express";
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from "dotenv";
-import fs from 'fs';
+// import fs from 'fs';
 
 dotenv.config();
 
 const app = express();
 app.use(cors({
-  origin: 'https://192.168.254.14:5173', // Frontend origin
+  origin: 'http://localhost:5173', // Frontend origin
   methods: ['GET', 'POST'],
   credentials: true,  // Allow credentials (cookies, etc.)
 }));
 app.use(cookieParser());
 //SSL Certificate for HTTPS connection
-const privateKey = fs.readFileSync('./Certificates/192.168.254.14-key.pem', 'utf8');
-const certificate = fs.readFileSync('./Certificates/192.168.254.14.pem', 'utf8');
-const credentials = { key: privateKey, cert: certificate };
+// const privateKey = fs.readFileSync('./Certificates/192.168.254.14-key.pem', 'utf8');
+// const certificate = fs.readFileSync('./Certificates/192.168.254.14.pem', 'utf8');
+// const credentials = { key: privateKey, cert: certificate };
 
-const server = https.createServer(credentials,app);
+const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'https://192.168.254.14:5173', // Frontend origin
+    origin: 'http://localhost:5173', // Frontend origin
     methods: ['GET', 'POST'],
     credentials: true,
   },

@@ -2,6 +2,7 @@ import { createContext, useState, useEffect, useContext } from "react";
 import { useAuthContext } from "../Context/AuthContext";
 import io from "socket.io-client";
 
+const url = import.meta.env.VITE_Backend_Url;
 const SocketContext = createContext();
 
 export const useSocketContext = () => {
@@ -15,7 +16,7 @@ export const SocketContextProvider = ({ children }) => {
 
 	useEffect(() => {
 		if (authUser) {
-			const socket = io("http://localhost:5000", {
+			const socket = io(`${url}`, {
 				query: {
 					userId: authUser,
 				},

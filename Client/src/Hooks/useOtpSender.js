@@ -23,12 +23,12 @@ const useOtpSender = () => {
         setError(null);
 
         try {
-            const response = await axios.post('http://localhost:5000/users/send-otp', {
-                phoneNumber,
-                otp: generatedOtp,
-            });
+            // const response = await axios.post('http://localhost:5000/users/send-otp', {
+            //     phoneNumber,
+            //     otp: generatedOtp,
+            // });
+            // toast.success(response.data.message);
             console.log(generatedOtp);
-            toast.success(response.data.message);
             return generatedOtp;
         } catch (err) {
             const errorMessage = err.response?.data?.message || 'Failed to send OTP.';

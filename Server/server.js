@@ -15,7 +15,7 @@ import {getAllProfiles} from "./utils/getAllProfile.js";
 dotenv.config();
 
 const corsOptions = {
-    origin: 'https://192.168.254.14:5173',  // Your front-end origin
+    origin: 'http://localhost:5173',  // Your front-end origin
     credentials: true,  // Allow cookies to be sent with requests
     methods: ['GET', 'POST', 'OPTIONS'],  // Ensure the correct methods are allowed
     allowedHeaders: ['Content-Type', 'Authorization'],  // Headers you expect

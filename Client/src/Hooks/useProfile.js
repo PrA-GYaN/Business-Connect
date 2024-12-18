@@ -1,15 +1,17 @@
 import axios from "axios";
 import { useState } from "react";
 
+const url = import.meta.env.VITE_Backend_Url;
 const useProfile = () => {
     const [profile, setProfile] = useState({});
 
     const getProfileById = async(id) => {
         try {
-            const { data } = await axios.get(`http://localhost:5000/users/getprofilebyid/${id}`);
+            const { data } = await axios.get(`${url}/users/getprofilebyid/${id}`);
             setProfile(data);
             return data;
         } catch (err) {
+            // console.log(url);
             console.error('Error fetching profile:', err);
             return null;
         }
@@ -20,7 +22,7 @@ const useProfile = () => {
             user_skills
         };
         try {
-            const { data } = await axios.post(`http://localhost:5000/users/getrecommened`,user_data,
+            const { data } = await axios.post(`${url}/users/getrecommened`,user_data,
             {
                 withCredentials: true,
             });
@@ -33,7 +35,7 @@ const useProfile = () => {
     };
     const like_dislike = async(likedUserId,action) => {
         try {
-            const { data } = await axios.post('http://localhost:5000/users/swipe', {
+            const { data } = await axios.post(`${url}/users/swipe`, {
                 likedUserId,
                 action
             },
@@ -50,7 +52,7 @@ const useProfile = () => {
  const updateUserProfile = async ( updates) => {
     console.log("Updates:", updates);
     try {
-        const { data } = await axios.post(`http://localhost:5000/users/updateUser`, updates, {
+        const { data } = await axios.post(`${url}/users/updateUser`, updates, {
             withCredentials: true,
         });
         setProfile((prevProfile) => ({ ...prevProfile, ...data }));
