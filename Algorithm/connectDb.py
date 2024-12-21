@@ -10,31 +10,35 @@ client = MongoClient(uri, server_api=ServerApi('1'))
 try:
     # Test MongoDB connection
     client.admin.command('ping')
-    print("Pinged your deployment. You successfully connected to MongoDB!")
 
     db = client["test"]  # Replace with your actual database name
-    collection = db["users"]  # Replace with your actual collection name
+    users_collection = db["users"]  # Replace with your actual collection name
+    threads_collection = db["threads"]  # Assuming there's a threads collection
 
     # Correct file paths
     individual_file_path = r'E:\Final-Year-Project\Algorithm\profiles.csv'
     business_file_path = r'E:\Final-Year-Project\Algorithm\business_profiles.csv'
+    threads_file_path = r'E:\Final-Year-Project\Algorithm\threads.csv'
 
-    # Open both CSV files for writing
+    # Open CSV files for writing
     with open(individual_file_path, mode='w', newline='') as individual_file, \
-         open(business_file_path, mode='w', newline='') as business_file:
+         open(business_file_path, mode='w', newline='') as business_file, \
+         open(threads_file_path, mode='w', newline='') as threads_file:
 
-        # Create CSV writers for both files
+        # Create CSV writers for all files
         individual_writer = csv.writer(individual_file)
         business_writer = csv.writer(business_file)
+        threads_writer = csv.writer(threads_file)
 
-        # Write headers to both files
+        # Write headers to all files
         individual_writer.writerow(['Profile ID', 'Interests', 'Skills'])
         business_writer.writerow(['Profile ID', 'Interests', 'Skills', 'Operational Focus', 
                                   'Technologies', 'Business Models', 'Strategic Goals', 
                                   'Performance Metrics', 'Industry Focus'])
+        threads_writer.writerow(['ThreadId','Title','Content','Tags'])
 
-        # Retrieve all documents from the collection
-        all_documents = collection.find()
+        # Retrieve all documents from the users collection
+        all_documents = users_collection.find()
 
         # Iterate over each document and write to the appropriate file
         for document in all_documents:
@@ -42,9 +46,6 @@ try:
             interests = document.get('interests', '')
             skills = document.get('skills', '')
             business_type = document.get('businessType', '')
-
-            print(f"Processing profile ID: {profile_id}")
-            print(f"Business Type: {business_type}")
 
             # If it's an individual profile, write to individual CSV file
             if business_type.lower() == 'individual':
@@ -65,7 +66,26 @@ try:
                                           str(technologies), str(business_models), str(strategic_goals), 
                                           str(performance_metrics), str(industry_focus)])
 
-    print("CSV files 'profiles.csv' and 'business_profiles.csv' created successfully!")
+        # Retrieve all documents from the threads collection
+        all_threads = threads_collection.find()
+
+        # Iterate over each thread document and write to the threads CSV file
+        for thread in all_threads:
+            thread_id = thread['_id']
+            creator = thread.get('title', '')
+            topic = thread.get('content', '')
+            messages = thread.get('tags', '')
+            
+            # If messages is a list, join them into a single string
+            if isinstance(messages, list):
+                messages = ' | '.join(messages)
+            
+            # Write thread data to the threads CSV file
+            threads_writer.writerow([thread_id, creator, topic, messages])
+
+    print("CSV files 'profiles.csv', 'business_profiles.csv', and 'threads.csv' created successfully!")
 
 except Exception as e:
     print("Error:", e)
+
+

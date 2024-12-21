@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import useProfile from "../Hooks/useProfile";
+import styles from "../Styles/Admin.module.css";
+import { IoTrashBinSharp } from "react-icons/io5";
 
 const Admin = () => {
-    const { getAllUsers, getAllPosts } = useProfile();
+    const { getAllUsers } = useProfile();
     const [profiles, setProfiles] = useState([]);
-    const [posts, setPosts] = useState([]);
 
     const fetchProfiles = async () => {
         try {
-            const data = await getAllUsers(); // Fetch user data
+            const data = await getAllUsers();
+            console.log("Data:", data);
             if (data && Array.isArray(data)) {
                 setProfiles(data);
             } else {
@@ -19,50 +21,9 @@ const Admin = () => {
         }
     };
 
-    const fetchPosts = async () => {
-        try {
-            const data = await getAllPosts(); // Fetch posts from the backend
-            if (data && Array.isArray(data)) {
-                setPosts(data);
-                console.log(data)
-            } else {
-                console.error("Invalid data format:", data);
-            }
-        } catch (error) {
-            console.error("Error fetching posts:", error);
-        }
-    };
-
-    // Fetch profiles and posts on component mount
     useEffect(() => {
         fetchProfiles();
-        fetchPosts();
     }, []);
-
-    // Handle post actions (delete and approve)
-    const handleDeletePost = async (postId) => {
-        try {
-            // Call API to delete post
-            console.log("Deleting post with ID:", postId);
-            // After deletion, you can update the posts state to reflect the changes
-            setPosts(posts.filter(post => post.id !== postId));
-        } catch (error) {
-            console.error("Error deleting post:", error);
-        }
-    };
-
-    const handleApprovePost = async (postId) => {
-        try {
-            // Call API to approve post
-            console.log("Approving post with ID:", postId);
-            // Update the posts state accordingly
-            setPosts(posts.map(post =>
-                post.id === postId ? { ...post, approved: true } : post
-            ));
-        } catch (error) {
-            console.error("Error approving post:", error);
-        }
-    };
 
     // Handle user deletion
     const handleDeleteUser = async (userId) => {
@@ -78,59 +39,46 @@ const Admin = () => {
 
     return (
         <div>
-            <h1>Admin Panel</h1>
+            <h1>Manage Users</h1>
 
             {/* User Profile Management */}
             <div>
-                <h3>Manage Users</h3>
                 {profiles.length > 0 ? (
-                    profiles.map((profile) => (
-                        <div key={profile.id} style={{ border: "1px solid #ccc", padding: "10px", margin: "10px 0" }}>
-                            <div>
-                                <h4>{profile.name}</h4>
-                                <p>Email: {profile.email}</p>
-                                <button
-                                    onClick={() => handleDeleteUser(profile.id)}
-                                    style={{ padding: "5px 10px", backgroundColor: "red", color: "white", border: "none", cursor: "pointer" }}
-                                >
-                                    Delete User
-                                </button>
-                            </div>
-                        </div>
-                    ))
+                    <table className={styles.table}>
+                        <thead>
+                            <tr>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Business Type</th>
+                                <th>Business Title</th>
+                                <th>Industry</th>
+                                <th>Verified</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {profiles.map((profile) => (
+                                <tr key={profile.id}>
+                                    <td>{profile.fullName}</td>
+                                    <td>{profile.email}</td>
+                                    <td>{profile.businessType}</td>
+                                    <td>{profile.businessTitle}</td>
+                                    <td>{profile.industry}</td>
+                                    <td>{profile.verified ? 'Yes' : 'No'}</td>
+                                    <td>
+                                        <button
+                                            onClick={() => handleDeleteUser(profile.id)}
+                                            className={styles.buttonDelete}
+                                        >
+                                            <IoTrashBinSharp />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 ) : (
                     <p>No profiles found</p>
-                )}
-            </div>
-
-            {/* Post Management */}
-            <div>
-                <h3>Manage Posts</h3>
-                {posts.length > 0 ? (
-                    posts.map((post) => (
-                        <div key={post.id} style={{ border: "1px solid #ccc", padding: "10px", margin: "10px 0" }}>
-                            <div>
-                                <p>{post.content}</p>
-                                <span>By: {post.author}</span>
-                            </div>
-                            <div>
-                                <button
-                                    onClick={() => handleDeletePost(post.id)}
-                                    style={{ padding: "5px 10px", backgroundColor: "red", color: "white", border: "none", cursor: "pointer" }}
-                                >
-                                    Delete
-                                </button>
-                                <button
-                                    onClick={() => handleApprovePost(post.id)}
-                                    style={{ padding: "5px 10px", backgroundColor: "green", color: "white", border: "none", cursor: "pointer" }}
-                                >
-                                    Approve
-                                </button>
-                            </div>
-                        </div>
-                    ))
-                ) : (
-                    <p>No posts found</p>
                 )}
             </div>
         </div>

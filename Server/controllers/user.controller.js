@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
+import Verification from "../models/verification.model.js";
 import generateTokenAndSetCookie from "../utils/generateToken.js";
 import cloudinary from "../utils/cloudinary.js";
 import { sendNotification } from "./notification.controller.js";
@@ -365,3 +366,50 @@ export const updateUserProfileField = async (req, res) => {
         res.status(500).json({ message: 'An error occurred while updating the profile', error });
     }
 };
+export const verifyUser = async (req, res) => {
+    const userId = req.body.userId;
+
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'Image file is required' });
+        }
+
+        const bufferStream = new stream.PassThrough();
+        bufferStream.end(req.file.buffer);
+
+        bufferStream.pipe(cloudinary.uploader.upload_stream(
+            { resource_type: 'image' },
+            async (error, result) => {
+                if (error) {
+                    return res.status(400).send('Error uploading image: ' + error.message);
+                }
+
+                const newVerification = new Verification({
+                    Id: userId,
+                    image: {
+                        url: result.secure_url,
+                        public_id: result.public_id,
+                    },
+                });
+
+                try {
+                    await newVerification.save();
+                    return res.status(201).json({ message: 'Image uploaded successfully', verification: newVerification });
+                } catch (err) {
+                    return res.status(400).send('Error saving verification: ' + err.message);
+                }
+            }
+        ));
+    } catch (error) {
+        return res.status(500).send('Error: ' + error.message);
+    }
+};
+
+export const verificationreq = async (req, res) => {
+    try {
+        const verifications = await Verification.find().populate('Id');
+        return res.status(200).json(verifications);
+    } catch (error) {
+        return res.status(500).json({ message: 'Server error' });
+    }
+}

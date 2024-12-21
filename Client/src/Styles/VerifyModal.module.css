@@ -1,0 +1,75 @@
+/* VerifyModal.module.css */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modalContent {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+    text-align: center;
+}
+
+.uploadSection {
+    margin-top: 20px;
+    border: 2px dashed #007bff;
+    padding: 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.3s;
+    position: relative;
+}
+
+.uploadSection.dragging {
+    border-color: #28a745; /* Change border color when dragging */
+}
+
+.fileInput {
+    display: none; /* Hide file input, only use drag-and-drop */
+}
+
+.previewImage {
+    margin-top: 10px;
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+}
+
+.dragText {
+    font-size: 14px;
+    color: #007bff;
+    font-weight: bold;
+}
+
+.buttonSection {
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 10px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    transition: background-color 0.3s;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+button:hover {
+    background-color: #0056b3;
+}

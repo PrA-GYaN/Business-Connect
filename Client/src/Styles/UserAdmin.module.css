@@ -1,0 +1,65 @@
+/* Container for the layout */
+.container {
+    display: flex;
+  }
+  
+  .sidebar {
+    width: 250px;
+    background-color: #5abec4;
+    color: white;
+    padding: 20px;
+    height: 100vh;
+  }
+  
+  .sidebarHeader {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  
+  .sidebarMenu {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .menuItem {
+    font-size: 18px;
+    margin: 15px 0;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .menuItem:hover {
+    background-color: #4f9b9a;
+  }
+  
+  /* Active menu item styling */
+  .active {
+    background-color: #4f9b9a;  /* Different background for active item */
+    font-weight: bold;  /* Optional: Make the active item bold */
+  }
+  
+  /* Logout Button */
+  .logoutButton {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 20px;
+    width: 100%;
+  }
+  
+  .logoutButton:hover {
+    background-color: #ff3333;
+  }
+  
+  .content {
+    flex: 1;
+    padding: 20px;
+  }  

@@ -16,7 +16,22 @@ const useProfile = () => {
             return null;
         }
     };
-    const getAllUsers = async(user_interests,user_skills) => {
+
+    const getAllUsers = async() => {
+        try {
+            const { data } = await axios.get(`${url}/users/getallusers`,
+            {
+                withCredentials: true,  
+        });
+            console.log("All Users:", data);
+            return data;
+        } catch (err) {
+            console.error('Error fetching profile:', err);
+            return null;
+        }
+    };
+
+    const getRecUsers = async(user_interests,user_skills) => {
         const user_data = {
             user_interests,
             user_skills
@@ -63,7 +78,7 @@ const useProfile = () => {
     }
 };  
 
-return { profile, like_dislike, getAllUsers, getProfileById, updateUserProfile };
+return { profile, like_dislike,getAllUsers, getRecUsers, getProfileById, updateUserProfile };
 };
 
 export default useProfile;

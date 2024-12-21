@@ -9,10 +9,10 @@ from sklearn.metrics import f1_score, accuracy_score  # Import accuracy_score
 
 # Read datasets
 train = pd.read_csv(r'E:\Final-Year-Project\Algorithm\hate speech\train.csv')
-print(f"Training Set Length: {len(train)}")
+# print(f"Training Set Length: {len(train)}")
 
 test = pd.read_csv(r'E:\Final-Year-Project\Algorithm\hate speech\test.csv')
-print(f"Test Set Length: {len(test)}")
+# print(f"Test Set Length: {len(test)}")
 
 # Clean text function
 def clean_text(df, text_field):
@@ -32,7 +32,7 @@ train_minority_upsampled = resample(train_minority,
                                  random_state=123)
 train_upsampled = pd.concat([train_minority_upsampled, train_majority])
 
-pipeline_sgd = Pipeline([
+pipeline_sgd = Pipeline([ 
     ('vect', CountVectorizer()),
     ('tfidf', TfidfTransformer()),
     ('sgd', SGDClassifier()),
@@ -48,8 +48,8 @@ y_predict = model.predict(X_test)
 f1 = f1_score(y_test, y_predict)
 accuracy = accuracy_score(y_test, y_predict)
 
-print(f"F1 Score: {f1}")
-print(f"Accuracy: {accuracy}")
+# print(f"F1 Score: {f1}")
+# print(f"Accuracy: {accuracy}")
 
 def predict_hate_speech(input_text):
     cleaned_input = clean_text(pd.DataFrame({'tweet': [input_text]}), 'tweet')
@@ -57,6 +57,33 @@ def predict_hate_speech(input_text):
     
     return "Hate Speech" if prediction[0] == 1 else "Not Hate Speech"
 
-input_text = "Like you"
-prediction = predict_hate_speech(input_text)
-print(f"Prediction for input: {prediction}")
+# Process CSV file for prediction
+def predict_from_csv(input_csv_path, output_csv_path):
+    # Read input CSV
+    input_df = pd.read_csv(input_csv_path)
+
+    # Clean Title and Content fields (combine both fields for better prediction)
+    input_df['text'] = input_df['Title'] + " " + input_df['Content']
+    input_df = clean_text(input_df, 'text')
+
+    # Predict hate speech for each row
+    input_df['Prediction'] = input_df['text'].apply(lambda x: predict_hate_speech(x))
+
+    # Create the output CSV format
+    output_df = input_df[['ThreadId', 'Title', 'Content', 'Tags', 'Prediction']]
+
+    # Save to the output CSV file
+    output_df.to_csv(output_csv_path, index=False)
+    return output_df
+
+# Example usage: Predict hate speech for CSV and save the results
+input_csv_path = r'E:\Final-Year-Project\Algorithm\threads.csv'  # Replace with actual path
+output_csv_path = r'E:\Final-Year-Project\Algorithm\output_threads.csv'  # Replace with desired output path
+predictions = predict_from_csv(input_csv_path, output_csv_path)
+
+# Print or save predictions
+# print(predictions)
+
+# Optionally save to CSV
+predictions.to_csv(r'E:\Final-Year-Project\Client\public\threads.csv', index=False)
+print("Predictions saved to CSV file")

@@ -11,6 +11,7 @@ import { FaRegComment } from "react-icons/fa";
 import { MdVerified, MdEdit } from "react-icons/md";
 import { useNavigate, useLocation } from "react-router-dom";
 import EditProfileModal from "../Components/EditProfileModal";
+import VerifyModal from "../Components/VerifyModal";
 
 const Profile = ({ id }) => {
     const navigate = useNavigate();
@@ -22,6 +23,7 @@ const Profile = ({ id }) => {
     const [bodyType, setBodyType] = useState('posts');
     const [threads, setThreads] = useState([]); // Ensuring threads is an array
     const [isModalOpen, setIsModalOpen] = useState({});
+    const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
     const { getThreadByProfile, handleVote, hasUpvoted, hasDownvoted, calculateTotalVotes } = useThread();
 
     id = pid;
@@ -29,6 +31,10 @@ const Profile = ({ id }) => {
     if (!id) {
         id = authUser;
     }
+
+    const handleVerify = () => {
+        setIsVerifyModalOpen(false);
+    };
 
     useEffect(() => {
         if (id) {
@@ -58,6 +64,12 @@ const Profile = ({ id }) => {
         <>
             <Navbar />
             <div className={styles.profileBox}>
+            {isVerifyModalOpen && (
+                <VerifyModal 
+                    onClose={() => setIsVerifyModalOpen(false)} 
+                    onVerify={handleVerify} 
+                />
+            )}
                 <div className={styles.profileInfo}>
                     {profile && (
                         <>
@@ -69,7 +81,7 @@ const Profile = ({ id }) => {
                                         {profile.verified ?
                                             <span className={styles.verified}><MdVerified /></span>
                                             :
-                                            <span className={styles.verifyNow}>Verify Now</span>
+                                            <span className={styles.verifyNow} onClick={() => setIsVerifyModalOpen(true)}>Verify Now</span>
                                         }
                                     </div>
                                     <div className={styles.profileCount}>

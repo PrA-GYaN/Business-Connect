@@ -11,6 +11,7 @@ import commentRoutes from "./routes/comment.route.js";
 import cookieParser from 'cookie-parser';
 import messageRoutes from './routes/message.route.js';
 import {getAllProfiles} from "./utils/getAllProfile.js";
+import {hatespeech} from "./utils/hatespeech.js";
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use("/comments", commentRoutes);
 
 server.listen(PORT, () => {
     getAllProfiles();
+    hatespeech();
     connectToMongoDB();
     console.log(`Server is running on port ${PORT}`);
 });
