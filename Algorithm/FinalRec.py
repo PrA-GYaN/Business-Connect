@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import ast
 from sklearn.metrics import mean_absolute_error, precision_score, recall_score, f1_score
-from joblib import dump, load
 import os
 import warnings
 from scipy.sparse import csr_matrix, find
@@ -10,7 +9,7 @@ from scipy.sparse import csr_matrix, find
 warnings.filterwarnings("ignore")
 
 class SimpleSVD:
-    def __init__(self, num_features=2, initial_learning_rate=0.01, regularization=0.02, epochs=100):
+    def __init__(self, num_features=2, initial_learning_rate=0.01, regularization=0.02, epochs=10):
         self.num_features = num_features
         self.initial_learning_rate = initial_learning_rate
         self.regularization = regularization
@@ -151,7 +150,7 @@ def grid_search_hyperparameters(X_train, y_train):
         'num_features': [2, 5],
         'initial_learning_rate': [0.01],
         'regularization': [0.01],
-        'epochs': [100, 200]
+        'epochs': [10, 100]
     }
     
     best_params = None
@@ -207,6 +206,9 @@ def analyze_recommendation(user, profiles, svd_model, interest_weight=0.6, skill
     results.sort(key=lambda x: x["Hybrid Score"], reverse=True)
     
     print("Profile Contributions (60% Content-Based, 40% Collaborative):")
+    print("Recommended Profiles based on the following criteria:")
+    print("Interests: 'E-commerce', 'Content Creation'")
+    print("Skills: 'Data Analysis', 'Presentation Skills'")
     for r in results:
         print(f"Profile ID: {r['Profile ID']}, "
               f"Content-Based: {r['Content-Based Score']:.4f}, "
@@ -241,7 +243,6 @@ def main(profiles_file, users_file, user_interests, user_skills):
 
     if os.path.exists(model_file_path):
         print("Loading existing model...")
-        svd = load(model_file_path)
     else:
         existing_users = [user for user in users if user['Seen Profiles']]
         if existing_users:
@@ -270,7 +271,7 @@ def main(profiles_file, users_file, user_interests, user_skills):
     analyze_recommendation(new_user, profiles, svd)
     
     recommended_indices = svd.recommend(0, n_recommendations=5, seen_items=None)
-    print("Recommended Profiles:", recommended_indices)
+    recommended_profile_ids = [profiles[index]['Profile ID'] for index in recommended_indices]
 
 data_dir = os.path.join(os.getcwd(), 'Algorithm')
 

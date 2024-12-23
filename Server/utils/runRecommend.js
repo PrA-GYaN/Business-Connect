@@ -7,7 +7,8 @@ export const runRecommend = async (req, res) => {
     // const {type,user_interests, user_skills,} = req.body;
     const user_interests = "['Music', 'Entrepreneurship', 'Leadership', 'Marketing Trends']";
     const  user_skills = "['Marketing', 'SEO', 'UX/UI Design', 'Networking']";
-    const type = 'individual';
+    const type = 'house';
+    // const type = 'individual';
     try {
         const result = await new Promise((resolve, reject) => {
             const __filename = fileURLToPath(import.meta.url);
@@ -61,6 +62,7 @@ export const runRecommend = async (req, res) => {
             }
         }
         res.status(200).json(users_list);
+        console.log('Recommended user list:' + users_list);
 
     } catch (error) {
         console.error('Error running Python script:', error);

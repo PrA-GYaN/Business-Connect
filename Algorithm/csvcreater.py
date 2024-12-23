@@ -2,7 +2,7 @@ import pandas as pd
 
 # Users data
 users_data = [
-    {"User ID": 1, "Interests": ["Data Science", "E-commerce"], "Skills": ["Python", "Data Analysis"], "Seen Profiles": [1, 2]},
+    {"User ID": 1, "Interests": ["Data Science", "E-commerce"], "Skills": ["Python", "Data Analysis"], "Seen Profiles": [2]},
     {"User ID": 2, "Interests": ["AI", "Content Creation"], "Skills": ["Machine Learning", "Writing"], "Seen Profiles": [3]},
     {"User ID": 3, "Interests": ["Marketing", "Social Media"], "Skills": ["SEO", "Presentation Skills"], "Seen Profiles": [4, 5]},
 ]

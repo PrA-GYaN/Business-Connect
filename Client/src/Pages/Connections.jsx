@@ -9,7 +9,7 @@ import Loader from '../Components/Loader';
 
 const Connections = () => {
     const { authUser } = useAuthContext();
-    const { getProfileById, getAllUsers,like_dislike } = useProfile();
+    const { getProfileById, getAllUsers,getRecUsers,like_dislike } = useProfile();
     const [connections, setConnections] = useState([]);
     const [users, setUsers] = useState([]);
     const [swipedCardIds, setSwipedCardIds] = useState([]);
@@ -27,7 +27,7 @@ const Connections = () => {
             try {
                 const profile = await getProfileById(authUser);
                 setConnections(profile.connections || []);
-                const usersData = await getAllUsers(profile.interests, profile.skills);
+                const usersData = await getRecUsers(profile.interests, profile.skills);
                 setUsers(usersData || []);
             } catch (error) {
                 console.error("Error fetching data:", error);

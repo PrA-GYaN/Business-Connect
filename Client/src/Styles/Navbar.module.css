@@ -36,6 +36,7 @@
     flex-direction: row;
     align-items: center;
     gap: 10rem;
+    outline: none;
 }
 .navbarLinks
 {
@@ -43,8 +44,17 @@
     flex-direction: row;
     gap:2rem;
 }
+.navbarLinks a
+{
+    text-decoration: none;
+    color: white;
+    font-size: 1.2rem;
+    outline: none;
+}
 .nonActiveLink
 {
+  border: none;
+  outline: none;
     display: grid;
     place-content: center;
     padding: 0.7rem 2.5rem;
@@ -62,6 +72,8 @@
     border-radius: 0.5rem;
 }
 .activeLink{
+  border: none;
+  outline: none;
     display: grid;
     place-content: center;
     padding: 0.7rem 2.5rem;
