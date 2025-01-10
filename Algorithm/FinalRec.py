@@ -5,6 +5,7 @@ from sklearn.metrics import mean_absolute_error, precision_score, recall_score, 
 import os
 import warnings
 from scipy.sparse import csr_matrix, find
+from sklearn.model_selection import train_test_split
 
 warnings.filterwarnings("ignore")
 
@@ -24,12 +25,13 @@ class SimpleSVD:
             learning_rate = self.initial_learning_rate * (1 / (1 + 0.01 * epoch))
             total_error = 0
             
+            # Iterate over all non-zero entries in the ratings matrix R
             for i in range(self.num_users):
                 row, col, ratings = find(R[i, :])
-                if ratings.size == 0:
+                if len(ratings) == 0:
                     continue
                 
-                Q_subset = self.Q[col]
+                Q_subset = self.Q[col, :]
                 eij = ratings - np.dot(self.P[i, :], Q_subset.T)
 
                 self.P[i, :] += learning_rate * (eij.dot(Q_subset) - self.regularization * self.P[i, :])
@@ -37,14 +39,18 @@ class SimpleSVD:
 
                 total_error += np.sum(eij ** 2)
 
-            num_non_zero = len(ratings)
-            average_error = total_error / num_non_zero if num_non_zero > 0 else 0
+            # Average error
+            average_error = total_error / len(ratings) if len(ratings) > 0 else 0
             print(f"Epoch {epoch + 1}/{self.epochs}, Error: {average_error:.4f}")
 
     def predict(self, user, item):
-        return np.dot(self.P[user, :], self.Q[item, :].T)
+        # Avoid NaN values by checking if values are valid
+        try:
+            return np.dot(self.P[user, :], self.Q[item, :].T)
+        except:
+            return 0
 
-    def recommend(self, user, n_recommendations=5, seen_items=None):
+    def recommend(self, user, n_recommendations=10, seen_items=None):
         user_ratings = self.predict(user, np.arange(self.num_items))
         if seen_items is not None:
             user_ratings[seen_items] = -1
@@ -138,7 +144,7 @@ def load_data(profiles_file, users_file):
         profiles_df['Skills'] = profiles_df['Skills'].apply(ast.literal_eval)
         users_df['Interests'] = users_df['Interests'].apply(ast.literal_eval)
         users_df['Skills'] = users_df['Skills'].apply(ast.literal_eval)
-        users_df['Seen Profiles'] = users_df['Seen Profiles'].apply(ast.literal_eval)
+        users_df['Liked Profiles'] = users_df['Liked Profiles'].apply(ast.literal_eval)
 
         return profiles_df.to_dict(orient='records'), users_df.to_dict(orient='records')
     except Exception as e:
@@ -150,7 +156,7 @@ def grid_search_hyperparameters(X_train, y_train):
         'num_features': [2, 5],
         'initial_learning_rate': [0.01],
         'regularization': [0.01],
-        'epochs': [10, 100]
+        'epochs': [10, 200]
     }
     
     best_params = None
@@ -206,10 +212,10 @@ def analyze_recommendation(user, profiles, svd_model, interest_weight=0.6, skill
     results.sort(key=lambda x: x["Hybrid Score"], reverse=True)
     
     print("Profile Contributions (60% Content-Based, 40% Collaborative):")
-    print("Recommended Profiles based on the following criteria:")
-    print("Interests: 'E-commerce', 'Content Creation'")
-    print("Skills: 'Data Analysis', 'Presentation Skills'")
-    for r in results:
+    print("Recommended Profiles based on the following criteria: ")
+    print("Interests: 'E-commerce', 'Content Creation'")  # Example Interest
+    print("Skills: 'Data Analysis', 'Presentation Skills'")  # Example Skill
+    for r in results[:10]:  # Only show top 10
         print(f"Profile ID: {r['Profile ID']}, "
               f"Content-Based: {r['Content-Based Score']:.4f}, "
               f"Collaborative: {r['Collaborative Score']:.4f}, "
@@ -217,13 +223,17 @@ def analyze_recommendation(user, profiles, svd_model, interest_weight=0.6, skill
     
     return results
 
+def split_data(R, test_size=0.4):
+    train_data, test_data = train_test_split(R, test_size=test_size, random_state=42)
+    return csr_matrix(train_data), csr_matrix(test_data)
+
 def main(profiles_file, users_file, user_interests, user_skills):
     profiles, users = load_data(profiles_file, users_file)
     
     new_user = {
         'Interests': user_interests,
         'Skills': user_skills,
-        'Seen Profiles': []
+        'Liked Profiles': []
     }
     
     num_profiles = len(profiles)
@@ -244,7 +254,7 @@ def main(profiles_file, users_file, user_interests, user_skills):
     if os.path.exists(model_file_path):
         print("Loading existing model...")
     else:
-        existing_users = [user for user in users if user['Seen Profiles']]
+        existing_users = [user for user in users if user['Liked Profiles']]
         if existing_users:
             existing_R = np.zeros((len(existing_users), num_profiles))
             
@@ -257,24 +267,31 @@ def main(profiles_file, users_file, user_interests, user_skills):
             
             existing_R_sparse = csr_matrix(existing_R)
 
-            best_params = grid_search_hyperparameters(existing_R_sparse, existing_R_sparse)
+            # Split the data into training and test sets
+            train_data, test_data = split_data(existing_R_sparse.toarray())
+
+            best_params = grid_search_hyperparameters(train_data, train_data)
             print(f"Best Hyperparameters: {best_params}")
 
             svd = SimpleSVD(num_features=best_params['num_features'],
                             initial_learning_rate=best_params['initial_learning_rate'],
                             regularization=best_params['regularization'],
                             epochs=best_params['epochs'])
-            svd.fit(existing_R_sparse)
+            svd.fit(train_data)
+
+            # Evaluate the model on the test set
+            rmse, mae, precision, recall, f1 = evaluate_model(test_data, svd)
+            print(f"Test RMSE: {rmse:.4f}, MAE: {mae:.4f}, Precision: {precision:.4f}, Recall: {recall:.4f}, F1: {f1:.4f}")
 
             # dump(svd, model_file_path)
 
     analyze_recommendation(new_user, profiles, svd)
     
-    recommended_indices = svd.recommend(0, n_recommendations=5, seen_items=None)
+    recommended_indices = svd.recommend(0, n_recommendations=10, seen_items=None)
     recommended_profile_ids = [profiles[index]['Profile ID'] for index in recommended_indices]
-
+    
 data_dir = os.path.join(os.getcwd(), 'Algorithm')
 
 profiles_file = os.path.join(data_dir, 'profiles.csv')
 users_file = os.path.join(data_dir, 'users.csv')
-main(profiles_file, users_file, ['E-commerce', 'Content Creation'], ['Data Analysis', 'Presentation Skills'])
+main(profiles_file, users_file,['E-commerce', 'Content Creation', 'Social Media Marketing'],['SEO', 'Data Analysis', 'Social Media Marketing'])
