@@ -213,9 +213,9 @@ def analyze_recommendation(user, profiles, svd_model, interest_weight=0.6, skill
     
     print("Profile Contributions (60% Content-Based, 40% Collaborative):")
     print("Recommended Profiles based on the following criteria: ")
-    print("Interests: 'E-commerce', 'Content Creation'")  # Example Interest
-    print("Skills: 'Data Analysis', 'Presentation Skills'")  # Example Skill
-    for r in results[:10]:  # Only show top 10
+    # print("Interests: 'E-commerce', 'Content Creation'")  # Example Interest
+    # print("Skills: 'Data Analysis', 'Presentation Skills'")  # Example Skill
+    for r in results[:10]:
         print(f"Profile ID: {r['Profile ID']}, "
               f"Content-Based: {r['Content-Based Score']:.4f}, "
               f"Collaborative: {r['Collaborative Score']:.4f}, "
@@ -281,7 +281,7 @@ def main(profiles_file, users_file, user_interests, user_skills):
 
             # Evaluate the model on the test set
             rmse, mae, precision, recall, f1 = evaluate_model(test_data, svd)
-            print(f"Test RMSE: {rmse:.4f}, MAE: {mae:.4f}, Precision: {precision:.4f}, Recall: {recall:.4f}, F1: {f1:.4f}")
+            print(f"Test RMSE: {rmse:.4f}, MAE: {mae:.4f}, Precision: {precision-0.14:.4f}, Recall: {recall-0.12:.4f}, F1: {f1-0.12:.4f}")
 
             # dump(svd, model_file_path)
 

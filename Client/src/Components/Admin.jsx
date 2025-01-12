@@ -17,7 +17,7 @@ const Admin = () => {
     const { getAllUsers, getAllMeetingsAdmin } = useProfile();
     const [profiles, setProfiles] = useState([]);
     const [meetings, setMeetings] = useState([]);
-    const [chartData, setChartData] = useState({
+    const [userChartData, setUserChartData] = useState({
         labels: [],
         datasets: [
             {
@@ -27,62 +27,59 @@ const Admin = () => {
             },
         ],
     });
-    const [chartOption, setChartOption] = useState("businessType");
-    const [selectedChartLabel, setSelectedChartLabel] = useState(null);
+    const [meetingChartData, setMeetingChartData] = useState({
+        labels: ["Pending", "Accepted"],
+        datasets: [
+            {
+                data: [0, 0],
+                backgroundColor: ["#FF6384", "#36A2EB"],
+                hoverBackgroundColor: ["#FF6384", "#36A2EB"],
+            },
+        ],
+    });
+    const [userChartOption, setUserChartOption] = useState("businessType");
+    const [selectedSection, setSelectedSection] = useState(null);
+    const [selectedData, setSelectedData] = useState([]);
 
     const colors = ["#36A2EB", "#FF6384", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40"]; // Predefined colors
 
-    // Fetch profiles and meetings, and update chart data
     const fetchData = async () => {
         try {
             const userData = await getAllUsers();
             const meetingData = await getAllMeetingsAdmin();
 
-            console.log("Fetched Profiles:", userData);
-            console.log("Fetched Meetings:", meetingData);
-
             if (userData && Array.isArray(userData)) {
                 setProfiles(userData);
-                updateChartData(userData, chartOption);
-            } else {
-                console.error("Invalid user data format:", userData);
+                updateUserChartData(userData, userChartOption);
             }
 
             if (meetingData && Array.isArray(meetingData)) {
                 setMeetings(meetingData);
-            } else {
-                console.error("Invalid meeting data format:", meetingData);
+                updateMeetingChartData(meetingData);
             }
         } catch (error) {
             console.error("Error fetching data:", error);
         }
     };
 
-    // Update chart data dynamically based on the selected option
-    const updateChartData = (data, option) => {
+    const updateUserChartData = (data, option) => {
         let labels = [];
         let counts = {};
 
-        // Categorize data based on the selected option
         switch (option) {
             case "businessType":
                 labels = [...new Set(data.map((profile) => profile.businessType?.trim().toLowerCase()))];
                 break;
-
             case "industry":
                 labels = [...new Set(data.map((profile) => profile.industry?.trim().toLowerCase()))];
                 break;
-
             case "verified":
                 labels = ["Verified", "Not Verified"];
                 break;
-
             default:
-                console.error("Invalid chart option:", option);
-                return;
+                break;
         }
 
-        // Count occurrences of each label
         labels.forEach((label) => {
             counts[label] = 0;
         });
@@ -93,27 +90,23 @@ const Admin = () => {
                     const type = profile.businessType?.trim().toLowerCase();
                     if (counts[type] !== undefined) counts[type]++;
                     break;
-
                 case "industry":
                     const industry = profile.industry?.trim().toLowerCase();
                     if (counts[industry] !== undefined) counts[industry]++;
                     break;
-
                 case "verified":
                     const verified = profile.verified ? "Verified" : "Not Verified";
                     counts[verified]++;
                     break;
-
                 default:
                     break;
             }
         });
 
-        // Update chart data
         const dataValues = Object.values(counts);
         const chartColors = colors.slice(0, labels.length);
 
-        setChartData({
+        setUserChartData({
             labels,
             datasets: [
                 {
@@ -125,33 +118,63 @@ const Admin = () => {
         });
     };
 
-    // Handle deletion of a user
-    const handleDeleteUser = async (userId) => {
-        try {
-            console.log("Deleting user with ID:", userId);
-            const updatedProfiles = profiles.filter((profile) => profile.id !== userId);
-            setProfiles(updatedProfiles);
-            updateChartData(updatedProfiles, chartOption);
-        } catch (error) {
-            console.error("Error deleting user:", error);
-        }
+    const updateMeetingChartData = (data) => {
+        const counts = { pending: 0, accepted: 0 };
+
+        data.forEach((meeting) => {
+            meeting.participants.forEach((participant) => {
+                if (participant.status === "pending") counts.pending++;
+                if (participant.status === "accepted") counts.accepted++;
+            });
+        });
+
+        setMeetingChartData({
+            labels: ["Pending", "Accepted"],
+            datasets: [
+                {
+                    data: [counts.pending, counts.accepted],
+                    backgroundColor: ["#FF6384", "#36A2EB"],
+                    hoverBackgroundColor: ["#FF6384", "#36A2EB"],
+                },
+            ],
+        });
     };
 
-    // Handle chart click to show table
-    const handleChartClick = (event, elements) => {
+    const handlePieClick = (event, elements, chartType) => {
         if (elements.length > 0) {
             const index = elements[0].index;
-            const label = chartData.labels[index];
-            setSelectedChartLabel(label);
+            const label = chartType === "user" ? userChartData.labels[index] : meetingChartData.labels[index];
+
+            if (chartType === "user") {
+                const filteredData = profiles.filter((profile) => {
+                    switch (userChartOption) {
+                        case "businessType":
+                            return profile.businessType?.trim().toLowerCase() === label;
+                        case "industry":
+                            return profile.industry?.trim().toLowerCase() === label;
+                        case "verified":
+                            return (profile.verified ? "Verified" : "Not Verified") === label;
+                        default:
+                            return false;
+                    }
+                });
+                setSelectedData(filteredData);
+            } else if (chartType === "meeting") {
+                const filteredData = meetings.filter((meeting) =>
+                    meeting.participants.some((participant) => participant.status === label.toLowerCase())
+                );
+                setSelectedData(filteredData);
+            }
+
+            setSelectedSection(label);
         }
     };
 
-    // Update chart data when the selected option changes
-    const handleChartOptionChange = (event) => {
+    const handleUserChartOptionChange = (event) => {
         const selectedOption = event.target.value;
-        setChartOption(selectedOption);
-        updateChartData(profiles, selectedOption);
-        setSelectedChartLabel(null); // Reset selected label
+        setUserChartOption(selectedOption);
+        updateUserChartData(profiles, selectedOption);
+        setSelectedSection(null);
     };
 
     useEffect(() => {
@@ -163,108 +186,95 @@ const Admin = () => {
             <h1>Manage Users and Meetings</h1>
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                {/* Pie Chart */}
+                {/* User Distribution Pie Chart */}
                 <div style={{ width: "40%" }}>
                     <h2>User Distribution</h2>
-                    <label htmlFor="chartOption">View by:</label>
+                    <label htmlFor="userChartOption">View by:</label>
                     <select
-                        id="chartOption"
-                        value={chartOption}
-                        onChange={handleChartOptionChange}
+                        id="userChartOption"
+                        value={userChartOption}
+                        onChange={handleUserChartOptionChange}
                         className={styles.selectDropdown}
                     >
                         <option value="businessType">Business Type</option>
                         <option value="industry">Industry</option>
                         <option value="verified">Verified</option>
                     </select>
-
-                    {chartData.labels.length > 0 ? (
-                        <Pie
-                            data={chartData}
-                            options={{
-                                onClick: handleChartClick,
-                                plugins: {
-                                    legend: {
-                                        position: "right",
-                                    },
+                    <Pie
+                        data={userChartData}
+                        options={{
+                            onClick: (event, elements) => handlePieClick(event, elements, "user"),
+                            plugins: {
+                                legend: {
+                                    position: "right",
                                 },
-                            }}
-                        />
-                    ) : (
-                        <p>No data available for the selected option</p>
-                    )}
+                            },
+                        }}
+                    />
                 </div>
 
-                {/* Meetings Section */}
-                <div style={{ width: "50%" }}>
-                    <h2>Meetings</h2>
-                    {meetings.length > 0 ? (
-                        <ul>
-                            {meetings.map((meeting) => (
-                                <li key={meeting.id}>
-                                    {meeting.title} - {meeting.date}
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p>No meetings</p>
-                    )}
+                {/* Meeting Status Pie Chart */}
+                <div style={{ width: "40%" }}>
+                    <h2>Meeting Status</h2>
+                    <Pie
+                        data={meetingChartData}
+                        options={{
+                            onClick: (event, elements) => handlePieClick(event, elements, "meeting"),
+                            plugins: {
+                                legend: {
+                                    position: "right",
+                                },
+                            },
+                        }}
+                    />
                 </div>
             </div>
 
-            {/* User Profile Table (shown on chart click) */}
-            {selectedChartLabel && (
+            {/* Display Table Based on Selected Section */}
+            {selectedSection && (
                 <div>
-                    <h2>{selectedChartLabel} Profiles</h2>
-                    {profiles.length > 0 ? (
+                    <h2>Details for: {selectedSection}</h2>
+                    {selectedData.length > 0 ? (
                         <table className={styles.table}>
                             <thead>
                                 <tr>
-                                    <th>Full Name</th>
-                                    <th>Email</th>
-                                    <th>Business Type</th>
-                                    <th>Business Title</th>
-                                    <th>Industry</th>
-                                    <th>Verified</th>
-                                    <th>Actions</th>
+                                    {selectedSection === "Pending" || selectedSection === "Accepted" ? (
+                                        <>
+                                            <th>Title</th>
+                                            <th>Start Time</th>
+                                            <th>End Time</th>
+                                            <th>Participants</th>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <th>Full Name</th>
+                                            <th>Email</th>
+                                            <th>Business Type</th>
+                                        </>
+                                    )}
                                 </tr>
                             </thead>
                             <tbody>
-                                {profiles
-                                    .filter((profile) => {
-                                        switch (chartOption) {
-                                            case "businessType":
-                                                return profile.businessType?.trim().toLowerCase() === selectedChartLabel;
-                                            case "industry":
-                                                return profile.industry?.trim().toLowerCase() === selectedChartLabel;
-                                            case "verified":
-                                                return (profile.verified ? "Verified" : "Not Verified") === selectedChartLabel;
-                                            default:
-                                                return false;
-                                        }
-                                    })
-                                    .map((profile) => (
-                                        <tr key={profile.id}>
-                                            <td>{profile.fullName}</td>
-                                            <td>{profile.email}</td>
-                                            <td>{profile.businessType}</td>
-                                            <td>{profile.businessTitle}</td>
-                                            <td>{profile.industry}</td>
-                                            <td>{profile.verified ? "Yes" : "No"}</td>
-                                            <td>
-                                                <button
-                                                    onClick={() => handleDeleteUser(profile.id)}
-                                                    className={styles.buttonDelete}
-                                                >
-                                                    <IoTrashBinSharp />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                {selectedSection === "Pending" || selectedSection === "Accepted"
+                                    ? selectedData.map((meeting) => (
+                                          <tr key={meeting._id}>
+                                              <td>{meeting.title}</td>
+                                              <td>{new Date(meeting.startTime).toLocaleString()}</td>
+                                              <td>{new Date(meeting.endTime).toLocaleString()}</td>
+                                              <td>{meeting.participants.length}</td>
+                                          </tr>
+                                      ))
+                                    : selectedData.map((profile) => (
+                                          <tr key={profile.id}>
+                                              <td>{profile.fullName}</td>
+                                              <td>{profile.email}</td>
+                                              <td>{profile.businessType}</td>
+                                          </tr>
+                                      ))}
                             </tbody>
                         </table>
                     ) : (
-                        <p>No profiles found</p>
+                        <p>No data found</p>
                     )}
                 </div>
             )}
