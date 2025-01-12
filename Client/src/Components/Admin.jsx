@@ -14,8 +14,9 @@ import {
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Admin = () => {
-    const { getAllUsers } = useProfile();
+    const { getAllUsers, getAllMeetingsAdmin } = useProfile();
     const [profiles, setProfiles] = useState([]);
+    const [meetings, setMeetings] = useState([]);
     const [chartData, setChartData] = useState({
         labels: [],
         datasets: [
@@ -27,23 +28,33 @@ const Admin = () => {
         ],
     });
     const [chartOption, setChartOption] = useState("businessType");
+    const [selectedChartLabel, setSelectedChartLabel] = useState(null);
 
     const colors = ["#36A2EB", "#FF6384", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40"]; // Predefined colors
 
-    // Fetch profiles and update chart data
-    const fetchProfiles = async () => {
+    // Fetch profiles and meetings, and update chart data
+    const fetchData = async () => {
         try {
-            const data = await getAllUsers();
-            console.log("Fetched Profiles:", data);
+            const userData = await getAllUsers();
+            const meetingData = await getAllMeetingsAdmin();
 
-            if (data && Array.isArray(data)) {
-                setProfiles(data);
-                updateChartData(data, chartOption);
+            console.log("Fetched Profiles:", userData);
+            console.log("Fetched Meetings:", meetingData);
+
+            if (userData && Array.isArray(userData)) {
+                setProfiles(userData);
+                updateChartData(userData, chartOption);
             } else {
-                console.error("Invalid data format:", data);
+                console.error("Invalid user data format:", userData);
+            }
+
+            if (meetingData && Array.isArray(meetingData)) {
+                setMeetings(meetingData);
+            } else {
+                console.error("Invalid meeting data format:", meetingData);
             }
         } catch (error) {
-            console.error("Error fetching profiles:", error);
+            console.error("Error fetching data:", error);
         }
     };
 
@@ -126,85 +137,137 @@ const Admin = () => {
         }
     };
 
+    // Handle chart click to show table
+    const handleChartClick = (event, elements) => {
+        if (elements.length > 0) {
+            const index = elements[0].index;
+            const label = chartData.labels[index];
+            setSelectedChartLabel(label);
+        }
+    };
+
     // Update chart data when the selected option changes
     const handleChartOptionChange = (event) => {
         const selectedOption = event.target.value;
         setChartOption(selectedOption);
         updateChartData(profiles, selectedOption);
+        setSelectedChartLabel(null); // Reset selected label
     };
 
     useEffect(() => {
-        fetchProfiles();
+        fetchData();
     }, []);
 
     return (
         <div>
-            <h1>Manage Users</h1>
+            <h1>Manage Users and Meetings</h1>
 
-            {/* Pie Chart */}
-            <div>
-                <h2>User Distribution</h2>
-                <label htmlFor="chartOption">View by:</label>
-                <select
-                    id="chartOption"
-                    value={chartOption}
-                    onChange={handleChartOptionChange}
-                    className={styles.selectDropdown}
-                >
-                    <option value="businessType">Business Type</option>
-                    <option value="industry">Industry</option>
-                    <option value="verified">Verified</option>
-                </select>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                {/* Pie Chart */}
+                <div style={{ width: "40%" }}>
+                    <h2>User Distribution</h2>
+                    <label htmlFor="chartOption">View by:</label>
+                    <select
+                        id="chartOption"
+                        value={chartOption}
+                        onChange={handleChartOptionChange}
+                        className={styles.selectDropdown}
+                    >
+                        <option value="businessType">Business Type</option>
+                        <option value="industry">Industry</option>
+                        <option value="verified">Verified</option>
+                    </select>
 
-                {chartData.labels.length > 0 ? (
-                    <div style={{ maxWidth: "500px", margin: "0 auto" }}>
-                        <Pie data={chartData} />
-                    </div>
-                ) : (
-                    <p>No data available for the selected option</p>
-                )}
-            </div>
+                    {chartData.labels.length > 0 ? (
+                        <Pie
+                            data={chartData}
+                            options={{
+                                onClick: handleChartClick,
+                                plugins: {
+                                    legend: {
+                                        position: "right",
+                                    },
+                                },
+                            }}
+                        />
+                    ) : (
+                        <p>No data available for the selected option</p>
+                    )}
+                </div>
 
-            {/* User Profile Management */}
-            <div>
-                {profiles.length > 0 ? (
-                    <table className={styles.table}>
-                        <thead>
-                            <tr>
-                                <th>Full Name</th>
-                                <th>Email</th>
-                                <th>Business Type</th>
-                                <th>Business Title</th>
-                                <th>Industry</th>
-                                <th>Verified</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {profiles.map((profile) => (
-                                <tr key={profile.id}>
-                                    <td>{profile.fullName}</td>
-                                    <td>{profile.email}</td>
-                                    <td>{profile.businessType}</td>
-                                    <td>{profile.businessTitle}</td>
-                                    <td>{profile.industry}</td>
-                                    <td>{profile.verified ? "Yes" : "No"}</td>
-                                    <td>
-                                        <button
-                                            onClick={() => handleDeleteUser(profile.id)}
-                                            className={styles.buttonDelete}
-                                        >
-                                            <IoTrashBinSharp />
-                                        </button>
-                                    </td>
-                                </tr>
+                {/* Meetings Section */}
+                <div style={{ width: "50%" }}>
+                    <h2>Meetings</h2>
+                    {meetings.length > 0 ? (
+                        <ul>
+                            {meetings.map((meeting) => (
+                                <li key={meeting.id}>
+                                    {meeting.title} - {meeting.date}
+                                </li>
                             ))}
-                        </tbody>
-                    </table>
-                ) : (
-                    <p>No profiles found</p>
-                )}
+                        </ul>
+                    ) : (
+                        <p>No meetings</p>
+                    )}
+                </div>
             </div>
+
+            {/* User Profile Table (shown on chart click) */}
+            {selectedChartLabel && (
+                <div>
+                    <h2>{selectedChartLabel} Profiles</h2>
+                    {profiles.length > 0 ? (
+                        <table className={styles.table}>
+                            <thead>
+                                <tr>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Business Type</th>
+                                    <th>Business Title</th>
+                                    <th>Industry</th>
+                                    <th>Verified</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {profiles
+                                    .filter((profile) => {
+                                        switch (chartOption) {
+                                            case "businessType":
+                                                return profile.businessType?.trim().toLowerCase() === selectedChartLabel;
+                                            case "industry":
+                                                return profile.industry?.trim().toLowerCase() === selectedChartLabel;
+                                            case "verified":
+                                                return (profile.verified ? "Verified" : "Not Verified") === selectedChartLabel;
+                                            default:
+                                                return false;
+                                        }
+                                    })
+                                    .map((profile) => (
+                                        <tr key={profile.id}>
+                                            <td>{profile.fullName}</td>
+                                            <td>{profile.email}</td>
+                                            <td>{profile.businessType}</td>
+                                            <td>{profile.businessTitle}</td>
+                                            <td>{profile.industry}</td>
+                                            <td>{profile.verified ? "Yes" : "No"}</td>
+                                            <td>
+                                                <button
+                                                    onClick={() => handleDeleteUser(profile.id)}
+                                                    className={styles.buttonDelete}
+                                                >
+                                                    <IoTrashBinSharp />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                            </tbody>
+                        </table>
+                    ) : (
+                        <p>No profiles found</p>
+                    )}
+                </div>
+            )}
         </div>
     );
 };

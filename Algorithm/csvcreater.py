@@ -20,7 +20,7 @@ def generate_random_interests_skills():
 # Generate Users and corresponding Profiles
 users_data = []
 profiles_data = []
-for user_id in range(1, 180):  # 200 users
+for user_id in range(1, 100):  # 200 users
     interests, skills = generate_random_interests_skills()
     
     # The user's interests and skills match the profile's interests and skills

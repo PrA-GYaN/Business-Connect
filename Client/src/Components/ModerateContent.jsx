@@ -54,7 +54,7 @@ const ModerateContent = () => {
             className={styles.deleteButton}
             onClick={() => deleteThread(thread.ThreadId)}
           >
-            Delete
+            Hide
           </button>
         </td>
       </tr>
@@ -105,7 +105,7 @@ const ModerateContent = () => {
                 className={styles.deleteButton}
                 onClick={deleteAllHateSpeechThreads}
               >
-                Delete All Hate Speech Threads
+                Hide All Hate Speech Threads
               </button>
             </div>
           )}

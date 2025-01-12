@@ -30,6 +30,16 @@ const useProfile = () => {
             return null;
         }
     };
+    const getAllMeetingsAdmin = async () => {
+        try {
+            const response = await axios.get(`http://localhost:5000/meetings/allmeetingsadmin`
+            );
+            console.log("Meetings:",response.data);
+            return response.data;
+        } catch (err) {
+            setError("Failed to fetch meetings. Please try again later.");
+        }
+    }
 
     const getRecUsers = async(user_interests,user_skills) => {
         const user_data = {
@@ -78,7 +88,7 @@ const useProfile = () => {
     }
 };  
 
-return { profile, like_dislike,getAllUsers, getRecUsers, getProfileById, updateUserProfile };
+return { profile,getAllMeetingsAdmin, like_dislike,getAllUsers, getRecUsers, getProfileById, updateUserProfile };
 };
 
 export default useProfile;

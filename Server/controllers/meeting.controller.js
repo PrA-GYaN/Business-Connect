@@ -109,6 +109,15 @@ export const rejectMeetingRequest = async (req, res) => {
     }
 };
 
+export const getAllMeetingsAdmin = async (req, res) => {
+    try {
+        const meetings = await Meeting.find();
+        res.status(200).json(meetings);
+    } catch (error) {
+        console.error("Error fetching meetings:", error);
+        res.status(500).json({ message: 'Error fetching meetings', error: error.message });
+    }
+}
 
 export const getAllMeetings = async (req, res) => {
     const getId = req.params.id; // ID to check against participants
