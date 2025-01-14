@@ -9,15 +9,17 @@ import Loader from '../Components/Loader';
 
 const Connections = () => {
     const { authUser } = useAuthContext();
-    const { getProfileById, getAllUsers,getRecUsers,like_dislike } = useProfile();
+    const { getProfileById, getAllUsers, getRecUsers, like_dislike } = useProfile();
     const [connections, setConnections] = useState([]);
+    const [requests, setRequests] = useState([]);
     const [users, setUsers] = useState([]);
     const [swipedCardIds, setSwipedCardIds] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('connections'); // To toggle between connections and requests
 
-    const handleSwipe = async(likedUserId,action) => {
+    const handleSwipe = async (likedUserId, action) => {
         console.log(`Swiped ${action} on card ${likedUserId}`);
-        like_dislike(likedUserId,action);
+        like_dislike(likedUserId, action);
         setSwipedCardIds((prev) => [...prev, likedUserId]);
     };
 
@@ -27,11 +29,11 @@ const Connections = () => {
             try {
                 const profile = await getProfileById(authUser);
                 setConnections(profile.connections || []);
-                // const usersData = await getRecUsers(profile.interests, profile.skills);
+                setRequests(profile.requests || []);
                 const usersData = await getAllUsers();
                 setUsers(usersData || []);
             } catch (error) {
-                console.error("Error fetching data:", error);
+                console.error('Error fetching data:', error);
             } finally {
                 setLoading(false);
             }
@@ -43,7 +45,7 @@ const Connections = () => {
     if (loading) {
         return (
             <div className={styles.loading}>
-                <Loader/>
+                <Loader />
             </div>
         );
     }
@@ -54,26 +56,85 @@ const Connections = () => {
             <div className={styles.connectionsBox}>
                 <div className={styles.connectionsContainer}>
                     <div className={styles.leftPanel}>
-                        <span className={styles.leftTitle}>Connections</span>
-                        <div className={styles.userConnections}>
-                            {connections.length > 0 ? (
-                                connections.map((connection) => (
-                                    <div key={connection.id} className={styles.connectionCard}>
-                                        <div className={styles.connectionProfile}>
-                                        <div
-                                            className={styles.profilePic}
-                                            style={{
-                                                backgroundImage: `url(${connection.userId.profilePic[0].url})`,
-                                            }}
-                                            ></div>
-                                        </div>
-                                        <div className={styles.connectionDetails}>
-                                            <span className={styles.connectionName}>{connection.userId.fullName}</span>
-                                        </div>
-                                    </div>
-                                ))
-                            ) : (
-                                <span className={styles.noConnections}>No connections available</span>
+                        {/* <span className={styles.leftTitle}>Connections</span> */}
+                        <div className={styles.tabs}>
+                            <div
+                                className={`${styles.tabButton} ${
+                                    activeTab === 'connections' ? styles.activeTab : ''
+                                }`}
+                                onClick={() => setActiveTab('connections')}
+                            >
+                                Connections
+                            </div>
+                            <div
+                                className={`${styles.tabButton} ${
+                                    activeTab === 'requests' ? styles.activeTab : ''
+                                }`}
+                                onClick={() => setActiveTab('requests')}
+                            >
+                                Requests
+                            </div>
+                        </div>
+                        <div className={styles.tabContent}>
+                            {activeTab === 'connections' && (
+                                <div className={styles.userConnections}>
+                                    {connections.length > 0 ? (
+                                        connections.map((connection) => (
+                                            <div
+                                                key={connection.id}
+                                                className={styles.connectionCard}
+                                            >
+                                                <div className={styles.connectionProfile}>
+                                                    <div
+                                                        className={styles.profilePic}
+                                                        style={{
+                                                            backgroundImage: `url(${connection.userId.profilePic[0].url})`,
+                                                        }}
+                                                    ></div>
+                                                </div>
+                                                <div className={styles.connectionDetails}>
+                                                    <span className={styles.connectionName}>
+                                                        {connection.userId.fullName}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <span className={styles.noConnections}>
+                                            No connections available
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                            {activeTab === 'requests' && (
+                                <div className={styles.userConnections}>
+                                    {requests.length > 0 ? (
+                                        requests.map((request) => (
+                                            <div
+                                                key={request.id}
+                                                className={styles.connectionCard}
+                                            >
+                                                <div className={styles.connectionProfile}>
+                                                    <div
+                                                        className={styles.profilePic}
+                                                        style={{
+                                                            backgroundImage: `url(${request.userId.profilePic[0].url})`,
+                                                        }}
+                                                    ></div>
+                                                </div>
+                                                <div className={styles.connectionDetails}>
+                                                    <span className={styles.connectionName}>
+                                                        {request.userId.fullName}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <span className={styles.noConnections}>
+                                            No requests available
+                                        </span>
+                                    )}
+                                </div>
                             )}
                         </div>
                     </div>

@@ -12,10 +12,10 @@ import Navbar from '../Components/Navbar';
 const Meeting = () => {
   const { socket, onlineUsers } = useSocketContext();
   const location = useLocation();
-  const { selectedConversationId } = location.state || {};
+  const { userID } = location.state || {};
   const [isCallActive, setIsCallActive] = useState(false);
   const [remoteStream, setRemoteStream] = useState(null);
-  const [peerId, setPeerId] = useState(onlineUsers[selectedConversationId]);
+  const [peerId, setPeerId] = useState(onlineUsers[userID]);
   const [connectionState, setConnectionState] = useState('disconnected');
   const [isCalling, setIsCalling] = useState(false);
   const [hasAnswered, setHasAnswered] = useState(false);
@@ -26,7 +26,7 @@ const Meeting = () => {
   const peerRef = useRef(null);
   const localStreamRef = useRef(null);
 
-  console.log('selectedConversationId:', selectedConversationId);
+  console.log('selectedConversationId:', userID);
   console.log('peerId:', peerId);
 
   useEffect(() => {
@@ -204,6 +204,7 @@ const Meeting = () => {
         const tracks = localStreamRef.current.getTracks();
         tracks.forEach(track => track.stop());
       }
+      
     }
   };
 
@@ -252,10 +253,10 @@ const Meeting = () => {
         </button>
       </div>
 
-      <div>
+      {/* <div>
         <p>Connection State: {connectionState}</p>
         {connectionState === 'connected' && <p>Connection successfully established!</p>}
-      </div>
+      </div> */}
     </div>
     </>
   );

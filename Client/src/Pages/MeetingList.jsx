@@ -7,10 +7,16 @@ import MeetingScheduler from '../Components/MeetingScheduler';
 import { useAuthContext } from '../Context/AuthContext';
 import Navbar from '../Components/Navbar';
 import { IoIosAddCircle } from "react-icons/io";
+import { useNavigate } from 'react-router-dom';
 
 const MeetingList = () => {
     const {authUser} = useAuthContext();
     const [isModalOpen, setModalOpen] = useState(false);
+    const navigate = useNavigate();
+    const openCallInNewWindow = (userID) => {
+        console.log('Opening call in new window for user:', userID);
+        navigate('/call', { state: {userID:userID} });
+    };
 
     const {
         meetings,
@@ -33,7 +39,14 @@ const MeetingList = () => {
         const isAccepted = participants.some(p => p.status === 'accepted');
         const isPending = participants.some(p => p.status === 'pending');
         const isCreatedByUser = createdBy === authUser;
-
+        let peerId = '';
+        if(authUser === createdBy){
+            peerId = participants.find(p => p.userId._id !== authUser).userId._id;
+        }
+        else
+        {
+            peerId = createdBy;
+        }
         return (
             <li key={_id}
                 className={`${styles.meetingItem} ${isAccepted ? styles.accepted : isPending ? styles.pending : styles.rejected}`}
@@ -41,8 +54,11 @@ const MeetingList = () => {
                 <strong>{title}</strong> <br />
                 {format(new Date(startTime), 'Pp', { timeZone })} - 
                 {format(new Date(endTime), 'Pp', { timeZone })} <br />
+                <div>
+                    Peer Id: {peerId}
+                </div>
                 {link && isAccepted && (
-                    <a href={link} target="_blank" rel="noopener noreferrer" className={styles.joinLink}>Join Meeting</a>
+                    <div onClick={()=>openCallInNewWindow(peerId)} className={styles.joinLink}>Join Meeting</div>
                 )}
                 {isPending && !isCreatedByUser && (
                     <div className={styles.buttonGroup}>
