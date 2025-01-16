@@ -10,6 +10,7 @@ import CreateThread from '../Components/CreateThread';
 import { HiHome } from "react-icons/hi2";
 import { IoCreate } from "react-icons/io5";
 import { MdExplore } from "react-icons/md";
+import ExploreThread from '../Components/ExploreThhread';
 
 const ThreadList = () => {
     const navigate = useNavigate();
@@ -145,8 +146,7 @@ const ThreadList = () => {
                         )}
                         {selectedOption === 'Explore' && (
                             <div className={styles.exploreSection}>
-                                <h2>Explore Threads</h2>
-                                <p>Implement the explore functionality or UI here.</p>
+                                <ExploreThread/>
                             </div>
                         )}
                     </div>

@@ -24,9 +24,10 @@ const Feed = ({prop}) => {
         hasMore,
     } = useFeed();
 
-    const [filterKeyword, setFilterKeyword] = useState('');
+    // const [filterKeyword, setFilterKeyword] = useState('');
     const observerRef = useRef();
-    // setFilterKeyword('');
+    console.log("Filter Keyword:",prop);
+    const filterKeyword = prop;
     console.log(filterKeyword);
     const filteredPosts = posts.filter(post => {
         const contentMatch = post.content?.toLowerCase().includes(filterKeyword.toLowerCase());

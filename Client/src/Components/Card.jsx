@@ -1,7 +1,8 @@
-import React from 'react';
+import React,{useState} from 'react';
 import { useSpring, animated } from 'react-spring';
 import { useGesture } from '@use-gesture/react';
 import styles from '../Styles/Card.module.css';
+import ModalProfile from './modalProfile.jsx';
 
 const Card = ({ card, onSwipe, isGone, swipeThreshold = 100, containerWidth = 300 }) => {
   const [props, api] = useSpring(() => ({ x: 0, opacity: 1, rotate: 0 }));
@@ -32,6 +33,20 @@ const Card = ({ card, onSwipe, isGone, swipeThreshold = 100, containerWidth = 30
   if (isGone) {
     return null;
   }
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedUserId, setSelectedUserId] = useState(null);
+
+    const openModal = (userId) => {
+      console.log("userId", userId);
+        setSelectedUserId(userId);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedUserId(null);
+    };
 
   const textWatermark = props.x.to(x => {
     if (x > swipeThreshold) return 'Accepted';
@@ -40,8 +55,14 @@ const Card = ({ card, onSwipe, isGone, swipeThreshold = 100, containerWidth = 30
   });
 
   const watermarkColor = props.x.to(x => (x > swipeThreshold ? 'green' : x < -swipeThreshold ? 'red' : 'transparent'));
-
   return (
+    <>
+    {isModalOpen && (
+      <ModalProfile 
+          id={selectedUserId} 
+          onClose={closeModal}
+      />
+  )}
     <animated.div
       {...bind()}
       aria-label={`Swipe card for ${card.fullName}`}
@@ -52,9 +73,16 @@ const Card = ({ card, onSwipe, isGone, swipeThreshold = 100, containerWidth = 30
         transform: props.rotate.to((r) => `rotate(${r}deg)`),
       }}
     >
-      <div className={styles.cardInfo}>
+      <div className={styles.cardInfo} onClick={() => openModal(card._id)}>
         <p style={{ fontSize: '1.5rem', margin: 0 }}>{card.fullName}</p>
-        <p style={{ margin: 0 }}>{card.interests.join(', ')}</p>
+        {
+          card.businessType === 'house' ?
+          (
+            <p style={{ margin: 0 }}>{card.operationalFocus.join(', ')}</p>
+          ) : (
+            <p style={{ margin: 0 }}>{card.interests.join(', ')}</p>
+          ) 
+        }
       </div>
       <animated.div
         className={styles.watermark}
@@ -67,6 +95,7 @@ const Card = ({ card, onSwipe, isGone, swipeThreshold = 100, containerWidth = 30
         {textWatermark}
       </animated.div>
     </animated.div>
+  </>
   );
 };
 

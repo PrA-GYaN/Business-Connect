@@ -18,6 +18,13 @@ const MeetingList = () => {
         navigate('/call', { state: {userID:userID} });
     };
 
+    const isMeetingWithin10Minutes = (startTime) => {
+        const now = new Date();
+        const meetingTime = new Date(startTime);
+        const timeDifference = (meetingTime - now) / 1000 / 60;
+        return timeDifference <= 1000 && meetingTime.toDateString() === now.toDateString();
+    };
+
     const {
         meetings,
         loading,
@@ -33,6 +40,15 @@ const MeetingList = () => {
     if (error) return <div className="error">{error}</div>;
 
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    const sortedMeetings = meetingsToDisplay.sort((a, b) => {
+        const aAccepted = a.participants.some(p => p.status === 'accepted');
+        const bAccepted = b.participants.some(p => p.status === 'accepted');
+        if (aAccepted && !bAccepted) return -1;
+        if (!aAccepted && bAccepted) return 1;
+        if (aAccepted && bAccepted) return new Date(a.startTime) - new Date(b.startTime);
+        return 0;
+    });
 
     const renderMeetingItem = (meeting) => {
         const { _id, title, startTime, endTime, link, participants, createdBy } = meeting;
@@ -51,13 +67,12 @@ const MeetingList = () => {
             <li key={_id}
                 className={`${styles.meetingItem} ${isAccepted ? styles.accepted : isPending ? styles.pending : styles.rejected}`}
                 >
-                <strong>{title}</strong> <br />
-                {format(new Date(startTime), 'Pp', { timeZone })} - 
-                {format(new Date(endTime), 'Pp', { timeZone })} <br />
-                <div>
-                    Peer Id: {peerId}
+                <strong>{title}</strong>
+                <div className={styles.participants}>
+                    <span className={styles.title}>Start Time:</span>
+                    {format(new Date(startTime), 'Pp', { timeZone })}
                 </div>
-                {link && isAccepted && (
+                {link && isAccepted && isMeetingWithin10Minutes(startTime) && (
                     <div onClick={()=>openCallInNewWindow(peerId)} className={styles.joinLink}>Join Meeting</div>
                 )}
                 {isPending && !isCreatedByUser && (
@@ -90,9 +105,9 @@ const MeetingList = () => {
                     </div>
 
                     <div className={styles.meetingGroup}>
-                        {meetingsToDisplay.length > 0 ? (
+                        {sortedMeetings.length > 0 ? (
                             <ul className={styles.meetingList}>
-                                {meetingsToDisplay.map(renderMeetingItem)}
+                                {sortedMeetings.map(renderMeetingItem)}
                             </ul>
                         ) : (
                             <div className={styles.noMeetings}>No meetings available</div>

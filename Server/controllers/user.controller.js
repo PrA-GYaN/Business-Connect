@@ -288,7 +288,7 @@ export const Liked_Dislike = async (req, res) => {
         }
         await user.save();
 
-        if (reverseSwipe && reverseSwipe.action === 'Liked') {
+        if (reverseSwipe && reverseSwipe.action === 'Liked' && existingSwipe.action === 'Liked') {
 
             if (!likedUser.connections.some(conn => conn.userId.toString() === userId.toString())) {
                 likedUser.connections.push({ userId });

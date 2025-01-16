@@ -15,7 +15,7 @@ const Connections = () => {
     const [users, setUsers] = useState([]);
     const [swipedCardIds, setSwipedCardIds] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('connections'); // To toggle between connections and requests
+    const [activeTab, setActiveTab] = useState('connections');
 
     const handleSwipe = async (likedUserId, action) => {
         console.log(`Swiped ${action} on card ${likedUserId}`);

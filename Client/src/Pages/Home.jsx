@@ -9,13 +9,15 @@ import Modal from '../Components/Modal';
 import { FcViewDetails } from "react-icons/fc";
 import { FcCollaboration } from "react-icons/fc";
 import { FcOvertime } from "react-icons/fc";
-import { IoMdSearch } from "react-icons/io";
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
+  const navigate = useNavigate();
   const {authUser,fullName,profilePic,openProfile} = useAuthContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [connections, setConnections] = useState([]);
   const[filters,setFilters] = useState('');
+  console.log("Filters:",filters);
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
@@ -46,6 +48,11 @@ const Home = () => {
     fetchData();
 }, [authUser]);
 
+const useFilter = () => {
+  setFilters(fullName);
+  console.log("Filters:",filters);
+}
+
   return (
     <div className={styles.homeBox}>
       <Navbar/>
@@ -72,13 +79,13 @@ const Home = () => {
 
             </div>
             <div className={styles.profilebtns}>
-              <div className={styles.posts}>
-                <FcViewDetails className={styles.icon}  onClick={()=>setFilters(String(fullName))}/> Posts
+              <div className={styles.posts} onClick={()=>useFilter()}>
+                <FcViewDetails className={styles.icon}/> Posts
               </div>
-              <div className={styles.posts}>
+              <div className={styles.posts} onClick={()=>navigate('/threads')}>
                 <FcCollaboration className={styles.icon}/> Threads
               </div>
-              <div className={styles.posts}>
+              <div className={styles.posts} onClick={()=>navigate('/meeting')}>
                 <FcOvertime className={styles.icon}/> Meetings
               </div>
             </div>
@@ -93,7 +100,7 @@ const Home = () => {
               Post
             </button>
           </div>
-          <Feed prop={''}/>
+          <Feed prop={filters}/>
         </div>
         <div className={styles.rightPanel}>
           <div className={styles.friendBox}>

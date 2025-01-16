@@ -105,6 +105,7 @@ const MeetingScheduler = ({ isOpen, onClose, participants = [] }) => {
     meetingRequest(meetingData);
     setMeetingDetails(`Meeting "${meetingTitle}" scheduled on ${startDate.toLocaleDateString()} ${selectedTime}.\nIn UTC, that's ${meetingData.startTime}.`);
     resetForm();
+    onClose();
   };
 
   const confirmClose = () => {
