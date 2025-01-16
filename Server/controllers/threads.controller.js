@@ -11,7 +11,8 @@ export const createThread = async (req, res) => {
         // Destructuring data from the request body
         const { title, content, author, tags, community } = req.body;
         const image = req.file;
-
+        const tagsarr = tags.split(',');
+        console.log('tags:', tagsarr);
         // Basic validation of required fields
         if (!title || !author) {
             return res.status(400).json({ error: 'Title and author are required fields.' });
@@ -45,12 +46,12 @@ export const createThread = async (req, res) => {
             title,
             content: content || null,  // If no content, set to null
             author,
-            tags: tags || [],  // Default to an empty array if no tags are provided
+            tags: tagsarr || [],  // Default to an empty array if no tags are provided
             community,  // Community field
             image: imageData || [],  // Add image data if available, otherwise null
             createdAt: new Date(),  // Add a timestamp for when the thread is created
         });
-
+        console.log('New thread:', newThread);
         // Save the new thread to the database
         await newThread.save();
 
@@ -82,11 +83,20 @@ export const getAllThreads = async (req, res) => {
 
 // Get thread by ID
 export const getThreadById = async (req, res) => {
-    const userId = req.user._id;
+    const threadId = req.params.id;
     try {
-        const thread = await Thread.findById(req.params.id).populate('author', 'username');
-        if (!thread) return res.status(404).json({ message: 'Thread not found' });
-        res.status(200).json(thread);
+        const thread = await Thread.findById(threadId).populate('author', 'fullName profilePic');
+        if (!thread) {
+            return res.status(404).json({ message: 'Thread not found' });
+        }
+
+        const threadWithTimeAgo = {
+            ...thread._doc,
+            timeAgo: timeAgo(thread.createdAt)
+        };
+
+        console.log('Thread:', threadWithTimeAgo);
+        res.status(200).json(threadWithTimeAgo);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

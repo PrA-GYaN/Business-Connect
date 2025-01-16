@@ -103,6 +103,7 @@
     flex-direction: row;
     align-items: center;
     margin-top: 1rem;
+    z-index: 6;
 }
 .createPostInput
 {

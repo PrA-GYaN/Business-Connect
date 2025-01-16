@@ -1,5 +1,6 @@
 import Comment from '../models/comment.model.js';
 import Thread from '../models/thread.model.js';
+import {timeAgo} from '../utils/timeAgo.js';
 
 export const createComment = async (req, res) => {
     try {
@@ -12,12 +13,9 @@ export const createComment = async (req, res) => {
 
         const newComment = new Comment({ content, author, thread: threadId, type });
         await newComment.save();
-
-        // If it's a reply, update the parent comment's replies array
         if (parentCommentId) {
             await Comment.findByIdAndUpdate(parentCommentId, { $push: { replies: newComment._id } });
         } else {
-            // Update the thread to include the new comment
             await Thread.findByIdAndUpdate(threadId, { $push: { comments: newComment._id } });
         }
 
@@ -31,9 +29,22 @@ export const createComment = async (req, res) => {
 export const getCommentsByThreadId = async (req, res) => {
     try {
         const comments = await Comment.find({ thread: req.params.threadId })
-            .populate('author', 'fullName')
-            .populate('replies');
-        res.status(200).json(comments);
+            .populate('author', 'fullName profilePic')
+            .populate({
+                path: 'replies',
+                populate: {
+                    path: 'author',
+                    select: 'fullName profilePic',
+                },
+            });
+            const commentsWithTimeAgo = comments.map(comment => {
+                return {
+                    ...comment._doc,
+                    timeAgo: timeAgo(comment.createdAt)
+                };
+            });
+
+        res.status(200).json(commentsWithTimeAgo);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

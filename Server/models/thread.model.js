@@ -36,7 +36,7 @@ const ThreadSchema = new mongoose.Schema(
             type: String,
             enum:[
                 "Entrepreneurship","Leadership",
-                "Marketing","Sales","Startup","Finance","Growth","Networking",
+                "Marketing","Sales","Startup","Finance","Growth","Networking","Sales",
                 "Strategy","Productivity","Investment","Innovation","Management",
                 "Partnerships","Technology","E-commerce","Social Media","Team Building","Funding",
                 "Customer Service","Discussion","News","Question","Review"

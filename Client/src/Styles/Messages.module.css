@@ -112,12 +112,13 @@
     font-size: inherit;
     background-color: #f4f2f2;
     border: none;
-    color: #646464;
+    color: #333333;
     padding: 0.7rem 1rem;
     border-radius: 30px;
     width: 100%;
     transition: all ease-in-out .5s;
     margin-right: -2rem;
+    margin-bottom: 1rem;
   }
   
   .search__input:hover, .search__input:focus {
@@ -131,7 +132,7 @@
   
   .search__input::-webkit-input-placeholder {
     font-weight: 100;
-    color: #7e7e7e;
+    color: #333333;
   }
   
   .search__input:focus + .search__button {

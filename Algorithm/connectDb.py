@@ -81,7 +81,9 @@ try:
                 messages = ' | '.join(messages)
             
             # Write thread data to the threads CSV file
-            threads_writer.writerow([thread_id, creator, topic, messages])
+            # print(thread_id, creator, topic, messages)
+            if topic != None:
+                threads_writer.writerow([thread_id, creator, topic, messages])
 
     print("CSV files 'profiles.csv', 'business_profiles.csv', and 'threads.csv' created successfully!")
 

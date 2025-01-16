@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const useComments = (threadId, authUser, fullName) => {
+const useComments = (threadId, authUser, fullName,profilePic) => {
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -35,9 +35,9 @@ const useComments = (threadId, authUser, fullName) => {
 
         const newComment = { content, author: authUser, threadId };
         const optimisticComment = {
-            _id: Date.now(), // Temporary ID
+            _id: Date.now(),
             content,
-            author: { username: fullName },
+            author: { username: fullName,profilePic:[{url:profilePic}] },
             upvotes: [],
             downvotes: [],
             replies: []
@@ -73,7 +73,7 @@ const useComments = (threadId, authUser, fullName) => {
         const optimisticReply = {
             _id: Date.now(), // Temporary ID
             content: replyContent[parentCommentId],
-            author: { username: fullName },
+            author: { username: fullName,profilePic:[{url:profilePic}] },
             upvotes: [],
             downvotes: []
         };
@@ -116,7 +116,11 @@ const useComments = (threadId, authUser, fullName) => {
         }
     };
 
-    const handleVote = async (commentId, type) => {
+    const hasUpvotedComment = (comment) => comment.upvotes.includes(authUser);
+    const hasDownvotedComment = (comment) => comment.downvotes.includes(authUser);
+
+    const handleVoteComment = async (commentId, type) => {
+        console.log("CommentId:",commentId);
         const isUpvote = type === 'upvote';
         const comment = comments.find(comment => comment._id === commentId);
         const hasUpvoted = comment?.upvotes.includes(authUser);
@@ -178,10 +182,12 @@ const useComments = (threadId, authUser, fullName) => {
         error,
         handleCommentSubmit,
         handleReplySubmit,
-        handleVote,
+        handleVoteComment,
         handleReplyToggle,
         handleReplyVisibilityToggle,
         openReply,
+        hasUpvotedComment,
+        hasDownvotedComment,
         setReplyContent,
         replyContent,
         visibleReplies,

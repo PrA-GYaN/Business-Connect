@@ -14,19 +14,29 @@ import MeetingScheduler from '../Components/MeetingScheduler';
 import { useNavigate } from 'react-router-dom';
 
 const Messages = () => {
-    const { authUser,openProfile } = useAuthContext();
+    const { authUser, openProfile } = useAuthContext();
     const { selectedConversation, setSelectedConversation } = useConversation();
     const { loading, finalConversations, error } = useGetConversations();
     const { sendMessage } = useSendMessage();
     const { messages } = useGetMessages();
     const [message, setMessage] = useState('');
     const [isModalOpen, setModalOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState(''); // New state for search query
     const conversations = finalConversations;
     const navigate = useNavigate();
 
+    // Handle the search query input change
+    const handleSearchChange = (e) => {
+        setSearchQuery(e.target.value);
+    };
+
+    // Filter conversations based on search query
+    const filteredConversations = conversations.filter((conversation) =>
+        conversation.userId.fullName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     const openVideoCall = () => {
         if (selectedConversation) {
-            // console.log("Opening video call with:", selectedConversation._id);
             navigate('/call', { state: { selectedConversationId: selectedConversation._id } });
         }
     };
@@ -48,7 +58,27 @@ const Messages = () => {
             handleSend();
         }
     };
-
+    const formatTimestamp = (timestamp) => {
+        const messageDate = new Date(timestamp);
+        const today = new Date();
+        const oneWeekAgo = new Date(today);
+        oneWeekAgo.setDate(today.getDate() - 7);
+    
+        const isToday = messageDate.toDateString() === today.toDateString();
+        const isWithinWeek = messageDate >= oneWeekAgo && messageDate <= today;
+        const time = messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+        if (isToday) {
+            return time;
+        }
+        if (isWithinWeek) {
+            const dayOfWeek = messageDate.toLocaleDateString([], { weekday: 'short' }); // Returns "Sun", "Mon", etc.
+            return `${dayOfWeek}, ${time}`;
+        }
+        const date = messageDate.toLocaleDateString([], { month: 'numeric', day: 'numeric' });
+        return `${date}, ${time}`;
+    };
+    
     return (
         <div className={styles.messagesBox}>
             <Navbar />
@@ -56,9 +86,11 @@ const Messages = () => {
                 <Sidebar
                     loading={loading}
                     error={error}
-                    conversations={conversations}
+                    conversations={filteredConversations} // Pass the filtered conversations
                     selectedConversation={selectedConversation}
                     onUserClick={handleUserClick}
+                    searchQuery={searchQuery} // Pass search query to Sidebar
+                    onSearchChange={handleSearchChange} // Pass the search handler
                 />
                 <ChatBox
                     selectedConversation={selectedConversation}
@@ -68,6 +100,7 @@ const Messages = () => {
                     handleSend={handleSend}
                     handleKeyDown={handleKeyDown}
                     authUser={authUser}
+                    formatTimestamp={formatTimestamp}
                     isModalOpen={isModalOpen}
                     setModalOpen={setModalOpen}
                     openVideoCall={openVideoCall}
@@ -78,7 +111,7 @@ const Messages = () => {
     );
 };
 
-const Sidebar = ({ loading, error, conversations, selectedConversation, onUserClick }) => {
+const Sidebar = ({ loading, error, conversations, selectedConversation, onUserClick, searchQuery, onSearchChange }) => {
     if (loading) return <div>Loading conversations...</div>;
     if (error) return <div>Error loading conversations: {error.message}</div>;
 
@@ -86,11 +119,16 @@ const Sidebar = ({ loading, error, conversations, selectedConversation, onUserCl
         <div className={styles.sideBar}>
             <div className={styles.sideBartop}>
                 <div className={styles.sideTitle}>Chats</div>
-                <RiChatNewFill className={styles.newChat} />
             </div>
             <div className={styles.search}>
-                <input type="text" className={styles.search__input} placeholder="Search for users" aria-label="Search for users" />
-                <button className={styles.search__button} aria-label="Search"></button>
+                <input 
+                    type="text" 
+                    className={styles.search__input} 
+                    placeholder="Search for users" 
+                    value={searchQuery} // Bind the search input value
+                    onChange={onSearchChange} // Handle input changes
+                    aria-label="Search for users" 
+                />
             </div>
             <div className={styles.usersBox}>
                 {conversations.map(conversation => (
@@ -123,7 +161,7 @@ const UserItem = ({ conversation, isSelected, onClick }) => (
     </div>
 );
 
-const ChatBox = ({ selectedConversation, messages, authUser, message, setMessage, handleSend, handleKeyDown, isModalOpen,open, setModalOpen, openVideoCall }) => {
+const ChatBox = ({ selectedConversation, messages, authUser, message, setMessage, handleSend,formatTimestamp, handleKeyDown, isModalOpen, open, setModalOpen, openVideoCall }) => {
     const messagesContainerRef = useRef(null);
 
     useEffect(() => {
@@ -153,15 +191,9 @@ const ChatBox = ({ selectedConversation, messages, authUser, message, setMessage
             <div className={styles.profileInteractions}>
                 <div className={styles.profileInfo}>
                     <div className={styles.profilePicsm} style={{ backgroundImage: `url(${selectedConversation.profilePic[0].url})` }} />
-                    <div className={styles.profileName} onClick={()=>open({id:selectedConversation._id})}>{selectedConversation.fullName}</div>
+                    <div className={styles.profileName} onClick={() => open({ id: selectedConversation._id })}>{selectedConversation.fullName}</div>
                 </div>
                 <div className={styles.interactions}>
-                    <span className={styles.interactionBtn}>
-                        <FaVideo 
-                            className={styles.videoCall}
-                            onClick={openVideoCall}
-                        />
-                    </span>
                     <span
                         className={styles.interactionBtn}
                         onClick={openModal}
@@ -179,7 +211,7 @@ const ChatBox = ({ selectedConversation, messages, authUser, message, setMessage
                 {groupedMessages.map((group, groupIndex) => (
                     <div key={groupIndex} className={styles.groupBox}>
                         <div className={styles.timestamp}>
-                            {new Date(group[0].createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {formatTimestamp(group[0].createdAt)}
                         </div>
                         {group.map((msg, msgIndex) => (
                             <div key={msgIndex} className={`${styles.message} ${(authUser === msg.senderId) ? styles.sender : styles.receiver}`}>

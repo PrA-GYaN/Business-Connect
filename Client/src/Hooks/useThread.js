@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuthContext } from '../Context/AuthContext';
+import { toast } from 'react-toastify';
 
 const useThread = () => {
     const [threads, setThreads] = useState([]);
@@ -33,7 +34,18 @@ const useThread = () => {
         }
     };
 
+    const getThreadById = async (threadId) => {
+        try {
+            const { data } = await axios.get(`http://localhost:5000/threads/getthreadbyid/${threadId}`);
+            return data;
+        } catch (error) {
+            console.error('Error fetching thread:', error);
+            return null;
+        }
+    }
+
     const handleVote = async (threadId, voteType) => {
+        console.log("ThreadId:",threadId);
         try {
             const url = `http://localhost:5000/threads/${voteType}/${threadId}`;
             const response = await axios.post(url, {}, { withCredentials: true });
@@ -69,6 +81,7 @@ const useThread = () => {
         hasUpvoted,
         hasDownvoted,
         calculateTotalVotes,
+        getThreadById
     };
 };
 

@@ -10,7 +10,7 @@ router.post("/create", upload.single('image'), createThread);
 router.get("/getall", getAllThreads);
 router.post("/delete", protectedRoute, deleteThread);
 router.post("/update", protectedRoute, updateThread);
-router.get("/getbyid/:id", getThreadById);
+router.get("/getthreadbyid/:id", getThreadById);
 router.get("/getthreadbyprofile/:id", getThreadByProfile);
 router.post("/upvote/:id", protectedRoute,upvoteThread);
 router.post("/downvote/:id",protectedRoute, downvoteThread);

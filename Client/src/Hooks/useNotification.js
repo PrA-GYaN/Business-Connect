@@ -24,7 +24,7 @@ const useNotification = () => {
                     }
                 );
                 const data = res.data;
-                data.forEach(item => {
+                data.reverse().forEach(item => {
                     addNotification(item);
                 });
             } catch (err) {

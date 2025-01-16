@@ -57,8 +57,8 @@
 .postImage {
     width: 40rem;
     height: 20rem;
-    background-color: crimson;
-    background-size: cover;
+    background-color: #F5F5F5;
+    background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
 }
@@ -78,6 +78,16 @@
     border: 1px solid black;
     transition: all 0.2s linear;
     border-radius: 1rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    user-select: none;
+}
+.icon {
+    font-size: 1.3rem;
+    margin-bottom: 0.2rem;
+    color: rgb(59, 133, 243)
 }
 .interactionBtn:hover {
     cursor: pointer;
@@ -92,12 +102,14 @@
     font-size: 1rem;
     width: 70%;
     border-radius: 1rem;
+    outline: none;
 }
 .commentBox {
     display: flex;
     flex-direction: row;
     gap: 1rem;
     padding: 0.5rem;
+    outline: none;
 }
 .commentBody {
     display: flex;
@@ -114,6 +126,7 @@
 .commentsSection {
     display: none;
     padding: 1rem 0rem;
+    border-top: 1px solid rgb(134, 134, 134);
 }
 .active {
     display: block;

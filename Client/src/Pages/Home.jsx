@@ -12,10 +12,10 @@ import { FcOvertime } from "react-icons/fc";
 import { IoMdSearch } from "react-icons/io";
 
 const Home = () => {
-  const {authUser,fullName,profilePic} = useAuthContext();
+  const {authUser,fullName,profilePic,openProfile} = useAuthContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [connections, setConnections] = useState([]);
-
+  const[filters,setFilters] = useState('');
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
@@ -31,7 +31,7 @@ const Home = () => {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
   const { getProfileById } = useProfile();
-  const [user, setUser] = useState({});
+  const [user, setUser] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,7 +73,7 @@ const Home = () => {
             </div>
             <div className={styles.profilebtns}>
               <div className={styles.posts}>
-                <FcViewDetails className={styles.icon}/> Posts
+                <FcViewDetails className={styles.icon}  onClick={()=>setFilters(String(fullName))}/> Posts
               </div>
               <div className={styles.posts}>
                 <FcCollaboration className={styles.icon}/> Threads
@@ -93,7 +93,7 @@ const Home = () => {
               Post
             </button>
           </div>
-          <Feed/>
+          <Feed prop={''}/>
         </div>
         <div className={styles.rightPanel}>
           <div className={styles.friendBox}>
@@ -104,7 +104,7 @@ const Home = () => {
             <div className={styles.friendList}>
               {connections.length > 0 ? (
                   connections.map((connection) => (
-                      <div key={connection.id} className={styles.connectionCard}>
+                      <div key={connection.id} className={styles.connectionCard} onClick={()=>openProfile({id:connection.userId._id})}>
                           <div className={styles.connectionProfile}>
                           <div
                               className={styles.profilePicfriend}

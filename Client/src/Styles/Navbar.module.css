@@ -135,4 +135,14 @@
     z-index: 10;  
     display: block;
   }
-  
+.notificationIcon
+{
+  position: relative;
+}
+.notify
+{
+  position: absolute;
+  top: -100%;
+  right: -50%;
+  color: red;
+}

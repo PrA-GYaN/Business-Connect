@@ -1,11 +1,13 @@
-// src/Components/Feed.js
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from '../Styles/Feed.module.css'; // Import the CSS module
 import { useAuthContext } from '../Context/AuthContext';
 import Loader from '../Components/Loader';
+import { AiOutlineLike } from "react-icons/ai";
+import { AiFillLike } from "react-icons/ai";
 import useFeed from '../Hooks/useFeed';
 
-const Feed = () => {
+const Feed = ({prop}) => {
+    console.log("Rerendring Page");
     const { authUser, profilePic } = useAuthContext();
     const {
         posts,
@@ -22,7 +24,15 @@ const Feed = () => {
         hasMore,
     } = useFeed();
 
+    const [filterKeyword, setFilterKeyword] = useState('');
     const observerRef = useRef();
+    // setFilterKeyword('');
+    console.log(filterKeyword);
+    const filteredPosts = posts.filter(post => {
+        const contentMatch = post.content?.toLowerCase().includes(filterKeyword.toLowerCase());
+        const authorMatch = post.authorId.fullName.toLowerCase().includes(filterKeyword.toLowerCase());
+        return contentMatch || authorMatch;
+    });
 
     useEffect(() => {
         const observer = new IntersectionObserver((entries) => {
@@ -46,7 +56,19 @@ const Feed = () => {
 
     return (
         <div className={styles.postContainer} aria-live="polite">
-            {posts.map((post) => (
+            {/* Filter Input */}
+            {/* <div className={styles.filterContainer}>
+                <input
+                    type="text"
+                    value={filterKeyword}
+                    onChange={(e) => setFilterKeyword(e.target.value)}
+                    placeholder="Filter posts by content or author"
+                    className={styles.filterInput}
+                    aria-label="Filter posts"
+                />
+            </div> */}
+
+            {filteredPosts.map((post) => (
                 <div key={post._id} className={styles.postBox}>
                     <div className={styles.author}>
                         <div 
@@ -68,7 +90,7 @@ const Feed = () => {
                                 className={`${styles.interactionBtn} ${post.likes.includes(authUser) ? styles.liked : ''}`} 
                                 onClick={() => handleLike(post._id)}
                             >
-                                {post.likes.length} Like
+                                {post.likes.includes(authUser) ? <AiFillLike className={styles.icon}/> : <AiOutlineLike className={styles.icon}/>} {post.likes.length} Like 
                             </div>
                             <div className={styles.interactionBtn} onClick={() => toggleComments(post._id)}>
                                 {visibleComments[post._id] ? 'Hide Comments' : 'Show Comments'}

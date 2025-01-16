@@ -9,10 +9,11 @@ export const useNotificationContext = () => {
 export const NotificationProvider = ({ children }) => {
     const audioRef = useRef(new Audio(notificationSound));
     const [notifications, setNotifications] = useState([]);
+
     const addNotification = (notification) => {
         setNotifications((prevNotifications) => [
-            ...prevNotifications,
             notification,
+            ...prevNotifications, // Then spread the previous notifications
         ]);
     };
 

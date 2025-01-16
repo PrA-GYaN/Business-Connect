@@ -1,0 +1,175 @@
+/* General Modal Styles */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5); /* Dark background for modal overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+  }
+  .modalContent {
+    position: relative;
+    width: 80%;
+    max-width: 600px;
+    max-height: 97vh; /* Set a max height to enable scrolling */
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow-y: auto; /* Enable vertical scrolling */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+  
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  
+  /* Title */
+  .modalContent h2 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    font-weight: 600;
+  }
+  
+  /* Reject Reason Textarea */
+  .rejectTextArea {
+    width: 100%;
+    height: 120px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+    resize: none;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+  }
+  
+  .rejectTextArea:focus {
+    outline: none;
+    border-color: #4CAF50; /* Green border on focus */
+  }
+  
+  /* Buttons */
+  .modalActions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  
+  .acceptBtn,
+  .rejectBtn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .acceptBtn:hover {
+    background-color: #45a049;
+  }
+  
+  .rejectBtn {
+    background-color: #f44336;
+  }
+  
+  .rejectBtn:hover {
+    background-color: #e53935;
+  }
+  
+  /* Close Button */
+  .closeBtn {
+    background-color: #999;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    display: block;
+    margin: 15px auto 0;
+    transition: background-color 0.3s ease;
+  }
+  
+  .closeBtn:hover {
+    background-color: #777;
+  }
+  
+  /* Form Layout */
+  .modalContent p {
+    margin-bottom: 10px;
+    font-size: 16px;
+  }
+  
+  .modalContent img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-top: 15px;
+  }
+  
+  .modalActions button {
+    width: 48%;
+  }
+  
+  /* Optional: Add some padding/margin to the main container to avoid edges on the screen */
+  .modalOverlay {
+    padding: 20px;
+  }
+  
+  /* Table Styling */
+  .verifyTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .verifyTable th,
+  .verifyTable td {
+    padding: 12px;
+    text-align: left;
+    border: 1px solid #ddd;
+  }
+  
+  .verifyTable th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+  
+  .verifyTable td {
+    background-color: #fff;
+  }
+  
+  .imageThumbnail {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  
+  /* Button styling in the table */
+  button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: #45a049;
+  }  

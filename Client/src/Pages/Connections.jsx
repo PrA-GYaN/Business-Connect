@@ -8,7 +8,7 @@ import Card from '../Components/Card';
 import Loader from '../Components/Loader';
 
 const Connections = () => {
-    const { authUser } = useAuthContext();
+    const { authUser,openProfile } = useAuthContext();
     const { getProfileById, getAllUsers, getRecUsers, like_dislike } = useProfile();
     const [connections, setConnections] = useState([]);
     const [requests, setRequests] = useState([]);
@@ -83,6 +83,7 @@ const Connections = () => {
                                             <div
                                                 key={connection.id}
                                                 className={styles.connectionCard}
+                                                onClick={()=>openProfile({id:connection.userId._id})}
                                             >
                                                 <div className={styles.connectionProfile}>
                                                     <div

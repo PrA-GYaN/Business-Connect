@@ -412,4 +412,54 @@ export const verificationreq = async (req, res) => {
     } catch (error) {
         return res.status(500).json({ message: 'Server error' });
     }
-}
+};
+
+export const deleteverificationreq = async (req, res) => {
+    const verificationId = req.body.verificationId;
+    console.log("Verification ID:", verificationId);
+    try {
+        const result = await Verification.deleteMany({ Id: verificationId });
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ message: 'No verification requests found with the given ID' });
+        }
+        console.log("Verification requests deleted:", result.deletedCount);
+        return res.status(200).json({ message: `${result.deletedCount} verification request(s) deleted successfully` });
+    }
+    catch (error) {
+        return res.status(500).json({ message: 'Server error' });
+    }
+};
+
+export const acceptVerification = async (req, res) => {
+    const userId = req.body.userId;
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        user.verified = true;
+        await user.save();
+        return res.status(200).json({ message: 'User verified successfully', user });
+    }
+    catch (error) {
+        return res.status(500).json({ message: 'Server error' });
+    }
+};
+
+export const declineVerification = async (req, res) => {
+    const userId = req.body.userId;
+    const reason = req.body.reason;
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        user.verified = false;
+        await sendNotification(`Your Verification request has been decline for following Reason: ${reason}`, userId);
+        await user.save();
+        return res.status(200).json({ message: 'User verification declined', user });
+    }
+    catch (error) {
+        return res.status(500).json({ message: 'Server error' });
+    }
+};

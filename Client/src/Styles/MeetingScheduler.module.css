@@ -8,6 +8,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 20;
 }
 .heading
 {
@@ -54,14 +55,18 @@
 }
 .closeButton {
   position: absolute;
-  top: -2%;
+  top: -1%;
   right: -2%;
   background: transparent;
   border: none;
   font-size:1.5rem;
   cursor: pointer;
+  color: #333333;
 }
-
+.closeButton:hover {
+  background-color: #63a4eb;
+  border-radius: 50%;
+}
 .errorMessage {
   color: red;
 }
@@ -92,7 +97,10 @@
   border: 1px solid #ddd;
   transition: border-color 0.3s;
 }
-
+.react-datepicker__navigation--next
+{
+  top: -2%;
+}
 .customselect:focus {
   border-color: #007bff;
   outline: none;

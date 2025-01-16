@@ -3,13 +3,15 @@ import { useAuthContext } from '../Context/AuthContext';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { FaHome, FaUserFriends, FaSortDown } from "react-icons/fa";
 import { TiMessages } from "react-icons/ti";
-import { IoNotifications, IoCalendarNumber,IoPeopleSharp } from "react-icons/io5";
+import { IoNotifications, IoCalendarNumber } from "react-icons/io5";
+import { PiUsersThreeFill } from "react-icons/pi";
+import { GoDotFill } from "react-icons/go";
 import { useState } from 'react';
 import Loader from './Loader';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const { authUser, fullName, profilePic, logout } = useAuthContext();
+  const { authUser, fullName, profilePic, logout,icon } = useAuthContext();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   if (!authUser || !fullName || !profilePic) {
     return (
@@ -86,7 +88,7 @@ const Navbar = () => {
                   className={({ isActive }) => (isActive ? styles.activeLink : styles.nonActiveLink)}
                 >
                   <span className={styles.navbarLinkSpan}>
-                    <IoPeopleSharp className={styles.icons} />
+                    <PiUsersThreeFill className={styles.icons} />
                   </span>
                 </NavLink>
             </div>
@@ -97,7 +99,10 @@ const Navbar = () => {
                   className={({ isActive }) => (isActive ? styles.activeLink :styles.nonActiveLink)}
                 >
                   <span className={styles.navbarLinkSpan}>
-                    <IoNotifications className={styles.icons} />
+                    <span className={styles.notificationIcon}>
+                    {icon && <GoDotFill className={styles.notify} />}
+                        <IoNotifications className={styles.icons} />
+                      </span>
                   </span>
                 </NavLink>
             </div>

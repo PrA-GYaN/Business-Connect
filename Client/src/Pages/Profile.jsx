@@ -12,8 +12,10 @@ import { MdVerified, MdEdit } from "react-icons/md";
 import { useNavigate, useLocation } from "react-router-dom";
 import EditProfileModal from "../Components/EditProfileModal";
 import VerifyModal from "../Components/VerifyModal";
+import useAdmin from "../Hooks/useadmin";
 
 const Profile = ({ id }) => {
+    const { verreq } = useAdmin();
     const navigate = useNavigate();
     const location = useLocation();
     const { pid } = location.state || {};
@@ -25,13 +27,14 @@ const Profile = ({ id }) => {
     const [isModalOpen, setIsModalOpen] = useState({});
     const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
     const { getThreadByProfile, handleVote, hasUpvoted, hasDownvoted, calculateTotalVotes } = useThread();
-
     id = pid;
-
+    console.log(pid);
+    console.log(authUser);
+    
     if (!id) {
         id = authUser;
     }
-
+    console.log(verreq);
     const handleVerify = () => {
         setIsVerifyModalOpen(false);
     };
@@ -78,11 +81,28 @@ const Profile = ({ id }) => {
                                 <div className={styles.profileMore}>
                                     <div className={styles.profilefullName}>
                                         <span>{profile.fullName}</span>
-                                        {profile.verified ?
-                                            <span className={styles.verified}><MdVerified /></span>
-                                            :
-                                            <span className={styles.verifyNow} onClick={() => setIsVerifyModalOpen(true)}>Verify Now</span>
-                                        }
+                                        {profile.verified ? (
+                                            <span className={styles.verified}>
+                                                <MdVerified />
+                                            </span>
+                                        ) : (
+                                            id == authUser && (
+                                                <>
+                                                {
+                                                    verreq.some(request => request.Id._id === id) ? (
+                                                        <span className={styles.verifyNow}>
+                                                        Pending
+                                                    </span>
+                                                    ):
+                                                    (
+                                                        <span className={styles.verifyNow} onClick={() => setIsVerifyModalOpen(true)}>
+                                                        Verify Now
+                                                        </span>
+                                                    )
+                                                }
+                                                </>
+                                            )
+                                        )}
                                     </div>
                                     <div className={styles.profileCount}>
                                         <div><strong>{Array.isArray(profile.connections) ? profile.connections.length : 0}</strong> connections</div>
@@ -99,9 +119,13 @@ const Profile = ({ id }) => {
                                         <p>{profile.phoneNumber}</p>
                                         <p>{profile.address}</p>
                                     </div>
-                                    <div className={styles.editProfile}>
-                                        <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, email: true }))} />
-                                    </div>
+                                    {
+                                        id == authUser && (
+                                            <div className={styles.editProfile}>
+                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, email: true }))} />
+                                            </div>
+                                        )
+                                    }
                                 </div>
                             </div>
                             <div className={styles.profileEdit}>
@@ -110,9 +134,13 @@ const Profile = ({ id }) => {
                                     <div className={styles.profileBio}>
                                         <p>{profile.bio}</p>
                                     </div>
-                                    <div className={styles.editProfile}>
-                                        <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, bio: true }))} />
-                                    </div>
+                                    {
+                                        id == authUser && (
+                                            <div className={styles.editProfile}>
+                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, email: true }))} />
+                                            </div>
+                                        )
+                                    }
                                 </div>
                             </div>
                             {
@@ -127,9 +155,13 @@ const Profile = ({ id }) => {
                                                     <span key={index} className={styles.interests}>{interest}</span>
                                                 ))}
                                             </div>
-                                            <div className={styles.editProfile}>
-                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, interests: true }))} />
-                                            </div>
+                                            {
+                                                id == authUser && (
+                                                    <div className={styles.editProfile}>
+                                                        <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, email: true }))} />
+                                                    </div>
+                                                )
+                                            }
                                         </div>
                                     </div>
                                     <div className={styles.profileEdit}>
@@ -140,9 +172,13 @@ const Profile = ({ id }) => {
                                                     <span key={index} className={styles.languages}>{language}</span>
                                                 ))}
                                             </div>
-                                            <div className={styles.editProfile}>
-                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, languages: true }))} />
-                                            </div>
+                                            {
+                                                id == authUser && (
+                                                    <div className={styles.editProfile}>
+                                                        <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, email: true }))} />
+                                                    </div>
+                                                )
+                                            }
                                         </div>
                                     </div>
                                     <div className={styles.profileEdit}>
@@ -153,9 +189,13 @@ const Profile = ({ id }) => {
                                                     <span key={index} className={styles.skill}>{skill}</span>
                                                 ))}
                                             </div>
-                                            <div className={styles.editProfile}>
-                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, skills: true }))} />
-                                            </div>
+                                            {
+                                                id == authUser && (
+                                                    <div className={styles.editProfile}>
+                                                        <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, email: true }))} />
+                                                    </div>
+                                                )
+                                            }
                                         </div>
                                     </div>
                                     </>
@@ -170,9 +210,13 @@ const Profile = ({ id }) => {
                                                     <span key={index} className={styles.interests}>{focus}</span>
                                                 ))}
                                             </div>
-                                            <div className={styles.editProfile}>
-                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, operationalFocus: true }))} />
-                                            </div>
+                                            {
+                                                id == authUser && (
+                                                    <div className={styles.editProfile}>
+                                                        <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, email: true }))} />
+                                                    </div>
+                                                )
+                                            }
                                         </div>
                                     </div>
 

@@ -1,8 +1,6 @@
 .createBox
 {
     height: 87vh;
-    margin-top: 13vh;
-    background-color: #98ccfa;
 }
 .createContainer
 {
@@ -10,13 +8,6 @@
     display: flex;
     flex-direction: row;
     gap: 0.7rem;
-}
-.leftPanel
-{
-    flex: 0 0 25%;
-    min-width: 17rem;
-    max-width: 20rem;
-    border-right: 1px solid black;
 }
 .rightPanel
 {
@@ -29,25 +20,15 @@
     padding: 1rem;
     min-width: 35rem;
 }
-.leftPanel
+.createTitle
 {
-    flex: 0 0 25%;
-    min-width: 17rem;
-    max-width: 20rem;
-    border-right: 1px solid black;
-    display:flex ;
-    flex-direction: column;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #333333;
+    font-family: "Inter", serif;
 }
-.leftPanel>div
-{
-    padding: 1rem;
-    border-bottom: 1px solid black;
-}
-.leftPanel>div:hover
-{
-    background-color: #5aaef8;
-    cursor: pointer;
-}
+
 .titleContainer input,
 .searchBox {
     width: 100%;
@@ -56,13 +37,15 @@
     margin-bottom: 15px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    outline: none;
 }
 
 .tagContainer button {
     padding: 10px;
     font-size: 16px;
     background-color: #f0f0f0;
-    border: 1px solid #ccc;
+    color: black;
+    border: 1px solid #747474;
     border-radius: 4px;
     cursor: pointer;
     margin-bottom: 15px;
@@ -76,6 +59,7 @@
     border: 1px solid #ccc;
     border-radius: 4px;
     resize: none;
+    outline: none;
 }
 
 .submitButton {

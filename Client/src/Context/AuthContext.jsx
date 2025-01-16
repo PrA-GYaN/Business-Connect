@@ -13,7 +13,8 @@ export const AuthContextProvider = ({ children }) => {
     const [authUser, setAuthUser] = useState(null);
     const [fullName, setName] = useState(null);
     const [profilePic, setProfile] = useState(null);
-    const [loading, setLoading] = useState(true); // Loading state
+    const [loading, setLoading] = useState(true);
+    const [icon, setIcon] = useState(false);
 
     useEffect(() => {
         const userCookie = Cookies.get('User');
@@ -39,6 +40,7 @@ export const AuthContextProvider = ({ children }) => {
         }
     };
 
+
     const logout = () => {
         console.log("Logging out...");
         Cookies.remove('User');
@@ -46,7 +48,7 @@ export const AuthContextProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ authUser, fullName, profilePic, loading, setAuthUser,openProfile, logout }}>
+        <AuthContext.Provider value={{ authUser, fullName, profilePic, loading, setAuthUser,openProfile, logout,icon,setIcon }}>
             {children}
         </AuthContext.Provider>
     );

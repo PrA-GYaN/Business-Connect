@@ -4,6 +4,7 @@ import { useAuthContext } from '../Context/AuthContext';
 import Navbar from './Navbar';
 import styles from '../Styles/CreateThreads.module.css';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const tagsList = [
     "Entrepreneurship", "Leadership", "Marketing", "Sales", "Startup", "Finance", "Growth", "Networking",
@@ -58,7 +59,7 @@ const CreateThread = () => {
                 tags: selectedTags,
                 community: selectedCommunity,
             };
-
+            console.log('New thread:', newThread);
             // Create FormData instance
             const formDataToSubmit = new FormData();
 
@@ -72,11 +73,15 @@ const CreateThread = () => {
                 formDataToSubmit.append('image', uploadedFile); // Make sure the backend expects 'image'
             }
 
-            // Log formData (optional, for debugging)
             console.log('Form data to submit:', formDataToSubmit);
-
-            // Send the POST request with FormData
-            await axios.post('http://localhost:5000/threads/create', formDataToSubmit, { withCredentials: true });
+            try{
+                await axios.post('http://localhost:5000/threads/create', formDataToSubmit, { withCredentials: true });
+                toast.success('Thread created successfully!');
+            }
+            catch(err){
+                console.log(err);
+                toast.error('Error creating thread');
+            }
 
             // Reset form after successful submission
             setTitle('');
@@ -128,18 +133,10 @@ const CreateThread = () => {
 
     return (
         <>
-            <Navbar />
             <div className={styles.createBox}>
                 <div className={styles.createContainer}>
-                    <div className={styles.leftPanel}>
-                        <div className={styles.panelHome} onClick={() => navigate('/threads')}>
-                            Home
-                        </div>
-                        <div className={styles.createThread} onClick={() => navigate('/create')}>
-                            Create
-                        </div>
-                    </div>
                     <div className={styles.rightPanel}>
+                    <span className={styles.createTitle}>Create Post</span>
                         <form onSubmit={handleSubmit}>
                             <div className={styles.titleContainer}>
                                 <input
