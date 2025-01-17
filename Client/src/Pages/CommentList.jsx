@@ -509,7 +509,7 @@ const CommentList = () => {
                                                                                     <div className={styles.commentTimeAgo}>{formatTimeAgo(reply.createdAt)}</div>
                                                                                 </div>
                                                                                 <div className={styles.commentContent}>{reply.content}</div>
-                                                                                <p>Votes: {(reply.upvotes?.length || 0) - (reply.downvotes?.length || 0)}</p>
+                                                                                {/* <p>Votes: {(reply.upvotes?.length || 0) - (reply.downvotes?.length || 0)}</p> */}
                                                                                 {/* 
                                                                                 <button onClick={() => handleVoteComment(reply._id, 'upvote')}>Upvote</button>
                                                                                 <button onClick={() => handleVoteComment(reply._id, 'downvote')}>Downvote</button> 

@@ -70,6 +70,11 @@ const userSchema = new Schema({
       'transportation', 'non-profit',
     ],
   },
+  requests: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Users',
+    required: false
+  }],
   phoneNumber: {
     type: String,
     required: true,

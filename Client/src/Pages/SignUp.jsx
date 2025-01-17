@@ -29,6 +29,7 @@ const Signup = () => {
         dob: '',
         gender: '',
         businessType: '',
+        company:'',
         image: null,
     });
     const [image, setImage] = useState(null);
@@ -190,6 +191,19 @@ const Signup = () => {
                                         onChange={handleChange}
                                     />
                                     {errors.businessTitle && <span className={styles.error}>{errors.businessTitle}</span>}
+                                </div>
+                            </div>
+                            <div className={styles.grp}>
+                                <div>
+                                    <input
+                                        type="text"
+                                        className={styles.input}
+                                        placeholder="Company Name"
+                                        name="company"
+                                        value={formData.company}
+                                        onChange={handleChange}
+                                    />
+                                    {errors.businessTitle && <span className={styles.error}>{errors.company}</span>}
                                 </div>
                             </div>
                             <div className={styles.grp}>

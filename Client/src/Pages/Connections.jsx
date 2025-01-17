@@ -6,16 +6,19 @@ import { useAuthContext } from '../Context/AuthContext';
 import styles from '../Styles/Connections.module.css';
 import Card from '../Components/Card';
 import Loader from '../Components/Loader';
+import ModalProfile from '../Components/modalProfile.jsx';
 
 const Connections = () => {
-    const { authUser,openProfile } = useAuthContext();
-    const { getProfileById, getAllUsers, getRecUsers, like_dislike } = useProfile();
+    const { authUser, openProfile } = useAuthContext();
+    const { getProfileById, getAllUsers, like_dislike } = useProfile();
     const [connections, setConnections] = useState([]);
     const [requests, setRequests] = useState([]);
     const [users, setUsers] = useState([]);
     const [swipedCardIds, setSwipedCardIds] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('connections');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedUserId, setSelectedUserId] = useState(null);
 
     const handleSwipe = async (likedUserId, action) => {
         console.log(`Swiped ${action} on card ${likedUserId}`);
@@ -25,6 +28,8 @@ const Connections = () => {
 
     useEffect(() => {
         const fetchData = async () => {
+            if (!authUser) return; // Guard clause to avoid fetching when authUser is null
+
             setLoading(true);
             try {
                 const profile = await getProfileById(authUser);
@@ -40,7 +45,7 @@ const Connections = () => {
         };
 
         fetchData();
-    }, [authUser]);
+    }, [authUser]); // Dependency on authUser, this will re-run when authUser changes
 
     if (loading) {
         return (
@@ -49,14 +54,23 @@ const Connections = () => {
             </div>
         );
     }
+    const openModal = (userId) => {
+        setSelectedUserId(userId);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedUserId(null);
+    };
 
     return (
         <>
             <Navbar />
+            {isModalOpen && <ModalProfile id={selectedUserId} onClose={closeModal} />}
             <div className={styles.connectionsBox}>
                 <div className={styles.connectionsContainer}>
                     <div className={styles.leftPanel}>
-                        {/* <span className={styles.leftTitle}>Connections</span> */}
                         <div className={styles.tabs}>
                             <div
                                 className={`${styles.tabButton} ${
@@ -83,7 +97,7 @@ const Connections = () => {
                                             <div
                                                 key={connection.id}
                                                 className={styles.connectionCard}
-                                                onClick={()=>openProfile({id:connection.userId._id})}
+                                                onClick={() => openProfile({ id: connection.userId._id })}
                                             >
                                                 <div className={styles.connectionProfile}>
                                                     <div
@@ -114,18 +128,19 @@ const Connections = () => {
                                             <div
                                                 key={request.id}
                                                 className={styles.connectionCard}
+                                                onClick={() => openModal(request._id)}
                                             >
                                                 <div className={styles.connectionProfile}>
                                                     <div
                                                         className={styles.profilePic}
                                                         style={{
-                                                            backgroundImage: `url(${request.userId.profilePic[0].url})`,
+                                                            backgroundImage: `url(${request.profilePic[0].url})`,
                                                         }}
                                                     ></div>
                                                 </div>
                                                 <div className={styles.connectionDetails}>
                                                     <span className={styles.connectionName}>
-                                                        {request.userId.fullName}
+                                                        {request.fullName}
                                                     </span>
                                                 </div>
                                             </div>

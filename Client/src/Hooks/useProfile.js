@@ -8,6 +8,7 @@ const useProfile = () => {
     const getProfileById = async(id) => {
         try {
             const { data } = await axios.get(`${url}/users/getprofilebyid/${id}`);
+            console.log("Connections:",data);
             setProfile(data);
             return data;
         } catch (err) {
@@ -23,7 +24,6 @@ const useProfile = () => {
             {
                 withCredentials: true,  
         });
-            console.log("All Users:", data);
             return data;
         } catch (err) {
             console.error('Error fetching profile:', err);

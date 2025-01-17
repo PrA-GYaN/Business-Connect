@@ -58,10 +58,11 @@ export const signup = async (req, res) => {
             dob,
             industry,
             businessType,
+            company,
         } = req.body;
 
-        console.log("Received data:", fullName, email, password, gender, businessTitle, phoneNumber, address, dob, industry,businessType);
-        if (!fullName || !email || !password || !gender || !businessTitle || !phoneNumber || !address || !dob || !industry || !businessType) {
+        console.log("Received data:", fullName, email, password, gender, businessTitle,company, phoneNumber, address, dob, industry,businessType);
+        if (!fullName || !email || !password || !gender || !businessTitle  || !company || !phoneNumber || !address || !dob || !industry || !businessType) {
             return res.status(400).json({ error: "All fields are required." });
         }
 
@@ -232,11 +233,13 @@ export const login = async (req, res) => {
 export const getProfileById = async (req, res) => {
 	const id = req.params.id;
 	try{
-		const user = await User.findById(id).select("-password")
-        .populate({
-            path: 'connections.userId', // Populate the userId in each comment
-            model: 'Users'
-          });
+		const user = await User.findById(id)
+    .select("-password")
+    .populate({
+        path: 'connections.userId',
+        model: 'Users'
+    })
+    .populate('requests', 'fullName profilePic');
 		if(user){
 			res.status(200).json(user);
 		}
@@ -252,7 +255,9 @@ export const getProfileById = async (req, res) => {
 export const getAllUser = async (req, res) => {
     const userId = req.user._id;
     try {
-        const users = await User.find({ _id: { $ne: userId } }).select('-password');
+        const users = await User.find({ _id: { $ne: userId } }).select('-password')
+        .populate('requests','fullName profilePic');
+        console.log("All Users:", users);
         res.status(200).json(users);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -285,15 +290,19 @@ export const Liked_Dislike = async (req, res) => {
             existingSwipe.action = action; 
         } else {
             user.swipes.push({ userId: likedUserId, action });
+            if (!likedUser.requests.includes(userId)) {
+                likedUser.requests.push(userId);
+                sendNotification(`${user.fullName} has liked you!`, likedUserId);
+            }
         }
         await user.save();
+        await likedUser.save();
 
         if (reverseSwipe && reverseSwipe.action === 'Liked' && existingSwipe.action === 'Liked') {
 
             if (!likedUser.connections.some(conn => conn.userId.toString() === userId.toString())) {
                 likedUser.connections.push({ userId });
-                sendNotification(`${likedUser.fullName} has liked you!`,userId);
-                sendNotification(`${user.fullName} has liked you!`,likedUserId);
+                // sendNotification(`${likedUser.fullName} has liked you!`,userId);
                 await likedUser.save();
             }
 
