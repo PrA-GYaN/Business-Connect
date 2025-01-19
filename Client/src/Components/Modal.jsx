@@ -9,8 +9,17 @@ const Modal = ({ isOpen, onClose }) => {
     const [image, setImage] = useState(null);
     const [content, setContent] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const maxContentLength = 1000;
 
     if (!isOpen) return null;
+    
+    const handleContentChange = (e) => {
+        if (e.target.value.length <= maxContentLength) {
+            setContent(e.target.value);
+        } else {
+            toast.warning(`Content cannot exceed ${maxContentLength} characters.`);
+        }
+    };
 
     const handleOverlayClick = (e) => {
         if (e.target === e.currentTarget) {
@@ -18,26 +27,30 @@ const Modal = ({ isOpen, onClose }) => {
             if (content || image) {
                 const confirmClose = window.confirm('You have unsaved changes. Are you sure you want to close the modal?');
                 if (confirmClose) {
-                    onClose();
+                    console.log('e.target:', e.target); // Debug log
+                    console.log('e.currentTarget:', e.currentTarget); // Debug log
+                    if (e.target === e.currentTarget) {
+                        console.log('Closing modal');
+                        onClose(); // Close modal when clicking on the overlay
+                    }
                 }
             } else {
                 onClose();
             }
         }
     };
-
+    
     const handleImageChange = (e) => {
-        setImage(e.target.files[0]);
-    };
-
-    const handleContentChange = (e) => {
-        setContent(e.target.value);
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            setImage(file);
+        } else {
+            toast.error('Only image files are allowed. Please select a valid image.');
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        // Check if both content and image are empty
         if (!content && !image) {
             toast.error('Please provide either content or an image to submit the post.');
             return;
@@ -62,7 +75,7 @@ const Modal = ({ isOpen, onClose }) => {
             setContent('');
         } catch (error) {
             console.error(error.response.data);
-            toast.error('Error uploading post. Please try again.');
+            toast.error(error.response.data.error);
         } finally {
             setIsLoading(false);
             onClose();
@@ -91,6 +104,7 @@ const Modal = ({ isOpen, onClose }) => {
                             onChange={handleImageChange} 
                             style={{ display: 'none' }} 
                             id="image-upload" 
+                            accept="image/*"
                         />
                         <label htmlFor="image-upload" className={styles.upload}>
                             Upload Image

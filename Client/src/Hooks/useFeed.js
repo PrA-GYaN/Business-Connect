@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuthContext } from '../Context/AuthContext';
+import {toast} from 'react-toastify';
 
 const useFeed = () => {
     const { authUser, fullName, profilePic } = useAuthContext();
@@ -16,7 +17,9 @@ const useFeed = () => {
 
     const fetchPosts = async (currentPage) => {
         try {
-            const { data } = await axios.get(`http://localhost:5000/posts/getposts?page=${currentPage}&limit=1`);
+            const { data } = await axios.get(`http://localhost:5000/posts/getposts?page=${currentPage}&limit=20`,
+                { withCredentials: true },
+            );
             if (data.posts.length > 0) {
                 setPosts((prevPosts) => [...prevPosts, ...data.posts]); // Append new post
                 setHasMore(data.hasMore);
@@ -74,6 +77,10 @@ const useFeed = () => {
     };
 
     const handleCommentChange = (postId, value) => {
+        if (value.length > 200) {
+            toast.warning("Comment cannot exceed 200 characters.");
+            return; // Prevent update if comment exceeds 200 characters
+        }
         setNewComment((prev) => ({ ...prev, [postId]: value }));
     };
 

@@ -8,14 +8,15 @@ import useConversation from '../Hooks/useConversation';
 import useSendMessage from '../Hooks/useSendMessage';
 import useGetMessages from '../Hooks/useGetMessages';
 import { useAuthContext } from '../Context/AuthContext';
-import { FaVideo } from "react-icons/fa";
+import { SlOptionsVertical } from "react-icons/sl";
 import { RiCalendarScheduleFill } from "react-icons/ri";
 import MeetingScheduler from '../Components/MeetingScheduler';
 import { useNavigate } from 'react-router-dom';
+import Loader from '../Components/Loader';
 
 const Messages = () => {
     const { authUser, openProfile } = useAuthContext();
-    const { selectedConversation, setSelectedConversation } = useConversation();
+    const { selectedConversation, setSelectedConversation,isTyping } = useConversation();
     const { loading, finalConversations, error } = useGetConversations();
     const { sendMessage } = useSendMessage();
     const { messages } = useGetMessages();
@@ -25,10 +26,26 @@ const Messages = () => {
     const conversations = finalConversations;
     const navigate = useNavigate();
 
+    console.log("conversations", conversations);
     // Handle the search query input change
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
     };
+
+    const handleTyping = () => {
+        if (!isTyping) {
+            setIsTyping(true);
+            socket.emit('typing', { conversationId: selectedConversation._id });
+        }
+        setTimeout(() => setIsTyping(false), 3000);
+    };
+    if (loading) {
+        return (
+            <div className={styles.loading}>
+                <Loader />
+            </div>
+        );
+    }
 
     // Filter conversations based on search query
     const filteredConversations = conversations.filter((conversation) =>
@@ -72,7 +89,7 @@ const Messages = () => {
             return time;
         }
         if (isWithinWeek) {
-            const dayOfWeek = messageDate.toLocaleDateString([], { weekday: 'short' }); // Returns "Sun", "Mon", etc.
+            const dayOfWeek = messageDate.toLocaleDateString([], { weekday: 'short' });
             return `${dayOfWeek}, ${time}`;
         }
         const date = messageDate.toLocaleDateString([], { month: 'numeric', day: 'numeric' });
@@ -105,6 +122,7 @@ const Messages = () => {
                     setModalOpen={setModalOpen}
                     openVideoCall={openVideoCall}
                     open={openProfile}
+                    isTyping={isTyping}
                 />
             </div>
         </div>
@@ -114,7 +132,9 @@ const Messages = () => {
 const Sidebar = ({ loading, error, conversations, selectedConversation, onUserClick, searchQuery, onSearchChange }) => {
     if (loading) return <div>Loading conversations...</div>;
     if (error) return <div>Error loading conversations: {error.message}</div>;
-
+    const handleDeleteConversation = (conversationId) => {
+        console.log("Deleting conversation with ID:", conversationId);
+    };
     return (
         <div className={styles.sideBar}>
             <div className={styles.sideBartop}>
@@ -137,6 +157,7 @@ const Sidebar = ({ loading, error, conversations, selectedConversation, onUserCl
                         conversation={conversation}
                         isSelected={selectedConversation && selectedConversation._id === conversation.userId._id}
                         onClick={() => onUserClick(conversation.userId)}
+                        ondelete = {() => handleDeleteConversation(conversation._id)}
                     />
                 ))}
             </div>
@@ -158,10 +179,13 @@ const UserItem = ({ conversation, isSelected, onClick }) => (
             <div className={styles.userName}>{conversation.userId.fullName}</div>
             <div className={styles.lastMessage}>{conversation.lastMessage}{"\u00A0\u00A0\u00A0"}{conversation.timeAgo}</div>
         </div>
+        <div className={styles.options}>
+            <SlOptionsVertical className={styles.optionIcon}/>
+        </div>
     </div>
 );
 
-const ChatBox = ({ selectedConversation, messages, authUser, message, setMessage, handleSend,formatTimestamp, handleKeyDown, isModalOpen, open, setModalOpen, openVideoCall }) => {
+const ChatBox = ({ selectedConversation, messages, authUser, message,isTyping, setMessage, handleSend,formatTimestamp, handleKeyDown, isModalOpen, open, setModalOpen, openVideoCall }) => {
     const messagesContainerRef = useRef(null);
 
     useEffect(() => {
@@ -229,7 +253,9 @@ const ChatBox = ({ selectedConversation, messages, authUser, message, setMessage
                     </div>
                 ))}
             </div>
-
+            <div className={styles.typingIndicator}>
+                {isTyping && <p>{selectedConversation.fullName} is typing...</p>}
+            </div>
             <div className={styles.messageBox}>
                 <input
                     placeholder='Type a message'

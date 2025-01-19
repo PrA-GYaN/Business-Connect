@@ -210,12 +210,23 @@ export const login = async (req, res) => {
     console.log("Login Request Received");
 	try {
 		const { phoneNumber, password } = req.body;
+        if (!phoneNumber || !phoneNumber.startsWith("+9779")) {
+            return res.status(400).json({ error: "Invalid phone number. It should start with +9779." });
+        }
+
+        if (!password || password.length <= 5) {
+            return res.status(400).json({ error: "Password must be 6 characters or long." });
+        }
+
 		const user = await User.findOne({ phoneNumber });
 		const isPasswordCorrect = await bcrypt.compare(password, user?.password || "");
 
-		if (!user || !isPasswordCorrect) {
-			return res.status(400).json({ error: "Invalid username or password" });
-		}
+		if (!user) {
+            return res.status(400).json({ error: "Invalid username" });
+        }
+        if (!isPasswordCorrect) {
+            return res.status(400).json({ error: "Invalid password" });
+        }
 
 		generateTokenAndSetCookie(user._id,user.fullName,user.profilePic,res);
 		res.status(200).json({
@@ -255,25 +266,36 @@ export const getProfileById = async (req, res) => {
 export const getAllUser = async (req, res) => {
     const userId = req.user._id;
     try {
-        const users = await User.find({ _id: { $ne: userId } }).select('-password')
-        .populate('requests','fullName profilePic');
-        console.log("All Users:", users);
+        // Retrieve the connected users for the current user
+        const connectedUsers = await User.findById(userId).select('connections');
+        const connectedUserIds = connectedUsers.connections.map(connection => connection.userId._id);// Extract IDs as strings
+        
+        console.log('Connected User IDs:', connectedUserIds);
+        // Retrieve all users except the current user and connected users
+        const users = await User.find({
+            _id: { $ne: userId, $nin: connectedUserIds }
+        })
+        .select('-password')
+        .populate('requests', 'fullName profilePic');
         res.status(200).json(users);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
-}
+};
 
 export const Liked_Dislike = async (req, res) => {
     const userId = req.user._id;
     try {
         const { likedUserId, action: initialAction } = req.body;
 
+        // Validate input
         if (!likedUserId || !['right', 'left'].includes(initialAction)) {
             return res.status(400).json({ message: 'Invalid input' });
         }
 
         const action = initialAction === 'right' ? 'Liked' : 'Disliked';
+
+        // Fetch user and likedUser details in parallel
         const [user, likedUser] = await Promise.all([
             User.findById(userId).select('-password'),
             User.findById(likedUserId).select('-password'),
@@ -283,38 +305,44 @@ export const Liked_Dislike = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        const existingSwipe = user.swipes.find(swipe => swipe.userId.toString() === likedUserId.toString());
+        // Check for existing swipe
+        let existingSwipe = user.swipes.find(swipe => swipe.userId.toString() === likedUserId.toString());
         const reverseSwipe = likedUser.swipes.find(swipe => swipe.userId.toString() === userId.toString());
 
+        // Update or add swipe
         if (existingSwipe) {
-            existingSwipe.action = action; 
+            existingSwipe.action = action;
         } else {
+            console.log(`${user.fullName} ${action} ${likedUser.fullName}`);
             user.swipes.push({ userId: likedUserId, action });
-            if (!likedUser.requests.includes(userId)) {
+
+            if (action === 'Liked' && !likedUser.requests.includes(userId)) {
                 likedUser.requests.push(userId);
                 sendNotification(`${user.fullName} has liked you!`, likedUserId);
             }
         }
-        await user.save();
-        await likedUser.save();
 
-        if (reverseSwipe && reverseSwipe.action === 'Liked' && existingSwipe.action === 'Liked') {
+        // Save both user and likedUser
+        await Promise.all([user.save(), likedUser.save()]);
+
+        // Handle mutual like (match)
+        if (reverseSwipe && reverseSwipe.action === 'Liked' && action === 'Liked') {
 
             if (!likedUser.connections.some(conn => conn.userId.toString() === userId.toString())) {
+                console.log(`${likedUser.fullName} has liked you back!`);
                 likedUser.connections.push({ userId });
-                // sendNotification(`${likedUser.fullName} has liked you!`,userId);
-                await likedUser.save();
+                sendNotification(`${likedUser.fullName} has liked you back!`, userId);
             }
 
             if (!user.connections.some(conn => conn.userId.toString() === likedUserId.toString())) {
+                console.log(`${user.fullName} has liked you back!`);
                 user.connections.push({ userId: likedUserId });
-                sendNotification(`${likedUser.fullName} has liked you back!`,userId);
-                await user.save();
-                console.log("Added Connection in User");
+                sendNotification(`${likedUser.fullName} has liked you!`, userId);
             }
-        } else {
-            // console.log("Reverse swipe not found or conditions not met");
-
+            user.requests.pull(likedUserId);
+            likedUser.requests.pull(userId);
+            // Save after mutual connection
+            await Promise.all([user.save(), likedUser.save()]);
         }
 
         return res.status(200).json({ message: 'Swipe processed successfully' });
@@ -324,6 +352,7 @@ export const Liked_Dislike = async (req, res) => {
         return res.status(500).json({ message: 'Server error' });
     }
 };
+
 
 export const updateUserProfileField = async (req, res) => {
     const userId = req.user._id

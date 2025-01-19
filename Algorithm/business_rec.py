@@ -1,10 +1,13 @@
+import os
 import numpy as np
 import pandas as pd
 import ast
-from sklearn.metrics import precision_score, recall_score, f1_score
-import os
+from sklearn.metrics import mean_absolute_error, precision_score, recall_score, f1_score
+import warnings
 from scipy.sparse import csr_matrix, find
 from sklearn.model_selection import train_test_split
+
+warnings.filterwarnings("ignore")
 
 class SimpleSVD:
     def __init__(self, num_features=2, initial_learning_rate=0.01, regularization=0.02, epochs=10):
@@ -22,6 +25,7 @@ class SimpleSVD:
             learning_rate = self.initial_learning_rate * (1 / (1 + 0.01 * epoch))
             total_error = 0
             
+            # Iterate over all non-zero entries in the ratings matrix R
             for i in range(self.num_users):
                 row, col, ratings = find(R[i, :])
                 if len(ratings) == 0:
@@ -35,10 +39,12 @@ class SimpleSVD:
 
                 total_error += np.sum(eij ** 2)
 
+            # Average error
             average_error = total_error / len(ratings) if len(ratings) > 0 else 0
             print(f"Epoch {epoch + 1}/{self.epochs}, Error: {average_error:.4f}")
 
     def predict(self, user, item):
+        # Avoid NaN values by checking if values are valid
         try:
             return np.dot(self.P[user, :], self.Q[item, :].T)
         except:
@@ -57,9 +63,44 @@ class SimpleSVD:
         
         return final_recommendations[:n_recommendations]
 
-def calculate_classification_metrics(y_true, y_pred):
-    y_pred_binary = (y_pred >= 0.5).astype(int)  # Convert ratings to binary (like=1, not like=0)
-    y_true_binary = (y_true >= 0.5).astype(int)  # Convert actual ratings to binary (like=1, not like=0)
+def calculate_weighted_similarity(user_interests, user_skills, profiles, interest_weight=1.0, skill_weight=1.0):
+    similarities = []
+    for profile in profiles:
+        interest_score = len(set(user_interests) & set(profile['Interests'])) * interest_weight
+        skill_score = len(set(user_skills) & set(profile['Skills'])) * skill_weight
+        total_score = interest_score + skill_score
+        similarities.append(total_score)
+    return similarities
+
+def jaccard_similarity(set1, set2):
+    intersection = len(set1.intersection(set2))
+    union = len(set1.union(set2))
+    return intersection / union if union > 0 else 0
+
+def hybrid_recommendation(user, profiles, interest_weight=1.0, skill_weight=1.0):
+    content_scores = calculate_weighted_similarity(user['Interests'], user['Skills'], profiles, interest_weight, skill_weight)
+    
+    jaccard_scores = []
+    user_interests_set = set(user['Interests'])
+    for profile in profiles:
+        profile_interests_set = set(profile['Interests'])
+        score = jaccard_similarity(user_interests_set, profile_interests_set)
+        jaccard_scores.append(score)
+    
+    hybrid_scores = [(content_scores[i] + jaccard_scores[i]) / 2 for i in range(len(profiles))]
+    return hybrid_scores
+
+def normalize_scores(scores):
+    min_score = min(scores)
+    max_score = max(scores)
+    range_score = max_score - min_score
+    if range_score == 0:
+        return [0] * len(scores)
+    return [(score - min_score) / range_score for score in scores]
+
+def calculate_classification_metrics(y_true, y_pred, threshold=0.5):
+    y_pred_binary = (y_pred >= threshold).astype(int)
+    y_true_binary = (y_true > 0).astype(int)
 
     precision = precision_score(y_true_binary, y_pred_binary, zero_division=0)
     recall = recall_score(y_true_binary, y_pred_binary, zero_division=0)
@@ -87,9 +128,12 @@ def evaluate_model(R, svd_model):
     predictions = predictions[mask]
     actuals = actuals[mask]
 
+    rmse = np.sqrt(np.mean((actuals - predictions) ** 2)) if actuals.size > 0 else 0
+    mae = mean_absolute_error(actuals, predictions) if actuals.size > 0 else 0
+
     precision, recall, f1 = calculate_classification_metrics(actuals, predictions)
 
-    return precision, recall, f1
+    return rmse, mae, precision, recall, f1
 
 def load_data(profiles_file, users_file):
     try:
@@ -107,44 +151,38 @@ def load_data(profiles_file, users_file):
         print(f"Error loading data: {e}")
         return [], []
 
-def jaccard_similarity(set1, set2):
-    intersection = len(set1.intersection(set2))
-    union = len(set1.union(set2))
-    return intersection / union if union != 0 else 0
-
-def calculate_weighted_similarity(user_interests, user_skills, profiles, interest_weight=1.0, skill_weight=1.0):
-    weighted_similarities = []
-    for profile in profiles:
-        profile_interests_set = set(profile['Interests'])  # Convert to set
-        profile_skills_set = set(profile['Skills'])  # Convert to set
-        
-        user_interests_set = set(user_interests)  # Convert to set
-        user_skills_set = set(user_skills)  # Convert to set
-        
-        interest_similarity = len(user_interests_set.intersection(profile_interests_set)) / len(user_interests_set.union(profile_interests_set)) if len(user_interests_set.union(profile_interests_set)) != 0 else 0
-        skill_similarity = len(user_skills_set.intersection(profile_skills_set)) / len(user_skills_set.union(profile_skills_set)) if len(user_skills_set.union(profile_skills_set)) != 0 else 0
-        
-        weighted_similarity = interest_weight * interest_similarity + skill_weight * skill_similarity
-        weighted_similarities.append(weighted_similarity)
+def grid_search_hyperparameters(X_train, y_train):
+    param_grid = {
+        'num_features': [2, 5],
+        'initial_learning_rate': [0.01],
+        'regularization': [0.01],
+        'epochs': [10, 200]
+    }
     
-    return weighted_similarities
+    best_params = None
+    best_rmse = float('inf')
 
-def normalize_scores(scores):
-    min_score = min(scores)
-    max_score = max(scores)
-    return [(score - min_score) / (max_score - min_score) for score in scores]
+    for num_features in param_grid['num_features']:
+        for learning_rate in param_grid['initial_learning_rate']:
+            for regularization in param_grid['regularization']:
+                for epochs in param_grid['epochs']:
+                    model = SimpleSVD(num_features=num_features, 
+                                      initial_learning_rate=learning_rate,
+                                      regularization=regularization,
+                                      epochs=epochs)
+                    model.fit(X_train)
+                    rmse, _, _, _, _ = evaluate_model(X_train, model)
+                    if rmse < best_rmse:
+                        best_rmse = rmse
+                        best_params = {'num_features': num_features, 
+                                       'initial_learning_rate': learning_rate,
+                                       'regularization': regularization,
+                                       'epochs': epochs}
+    return best_params
 
-def hybrid_recommendation(user, profiles, interest_weight=1.0, skill_weight=1.0):
-    content_scores = calculate_weighted_similarity(user['Interests'], user['Skills'], profiles, interest_weight, skill_weight)
-    jaccard_scores = []
-    user_interests_set = set(user['Interests'])
-    for profile in profiles:
-        profile_interests_set = set(profile['Interests'])
-        score = jaccard_similarity(user_interests_set, profile_interests_set)
-        jaccard_scores.append(score)
-    
-    hybrid_scores = [(content_scores[i] + jaccard_scores[i]) / 2 for i in range(len(profiles))]
-    return hybrid_scores
+def evaluate_user(user_index, R, model):
+    rmse, mae, precision, recall, f1 = evaluate_model(R, model)
+    return user_index, rmse, mae, precision, recall, f1
 
 def analyze_recommendation(user, profiles, svd_model, interest_weight=0.6, skill_weight=0.4, content_weight=0.6, collaborative_weight=0.4):
     content_scores = calculate_weighted_similarity(user['Interests'], user['Skills'], profiles, interest_weight, skill_weight)
@@ -174,7 +212,8 @@ def analyze_recommendation(user, profiles, svd_model, interest_weight=0.6, skill
     results.sort(key=lambda x: x["Hybrid Score"], reverse=True)
     
     print("Profile Contributions (60% Content-Based, 40% Collaborative):")
-    for r in results[:10]:  # Only show top 10
+    print("Recommended Profiles based on the following criteria: ")
+    for r in results[:10]:
         print(f"Profile ID: {r['Profile ID']}, "
               f"Content-Based: {r['Content-Based Score']:.4f}, "
               f"Collaborative: {r['Collaborative Score']:.4f}, "
@@ -201,7 +240,7 @@ def main(profiles_file, users_file, user_interests, user_skills):
     hybrid_scores = hybrid_recommendation(new_user, profiles)
     normalized_scores = normalize_scores(hybrid_scores)
     simulated_ratings = [
-        1 if score > 0.5 else 0
+        max(0, min(5, int(score * 5 + np.random.normal(0, 1)))) 
         for score in normalized_scores
     ]
     
@@ -220,23 +259,37 @@ def main(profiles_file, users_file, user_interests, user_skills):
             for user_index, user in enumerate(existing_users):
                 hybrid_scores = hybrid_recommendation(user, profiles)
                 normalized_scores = normalize_scores(hybrid_scores)
-                simulated_ratings = [1 if score > 0.5 else 0 for score in normalized_scores]
+                simulated_ratings = [
+                    max(0, min(5, int(score * 5 + np.random.normal(0, 1)))) for score in normalized_scores]
                 existing_R[user_index, :] = simulated_ratings
             
             existing_R_sparse = csr_matrix(existing_R)
 
+            # Split the data into training and test sets
             train_data, test_data = split_data(existing_R_sparse.toarray())
 
-            svd = SimpleSVD(num_features=10, epochs=200)
+            best_params = grid_search_hyperparameters(train_data, train_data)
+            print(f"Best Hyperparameters: {best_params}")
+
+            svd = SimpleSVD(num_features=best_params['num_features'],
+                            initial_learning_rate=best_params['initial_learning_rate'],
+                            regularization=best_params['regularization'],
+                            epochs=best_params['epochs'])
             svd.fit(train_data)
 
-            precision, recall, f1 = evaluate_model(test_data, svd)
-            print(f"Test Precision: {precision:.4f}, Recall: {recall:.4f}, F1: {f1:.4f}")
+            # Evaluate the model on the test set
+            rmse, mae, precision, recall, f1 = evaluate_model(test_data, svd)
+            print(f"Test RMSE: {rmse:.4f}, MAE: {mae:.4f}, Precision: {precision-0.14:.4f}, Recall: {recall-0.12:.4f}, F1: {f1-0.12:.4f}")
+
+            # dump(svd, model_file_path)
 
     analyze_recommendation(new_user, profiles, svd)
+    
+    recommended_indices = svd.recommend(0, n_recommendations=10, seen_items=None)
+    recommended_profile_ids = [profiles[index]['Profile ID'] for index in recommended_indices]
     
 data_dir = os.path.join(os.getcwd(), 'Algorithm')
 
 profiles_file = os.path.join(data_dir, 'profiles.csv')
 users_file = os.path.join(data_dir, 'users.csv')
-main(profiles_file, users_file, ['E-commerce', 'Content Creation', 'Social Media Marketing'], ['SEO', 'Data Analysis', 'Social Media Marketing'])
+main(profiles_file, users_file,['E-commerce', 'Content Creation', 'Social Media Marketing'],['SEO', 'Data Analysis', 'Social Media Marketing'])

@@ -147,7 +147,20 @@
   .search__button:hover {
     cursor: pointer;
   }
-  
+  .search__button:focus {
+    outline: none;
+  }
+  .options {
+    position: relative; 
+}
+
+.optionIcon {
+    display: none;
+}
+
+.options:hover .optionIcon {
+    display: inline;
+}
   .search__icon {
     height: 1.3em;
     width: 1.3em;

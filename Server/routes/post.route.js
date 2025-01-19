@@ -11,7 +11,7 @@ const upload = multer({ storage });
 router.post('/upload', upload.single('image'), createPost);
 router.post('/like/:id',protectedRoute, likePost);
 router.post('/comment/:id',protectedRoute, commentPost);
-router.get('/getposts', getPosts);
+router.get('/getposts',protectedRoute, getPosts);
 router.get('/getpossbyid/:id', getPostById);
 
 export default router;

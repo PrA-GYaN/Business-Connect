@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-
 import { useSocketContext } from "../Context/SocketContext";
 import useConversation from "./useConversation";
+
 const useListenMessages = () => {
 	const { socket } = useSocketContext();
 	const { messages, setMessages } = useConversation();
@@ -12,6 +12,10 @@ const useListenMessages = () => {
 		});
 
 		return () => socket?.off("newMessage");
+
+		
+
 	}, [socket, setMessages, messages]);
+
 };
 export default useListenMessages;

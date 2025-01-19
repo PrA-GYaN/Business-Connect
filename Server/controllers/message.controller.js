@@ -60,3 +60,24 @@ export const getMessages = async (req, res) => {
 		res.status(500).json({ error: "Internal server error" });
 	}
 };
+
+export const deleteConversation = async(req,res) =>
+{
+	try{
+		const {id:receiverId} = req.params;
+		const senderId = req.user._id;
+
+		const conversation = await Conversation.findOneAndDelete({
+			participants: { $all: [senderId, receiverId] },
+		});
+
+		if(!conversation) return res.status(404).json({error: "Conversation not found"});
+
+		res.status(200).json({message: "Conversation deleted successfully"});
+	}
+	catch(error)
+	{
+		console.log("Error in deleteConversation controller: ", error.message);
+		res.status(500).json({error: "Internal server error"});
+	}
+}

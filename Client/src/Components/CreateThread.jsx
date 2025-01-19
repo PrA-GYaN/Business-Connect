@@ -74,13 +74,19 @@ const CreateThread = () => {
             }
 
             console.log('Form data to submit:', formDataToSubmit);
+            const hateResult = await axios.post('http://localhost:5000/threads/hatecheck', { title, content });
+            console.log('Hate result:', hateResult.data);
+            if (hateResult.data.prediction === 'Hate Speech') {
+                toast.error('Hateful content detected. Please modify your thread content.');
+                return;
+            }
             try{
                 await axios.post('http://localhost:5000/threads/create', formDataToSubmit, { withCredentials: true });
                 toast.success('Thread created successfully!');
             }
             catch(err){
                 console.log(err);
-                toast.error('Error creating thread');
+                toast.error(err.response.data.error);
             }
 
             // Reset form after successful submission

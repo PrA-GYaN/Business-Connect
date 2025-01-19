@@ -7,6 +7,7 @@
 {
     width: 100%;
     display: flex;
+    min-height: 87vh;
     flex-direction: row;
     gap: 3rem;
 }
@@ -90,6 +91,7 @@
     padding:0 1rem;
     display: flex;
     flex-direction: column;
+    min-width: 49%;
     gap: 0.5rem;
 }
 .createPost
@@ -103,7 +105,7 @@
     flex-direction: row;
     align-items: center;
     margin-top: 1rem;
-    z-index: 6;
+    z-index: 2;
 }
 .createPostInput
 {

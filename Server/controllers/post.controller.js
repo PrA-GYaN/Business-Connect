@@ -1,6 +1,7 @@
 import Post from "../models/post.model.js";
 import cloudinary from "../utils/cloudinary.js";
 import stream from 'stream';
+import User from "../models/user.model.js";
 
 export const createPost = async (req, res) => {
   try {
@@ -9,7 +10,6 @@ export const createPost = async (req, res) => {
       const { authorId, content } = req.body;
 
       if (!req.file) {
-          // Creating a post without an image
           const newPost = new Post({ authorId, content });
 
           try {
@@ -75,29 +75,40 @@ export const deletePost = async (req, res) => {
   }
 };
 
-// controllers/postController.js
 export const getPosts = async (req, res) => {
+  const userId = req.user._id; // Current logged-in user ID
   const page = parseInt(req.query.page) || 1; // Get the page number
-  const limit = 1; // Set limit to 1 for one post at a time
-  const skip = (page - 1) * limit; // Calculate the number of documents to skip
+  const limit = 20; // Limit number of posts per page
+  const skip = (page - 1) * limit; // Skip number of posts based on page
 
   try {
-    const totalPosts = await Post.countDocuments(); // Count total posts
-    const posts = await Post.find()
-      .populate('authorId')
+    // Find the current user by their ID, including their connections
+    const user = await User.findById(userId).populate('connections.userId');
+
+    // Get connection IDs from the populated 'connections' field
+    const connectionIds = user.connections.map(connection => connection.userId._id);
+    console.log('Connection IDs:', connectionIds);
+    // Get total number of posts from connections
+    const totalPosts = await Post.countDocuments({ authorId: { $in: connectionIds } });
+    console.log('Total posts:', totalPosts);
+    // Fetch posts from user's connections
+    const posts = await Post.find({ authorId: { $in: connectionIds } })
+      .populate('authorId')  // Populate the author details
       .populate({
-        path: 'comments.userId',
+        path: 'comments.userId', 
         model: 'Users'
       })
-      .skip(skip)
-      .limit(limit); // Apply pagination
+      .skip(skip) // Apply pagination
+      .limit(limit); // Apply limit
 
+    // Map posts to include images (if available)
     const postsWithImages = posts.map(post => ({
       ...post.toObject(),
-      image: post.image || null,
+      image: post.image || null,  // Use the image URL or set null
     }));
 
-    const hasMore = totalPosts > page * limit; // Check if more posts are available
+    // Check if there are more posts for pagination
+    const hasMore = totalPosts > page * limit;
 
     res.status(200).json({ posts: postsWithImages, hasMore });
   } catch (err) {

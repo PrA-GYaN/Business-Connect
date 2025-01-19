@@ -54,6 +54,7 @@ const Feed = ({prop}) => {
     }, [loading, hasMore]);
 
     if (error) return <p>{error}</p>;
+    console.log("Posts:",posts);
 
     return (
         <div className={styles.postContainer} aria-live="polite">
@@ -68,7 +69,12 @@ const Feed = ({prop}) => {
                     aria-label="Filter posts"
                 />
             </div> */}
+            {
+                filteredPosts.length === 0 && !loading && <p className={styles.noPosts}>No posts to show</p>
+            }
+            {
 
+            }
             {filteredPosts.map((post) => (
                 <div key={post._id} className={styles.postBox}>
                     <div className={styles.author}>
@@ -133,7 +139,7 @@ const Feed = ({prop}) => {
                     </div>
                 </div>
             ))}
-            <div ref={observerRef} style={{ height: '20px' }} /> {/* This is the sentinel for loading more posts */}
+            <div ref={observerRef} style={{ height: '20px' }} />
         </div>
     );
 };
