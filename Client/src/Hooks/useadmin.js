@@ -13,7 +13,7 @@ const useAdmin = () => {
                 setLoading(true);
                 const response = await axios.get(`${url}/users/allverificationreq`);
                 setVerreq(response.data);
-                console.log(response.data[0].image[0].url);
+                // console.log(response.data[0].image[0].url);
             } catch (err) {
                 setError(err.message || "An error occurred while fetching verification requests.");
             } finally {

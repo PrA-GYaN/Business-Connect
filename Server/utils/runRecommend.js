@@ -6,10 +6,10 @@ import fs from 'fs';
 import mongoose from 'mongoose';
 
 export const runRecommend = async (req, res) => {
-    const { user_interests, user_skills, liked_profiles } = req.body;
-    // const user_interests = "['Music', 'Entrepreneurship', 'Leadership', 'Marketing Trends']";
-    // const user_skills = "['Marketing', 'SEO', 'UX/UI Design', 'Networking']";
-    // const liked_profiles = ['6789c4d95460a8925b9e0a0a', '6789ca15853b6dda48033d61'];
+    // const { user_interests, user_skills, liked_profiles } = req.body;
+    const user_interests = "['Music', 'Entrepreneurship', 'Leadership', 'Marketing Trends']";
+    const user_skills = "['Marketing', 'SEO', 'UX/UI Design', 'Networking']";
+    const liked_profiles = ['6789c4d95460a8925b9e0a0a', '6789ca15853b6dda48033d61'];
 
     // Validate input (optional but recommended)
     if (!user_interests || !user_skills) {
@@ -46,7 +46,7 @@ export const runRecommend = async (req, res) => {
             pythonProcess.on('close', (code) => {
                 if (code === 0) {
                     try {
-                        // console.log(output);
+                        console.log(output);
                         const parsedOutput = JSON.parse(output.trim());
                         resolve(parsedOutput);
                     } catch (e) {

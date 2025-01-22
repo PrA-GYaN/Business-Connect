@@ -8,7 +8,7 @@ const useProfile = () => {
     const getProfileById = async(id) => {
         try {
             const { data } = await axios.get(`${url}/users/getprofilebyid/${id}`);
-            console.log("Connections:",data);
+            // console.log("Connections:",data);
             setProfile(data);
             return data;
         } catch (err) {

@@ -318,11 +318,13 @@ if __name__ == "__main__":
     profiles_file = os.path.join(data_dir, 'profiles.csv')
     users_file = os.path.join(data_dir, 'users.csv')
 
+    # interests = ['Machine Learning', 'Data Science', 'Artificial Intelligence']
+    # skills = ['Python', 'R', 'SQL', 'TensorFlow']
+    # liked_profiles = []
+
     interests = ast.literal_eval(sys.argv[1])
     skills = ast.literal_eval(sys.argv[2])
     liked_profiles = ast.literal_eval(sys.argv[3])
-
-    # print(profiles_file, users_file, interests, skills, liked_profiles)
 
     res = main(profiles_file, users_file,interests,skills,liked_profiles)
     # print(res)

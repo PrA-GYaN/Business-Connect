@@ -23,18 +23,16 @@ const Profile = ({ id }) => {
     const { posts, getPostById, loading: postsLoading, error: postsError, handleLike, handleCommentSubmit, handleCommentChange, toggleComments, visibleComments, newComment, commentLoading } = usePost();
     const { authUser, profilePic } = useAuthContext();
     const [bodyType, setBodyType] = useState('posts');
-    const [threads, setThreads] = useState([]); // Ensuring threads is an array
+    const [threads, setThreads] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState({});
     const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
     const { getThreadByProfile, handleVote, hasUpvoted, hasDownvoted, calculateTotalVotes } = useThread();
     id = pid;
-    console.log(pid);
-    console.log(authUser);
     
     if (!id) {
         id = authUser;
     }
-    console.log(verreq);
+    // console.log(verreq);
     const handleVerify = () => {
         setIsVerifyModalOpen(false);
     };
@@ -137,7 +135,7 @@ const Profile = ({ id }) => {
                                     {
                                         id == authUser && (
                                             <div className={styles.editProfile}>
-                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, email: true }))} />
+                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, bio: true }))} />
                                             </div>
                                         )
                                     }
@@ -158,7 +156,7 @@ const Profile = ({ id }) => {
                                             {
                                                 id == authUser && (
                                                     <div className={styles.editProfile}>
-                                                        <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, email: true }))} />
+                                                        <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, interests: true }))} />
                                                     </div>
                                                 )
                                             }
@@ -175,7 +173,7 @@ const Profile = ({ id }) => {
                                             {
                                                 id == authUser && (
                                                     <div className={styles.editProfile}>
-                                                        <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, email: true }))} />
+                                                        <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, languages: true }))} />
                                                     </div>
                                                 )
                                             }
@@ -192,7 +190,7 @@ const Profile = ({ id }) => {
                                             {
                                                 id == authUser && (
                                                     <div className={styles.editProfile}>
-                                                        <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, email: true }))} />
+                                                        <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, skills: true }))} />
                                                     </div>
                                                 )
                                             }
@@ -213,7 +211,7 @@ const Profile = ({ id }) => {
                                             {
                                                 id == authUser && (
                                                     <div className={styles.editProfile}>
-                                                        <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, email: true }))} />
+                                                        <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, operationalFocus: true }))} />
                                                     </div>
                                                 )
                                             }
@@ -230,7 +228,7 @@ const Profile = ({ id }) => {
                                                 ))}
                                             </div>
                                             <div className={styles.editProfile}>
-                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, operationalFocus: true }))} />
+                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, technologies: true }))} />
                                             </div>
                                         </div>
                                     </div>
@@ -245,7 +243,7 @@ const Profile = ({ id }) => {
                                                 ))}
                                             </div>
                                             <div className={styles.editProfile}>
-                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, operationalFocus: true }))} />
+                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, businessModels: true }))} />
                                             </div>
                                         </div>
                                     </div>
@@ -260,7 +258,7 @@ const Profile = ({ id }) => {
                                                 ))}
                                             </div>
                                             <div className={styles.editProfile}>
-                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, operationalFocus: true }))} />
+                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, strategicGoals: true }))} />
                                             </div>
                                         </div>
                                     </div>
@@ -275,7 +273,7 @@ const Profile = ({ id }) => {
                                                 ))}
                                             </div>
                                             <div className={styles.editProfile}>
-                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, operationalFocus: true }))} />
+                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, performanceMetrics: true }))} />
                                             </div>
                                         </div>
                                     </div>
@@ -290,14 +288,13 @@ const Profile = ({ id }) => {
                                                 ))}
                                             </div>
                                             <div className={styles.editProfile}>
-                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, operationalFocus: true }))} />
+                                                <MdEdit onClick={() => setIsModalOpen(prev => ({ ...prev, industryFocus: true }))} />
                                             </div>
                                         </div>
                                     </div>
                                     </>
                                 )
                             }
-                            
                         </>
                     )}
                     {Object.keys(isModalOpen).map((field) => (

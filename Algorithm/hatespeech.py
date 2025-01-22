@@ -1,5 +1,6 @@
 import pandas as pd
 import re
+import os
 from sklearn.utils import resample
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.linear_model import SGDClassifier
@@ -7,11 +8,15 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score, accuracy_score  # Import accuracy_score
 
-# Read datasets
-train = pd.read_csv(r'E:\Final-Year-Project\Algorithm\hate speech\train.csv')
-# print(f"Training Set Length: {len(train)}")
+current_directory = os.path.dirname(os.path.abspath(__file__))
 
-test = pd.read_csv(r'E:\Final-Year-Project\Algorithm\hate speech\test.csv')
+# Define the relative path from the script's directory
+train_path = os.path.join(current_directory, 'hate speech', 'train.csv')
+test_path = os.path.join(current_directory, 'hate speech', 'test.csv')
+
+# Read datasets
+train = pd.read_csv(train_path)
+test = pd.read_csv(test_path)
 # print(f"Test Set Length: {len(test)}")
 
 # Clean text function
@@ -76,14 +81,15 @@ def predict_from_csv(input_csv_path, output_csv_path):
     output_df.to_csv(output_csv_path, index=False)
     return output_df
 
-# Example usage: Predict hate speech for CSV and save the results
-input_csv_path = r'E:\Final-Year-Project\Algorithm\threads.csv'  # Replace with actual path
-output_csv_path = r'E:\Final-Year-Project\Algorithm\output_threads.csv'  # Replace with desired output path
+input_csv_path = os.path.join(current_directory, 'threads.csv')
+output_csv_path = os.path.join(current_directory, 'output_threads.csv')
+public_output_csv_path = os.path.join(current_directory,'..','Client','public', 'threads.csv')
+
 predictions = predict_from_csv(input_csv_path, output_csv_path)
 
 # Print or save predictions
 # print(predictions)
 
 # Optionally save to CSV
-predictions.to_csv(r'E:\Final-Year-Project\Client\public\threads.csv', index=False)
+predictions.to_csv(public_output_csv_path, index=False)
 print("Predictions saved to CSV file")

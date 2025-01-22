@@ -4,7 +4,7 @@ import joblib
 import sys  # To handle command-line arguments
 
 # File paths for saving the model
-MODEL_FILE = r"E:\Final-Year-Project\Algorithm\hate_speech_model.joblib"
+MODEL_FILE = r".\Algorithm\hate_speech_model.joblib"
 
 # Function to clean text
 def clean_text(df, text_field):

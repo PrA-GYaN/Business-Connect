@@ -61,17 +61,18 @@ try:
                 liked_profiles_str = f"['{', '.join(liked_profiles)}']"
 
             # Write user data to the CSV file
-            users_writer.writerow([str(profile_id), str(interests), str(skills), liked_profiles_str])
 
             business_type = document.get('businessType', '')
 
             if business_type.lower() == 'individual':
+                users_writer.writerow([str(profile_id), str(interests), str(skills), liked_profiles_str])
                 individual_writer.writerow([str(profile_id), str(interests), str(skills)])
 
             elif business_type.lower() == 'house':
                 operational_focus = document.get('operationalFocus', '')
                 technologies = document.get('technologies', '')
                 individual_writer.writerow([str(profile_id), str(operational_focus), str(technologies)])
+                users_writer.writerow([str(profile_id), str(operational_focus), str(technologies), liked_profiles_str])
 
         all_threads = threads_collection.find()
 
