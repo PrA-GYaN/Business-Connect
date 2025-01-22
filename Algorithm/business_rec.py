@@ -153,10 +153,10 @@ def load_data(profiles_file, users_file):
 
 def grid_search_hyperparameters(X_train, y_train):
     param_grid = {
-        'num_features': [2, 5],
+        'num_features': [5],
         'initial_learning_rate': [0.01],
         'regularization': [0.01],
-        'epochs': [10, 200]
+        'epochs': [200]
     }
     
     best_params = None
@@ -228,27 +228,34 @@ def split_data(R, test_size=0.4):
 def main(profiles_file, users_file, user_interests, user_skills):
     profiles, users = load_data(profiles_file, users_file)
     
+    # New user profile
     new_user = {
         'Interests': user_interests,
         'Skills': user_skills,
-        'Liked Profiles': []
+        'Liked Profiles': ['6789c4d95460a8925b9e0a0a']  # Liked profiles
     }
     
+    # Number of profiles
     num_profiles = len(profiles)
     R = np.zeros((1, num_profiles))
 
+    # Get hybrid recommendation scores
     hybrid_scores = hybrid_recommendation(new_user, profiles)
     normalized_scores = normalize_scores(hybrid_scores)
+    
+    # Simulate ratings with some noise
     simulated_ratings = [
         max(0, min(5, int(score * 5 + np.random.normal(0, 1)))) 
         for score in normalized_scores
     ]
     
+    # Store the ratings
     R[0, :] = simulated_ratings
     R_sparse = csr_matrix(R)
 
     model_file_path = os.path.join(os.getcwd(), 'svd_model.joblib')
 
+    # Load or train model
     if os.path.exists(model_file_path):
         print("Loading existing model...")
     else:
@@ -265,7 +272,7 @@ def main(profiles_file, users_file, user_interests, user_skills):
             
             existing_R_sparse = csr_matrix(existing_R)
 
-            # Split the data into training and test sets
+            # Split data into training and test sets
             train_data, test_data = split_data(existing_R_sparse.toarray())
 
             best_params = grid_search_hyperparameters(train_data, train_data)
@@ -277,17 +284,30 @@ def main(profiles_file, users_file, user_interests, user_skills):
                             epochs=best_params['epochs'])
             svd.fit(train_data)
 
-            # Evaluate the model on the test set
+            # Evaluate model on the test set
             rmse, mae, precision, recall, f1 = evaluate_model(test_data, svd)
             print(f"Test RMSE: {rmse:.4f}, MAE: {mae:.4f}, Precision: {precision-0.14:.4f}, Recall: {recall-0.12:.4f}, F1: {f1-0.12:.4f}")
 
             # dump(svd, model_file_path)
 
+    # Analyze recommendations for the new user
     analyze_recommendation(new_user, profiles, svd)
     
+    # Recommend profiles, excluding liked profiles
     recommended_indices = svd.recommend(0, n_recommendations=10, seen_items=None)
-    recommended_profile_ids = [profiles[index]['Profile ID'] for index in recommended_indices]
     
+    # Remove liked profiles from recommendations
+    liked_profile_ids = new_user['Liked Profiles']
+    recommended_indices = [
+        index for index in recommended_indices 
+        if profiles[index]['Profile ID'] not in liked_profile_ids
+    ]
+    
+    recommended_profile_ids = [profiles[index]['Profile ID'] for index in recommended_indices]
+
+    print(f"Recommended Profile IDs (excluding liked profiles): {recommended_profile_ids}")
+
+
 data_dir = os.path.join(os.getcwd(), 'Algorithm')
 
 profiles_file = os.path.join(data_dir, 'profiles.csv')

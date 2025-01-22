@@ -13,7 +13,8 @@ const useThread = () => {
             try {
                 const response = await axios.get('http://localhost:5000/threads/getall');
                 const data = Array.isArray(response.data) ? response.data : [];
-                setThreads(data);
+                const activeThreads = data.filter(thread => thread.status === 'active');
+                setThreads(activeThreads);
             } catch (error) {
                 console.error('Error fetching threads:', error);
             } finally {

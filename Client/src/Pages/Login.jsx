@@ -3,12 +3,26 @@ import { useState } from 'react';
 import styles from '../Styles/Login.module.css';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import useOtpSender from '../Hooks/useOtpSender';
 
 const url = import.meta.env.VITE_Backend_Url;
 const Login = () => {
   const navigate = useNavigate();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
+  const validatePhoneNumber = (phone) => /^\+9779\d{9}$/.test(phone);
+  const {
+    sendOtpfunc,
+} = useOtpSender();
+  
+  const handleForgotPassword = async() => {
+    if(!validatePhoneNumber(phoneNumber)){
+      toast.error('Please enter valid phone number to reset your password.');
+      return;
+    }
+    const sentOtp = await sendOtpfunc(phoneNumber);
+    navigate('/forgot-password',{state: {phonenumber:phoneNumber,sentOtp: sentOtp}});
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,7 +71,7 @@ const Login = () => {
           />
           
           <p className={styles.pageLink}>
-            <span className={styles.pageLinkLabel}>Forgot Password?</span>
+            <span className={styles.pageLinkLabel} onClick={handleForgotPassword}>Forgot Password?</span>
           </p>
           <button type="submit" className={styles.formBtn}>Log in</button>
         </form>

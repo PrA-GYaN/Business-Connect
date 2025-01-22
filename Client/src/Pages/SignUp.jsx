@@ -5,7 +5,8 @@ import useOtpSender from '../Hooks/useOtpSender';
 import PhoneVerification from '../Components/PhoneVerification';
 
 const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-const validatePhoneNumber = (phone) => /^\+\d{1,3}\d{10}$/.test(phone);
+// const validatePhoneNumber = (phone) => /^\+\d{1,3}\d{10}$/.test(phone);
+const validatePhoneNumber = (phone) => /^\+9779\d{9}$/.test(phone);
 // const validatePassword = (password) => /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/.test(password);
 const validatePassword = (password) => /^.{5,}$/.test(password);
 

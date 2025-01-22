@@ -124,6 +124,29 @@ export const updateThread = async (req, res) => {
     }
 };
 
+export const deleteThreads = async (req, res) => {
+    console.log('Deleting threads:', req.body.threads);
+    try {
+        const { threads } = req.body;
+        if (!threads || threads.length === 0) {
+            return res.status(400).json({ message: 'No threads provided to delete' });
+        }
+
+        const updatedThreads = await Thread.updateMany(
+            { _id: { $in: threads } },
+            { $set: { status: 'deleted' } },
+            { new: true }
+        );
+        if (updatedThreads.nModified === 0) {
+            return res.status(404).json({ message: 'No threads found to update' });
+        }
+        res.status(200).json(updatedThreads);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+
 // Delete thread
 export const deleteThread = async (req, res) => {
     try {

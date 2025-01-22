@@ -10,7 +10,7 @@ import ModalProfile from '../Components/modalProfile.jsx';
 
 const Connections = () => {
     const { authUser, openProfile } = useAuthContext();
-    const { getProfileById, getAllUsers, like_dislike } = useProfile();
+    const { getProfileById, getAllUsers, like_dislike,getRecUsers } = useProfile();
     const [connections, setConnections] = useState([]);
     const [requests, setRequests] = useState([]);
     const [users, setUsers] = useState([]);
@@ -28,15 +28,38 @@ const Connections = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            if (!authUser) return; // Guard clause to avoid fetching when authUser is null
+            if (!authUser) return;
 
             setLoading(true);
             try {
                 const profile = await getProfileById(authUser);
                 setConnections(profile.connections || []);
                 setRequests(profile.requests || []);
-                const usersData = await getAllUsers();
+                let user_interests = [];
+                let user_skills = [];
+                let likedUserIds = [];
+                if(profile.businessType === "individual"){
+                    user_interests = profile.interests;
+                    user_skills = profile.skills;
+                    likedUserIds = profile.swipes
+                    .filter(swipe => swipe.action === "Liked")
+                    .map(swipe => swipe.userId);
+                }
+                if(profile.businessType === "house"){
+                    user_interests = profile.operationalFocus;
+                    user_skills = profile.technologies;
+                    likedUserIds = profile.swipes
+                    .filter(swipe => swipe.action === "Liked")
+                    .map(swipe => swipe.userId);
+                }
+                likedUserIds.push(authUser);
+                console.log("Interests:",user_interests);
+                console.log("Skills:",user_skills);
+                console.log("Liked User Ids:",likedUserIds);
+                const usersData = await getRecUsers(user_interests,user_skills,likedUserIds);
                 setUsers(usersData || []);
+                setLoading(false);
+
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {

@@ -41,10 +41,11 @@ const useProfile = () => {
         }
     }
 
-    const getRecUsers = async(user_interests,user_skills) => {
+    const getRecUsers = async(user_interests,user_skills,liked_profiles) => {
         const user_data = {
             user_interests,
-            user_skills
+            user_skills,
+            liked_profiles
         };
         try {
             const { data } = await axios.post(`${url}/users/getrecommened`,user_data,

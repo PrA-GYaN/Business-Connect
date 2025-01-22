@@ -24,8 +24,8 @@ const ThreadList = () => {
     if (loading) {
         return <Loader />;
     }
-    console.log(threads[0]);
 
+    console.log(threads[0]);
     return (
         <>
             <Navbar />

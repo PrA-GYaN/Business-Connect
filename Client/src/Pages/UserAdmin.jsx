@@ -3,13 +3,35 @@ import Admin from "../Components/Admin";
 import ModerateContent from "../Components/ModerateContent";
 import VerifyRequest from "../Components/VerifyRequest";
 import styles from "../Styles/UserAdmin.module.css";
+import Loader from "../Components/Loader";
+import axios from 'axios';
 
 const UserAdmin = () => {
   const [selectedComponent, setSelectedComponent] = useState('admin');
+  const [loading, setLoading] = useState(false);
 
   const handleNavigation = (component) => {
     setSelectedComponent(component);
   };
+
+  const RefreshData = async() => {
+    setLoading(true);
+    try
+    {
+      await axios.post('http://localhost:5000/users/updateData');
+      console.log(data);
+      setLoading(false);
+    }
+    catch(error)
+    {
+      console.error("Error fetching threads: ", error);
+    }
+    finally
+    {
+      setLoading(false);
+    }
+    window.location.reload();
+  }
 
   const renderContent = () => {
     switch (selectedComponent) {
@@ -23,6 +45,10 @@ const UserAdmin = () => {
         return <Admin />;
     }
   };
+  if(loading)
+  {
+    return <Loader/>
+  }
 
   return (
     <div className={styles.container}>
@@ -48,6 +74,7 @@ const UserAdmin = () => {
             Verify Request
           </li>
         </ul>
+        <button className={styles.refreshButton} onClick={RefreshData}>Refresh Data</button>
         <button className={styles.logoutButton}>Logout</button>
       </div>
       <div className={styles.content}>

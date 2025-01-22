@@ -12,8 +12,9 @@ import CallModal from './Components/CallModal';
 import MeetingList from './Pages/MeetingList';
 import { useNavigate } from 'react-router-dom';
 
-
 const Home = lazy(() => import("./Pages/Home"));
+// const {AdminRoute} = lazy(() => import("./Components/AdminRoute"));
+const ForgotPassword = lazy(() => import("./Components/ForgotPassword"));
 const Login = lazy(() => import("./Pages/Login"));
 const SignUp = lazy(() => import("./Pages/SignUp"));
 const CreateThread = lazy(() => import("./Components/CreateThread"));
@@ -65,8 +66,10 @@ function App() {
                     <Routes>
                         <Route path='/' element={authUser ? <Home /> : <Navigate to='/login' />} />
                         <Route path='/login' element={authUser ? <Navigate to='/' /> : <Login />} />
+                        <Route path='/forgot-password' element={<ForgotPassword />} />
                         <Route path='/signup' element={<SignUp />} />
                         <Route path='/setup' element={<Setup fullName={''} />} />
+                        {/* <AdminRoute path="/admin" element={<UserAdmin />} /> */}
                         
                         <Route path="/connections" element={authUser ? <Connections /> : <Navigate to='/login' />} />
                         <Route path="/messages" element={authUser ? <Messages /> : <Navigate to='/login' />} />
@@ -79,7 +82,10 @@ function App() {
                         <Route path="/create" element={authUser ? <CreateThread /> : <Navigate to='/login' />} />
                         <Route path="/threads/:threadId" element={<CommentList />} />
                         <Route path="/profile" element={authUser ? <Profile /> : <Navigate to='/login' />} />
-                        <Route path = '/admin' element={ <UserAdmin /> } />
+                        <Route 
+                            path="/admin" 
+                            element={authUser === '6789c4d95460a8925b9e0a0a' ? <UserAdmin /> : <NotFound />} 
+                            />
                         <Route path="*" element={<NotFound />} />
                     </Routes>
                 </Suspense>

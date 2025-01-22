@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Papa from 'papaparse';  // Import PapaParse for parsing CSV
+import Papa from 'papaparse';
+import axios from 'axios';
 import styles from '../Styles/ModerateContent.module.css';
 
 const ModerateContent = () => {
@@ -26,17 +27,34 @@ const ModerateContent = () => {
     fetchThreads();
   }, []);
 
-  // Delete thread by ThreadId
-  const deleteThread = (threadId) => {
-    setThreads((prevThreads) => prevThreads.filter(thread => thread.ThreadId !== threadId));
+  // Delete thread(s) by ThreadId(s) using POST
+  const deleteThread = async (threadIds) => {
+    try {
+      const url = 'http://localhost:5000/threads/deletethreads';
+
+      // Ensure threadIds is always an array
+      const response = await axios.post(url, { threads: threadIds }, { withCredentials: true });
+
+      console.log('Deleted threads:', response.data);
+      setThreads((prevThreads) =>
+        prevThreads.filter(thread => !threadIds.includes(thread.ThreadId))
+      );
+    } catch (error) {
+      console.error("Error deleting thread: ", error);
+    }
   };
 
   // Delete all Hate Speech threads
   const deleteAllHateSpeechThreads = () => {
-    setThreads((prevThreads) => prevThreads.filter(thread => thread.Prediction !== 'Hate Speech'));
+    const hateSpeechThreads = threads
+      .filter(thread => thread.Prediction === 'Hate Speech')
+      .map(thread => thread.ThreadId);
+
+    if (hateSpeechThreads.length > 0) {
+      deleteThread(hateSpeechThreads);
+    }
   };
 
-  // Filter threads based on prediction (Hate Speech or Not Hate Speech)
   const filteredThreads = filterPrediction
     ? threads.filter((thread) => thread.Prediction === filterPrediction)
     : threads;
@@ -52,7 +70,7 @@ const ModerateContent = () => {
         <td>
           <button
             className={styles.deleteButton}
-            onClick={() => deleteThread(thread.ThreadId)}
+            onClick={() => deleteThread([thread.ThreadId])} // Always pass as array
           >
             Hide
           </button>
@@ -98,7 +116,6 @@ const ModerateContent = () => {
             </tbody>
           </table>
           
-          {/* Delete All button */}
           {filterPrediction === "Hate Speech" && (
             <div className={styles.deleteAllButtonContainer}>
               <button

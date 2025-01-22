@@ -138,6 +138,24 @@ export const signup = async (req, res) => {
     }
 };
 
+export const changePassword = async (req, res) => {
+    const userNumber = req.body.phone;
+    const newPassword = req.body.newPassword;
+    try {
+        const user = await User.findOne({ phoneNumber: userNumber });
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        user.password = hashedPassword;
+        await user.save();
+        return res.status(200).json({ message: "Password changed successfully" });
+    }
+    catch (error) {
+        console.error("Error in changePassword controller:", error.message);
+    }
+}
 
 export const updateUserSelection = async (req, res) => {
     const { 
@@ -211,18 +229,23 @@ export const login = async (req, res) => {
 	try {
 		const { phoneNumber, password } = req.body;
         if (!phoneNumber || !phoneNumber.startsWith("+9779")) {
-            return res.status(400).json({ error: "Invalid phone number. It should start with +9779." });
+            return res.status(400).json({ error: "Invalid phone number. It should start with +9779" });
         }
 
         if (!password || password.length <= 5) {
-            return res.status(400).json({ error: "Password must be 6 characters or long." });
+            return res.status(400).json({ error: "Password must be 6 characters or long" });
+        }
+
+
+        if (phoneNumber.length !== 14) {
+            return res.status(400).json({ error: "Phone number must have exactly 10 digits after +977" });
         }
 
 		const user = await User.findOne({ phoneNumber });
 		const isPasswordCorrect = await bcrypt.compare(password, user?.password || "");
 
 		if (!user) {
-            return res.status(400).json({ error: "Invalid username" });
+            return res.status(400).json({ error: "Invalid phonenumber" });
         }
         if (!isPasswordCorrect) {
             return res.status(400).json({ error: "Invalid password" });

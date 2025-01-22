@@ -175,35 +175,51 @@ def evaluate_model(R, svd_model):
         return 0, 0, 0, 0, 0
 
 def load_data(profiles_file, users_file):
+    """Load and process data from CSV files."""
     try:
+        # Read profiles data
         profiles_df = pd.read_csv(profiles_file)
-        users_df = pd.read_csv(users_file)
-
+        
+        # Read users data, skipping the problematic second header row
+        users_df = pd.read_csv(users_file, skiprows=[1])
+        
+        # Function to safely convert string to list
         def convert_string_to_list(s):
             try:
+                # Remove any whitespace and replace single quotes with double quotes
                 s = s.strip()
                 s = s.replace("'", '"')
                 return ast.literal_eval(s)
             except:
+                # If conversion fails, try splitting by comma
                 try:
+                    # Remove brackets and split
                     s = s.strip('[]')
                     return [item.strip().strip("'").strip('"') for item in s.split(',')]
                 except:
                     return []
 
+        # Convert string representations of lists to actual lists
         for df in [profiles_df, users_df]:
             for col in ['Interests', 'Skills']:
                 if col in df.columns:
                     df[col] = df[col].apply(convert_string_to_list)
         
+        # Convert Liked Profiles to list
         if 'Liked Profiles' in users_df.columns:
             users_df['Liked Profiles'] = users_df['Liked Profiles'].apply(convert_string_to_list)
+
+        # Rename User ID to Profile ID in users_df if needed
+        if 'User ID' in users_df.columns and 'Profile ID' not in users_df.columns:
+            users_df = users_df.rename(columns={'User ID': 'Profile ID'})
 
         return profiles_df.to_dict(orient='records'), users_df.to_dict(orient='records')
     except Exception as e:
         logging.error(f"Error loading data: {str(e)}")
+        logging.error(f"Stack trace: ", exc_info=True)
         return [], []
-    
+
+
 def grid_search_hyperparameters(X_train, y_train):
     try:
         param_grid = {
@@ -257,10 +273,12 @@ def split_data(R, test_size=0.4):
     except Exception as e:
         logging.error(f"Error splitting data: {str(e)}")
         return csr_matrix(R), csr_matrix(R)
-
-def recommend_users_for_profile(profile_id, profiles, content_weight=1.0):
-    """Generate recommendations for a specific profile using only content-based filtering."""
+def recommend_users_for_profile(profile_id, profiles, svd_model, 
+                              interest_weight=0.6, skill_weight=0.4,
+                              content_weight=0.6, collaborative_weight=0.4):
+    """Generate recommendations using hybrid approach combining content-based and collaborative filtering."""
     try:
+        # Find profile index
         profile_index = next((index for (index, d) in enumerate(profiles) 
                             if d['Profile ID'] == profile_id), None)
         if profile_index is None:
@@ -268,40 +286,84 @@ def recommend_users_for_profile(profile_id, profiles, content_weight=1.0):
 
         profile = profiles[profile_index]
 
-        # Calculate content-based scores
-        interests_similarity = calculate_weighted_similarity(
+        # 1. Calculate content-based scores
+        content_scores = calculate_weighted_similarity(
             profile['Interests'], profile['Skills'], 
-            profiles, interest_weight=0.6, skill_weight=0.4
+            profiles, interest_weight, skill_weight
         )
-        normalized_scores = normalize_scores(interests_similarity)
+        normalized_content_scores = normalize_scores(content_scores)
         
-        # Prepare results
+        # 2. Calculate collaborative filtering scores
+        collaborative_scores = []
+        for user_index in range(len(profiles)):
+            try:
+                score = svd_model.predict(profile_index, user_index)
+                collaborative_scores.append(score)
+            except Exception as e:
+                logging.warning(f"Error predicting for user {user_index}: {str(e)}")
+                collaborative_scores.append(0)
+        
+        normalized_collaborative_scores = normalize_scores(collaborative_scores)
+        
+        # 3. Combine scores using weighted approach
         results = []
         for i, user in enumerate(profiles):
             if user['Profile ID'] != profile_id:  # Exclude self-recommendation
+                # Calculate hybrid score
+                hybrid_score = (
+                    content_weight * normalized_content_scores[i] +
+                    collaborative_weight * normalized_collaborative_scores[i]
+                )
+                
+                # Get matching interests and skills for explanation
+                matching_interests = set(profile['Interests']) & set(user['Interests'])
+                matching_skills = set(profile['Skills']) & set(user['Skills'])
+                
                 results.append({
                     "User ID": user['Profile ID'],
-                    "Score": normalized_scores[i],
-                    "Matching Interests": set(profile['Interests']) & set(user['Interests']),
-                    "Matching Skills": set(profile['Skills']) & set(user['Skills'])
+                    "Content-Based Score": normalized_content_scores[i],
+                    "Collaborative Score": normalized_collaborative_scores[i],
+                    "Hybrid Score": hybrid_score,
+                    "Matching Interests": matching_interests,
+                    "Matching Skills": matching_skills
                 })
         
-        results.sort(key=lambda x: x["Score"], reverse=True)
+        # Sort by hybrid score
+        results.sort(key=lambda x: x["Hybrid Score"], reverse=True)
         
         # Log recommendations
-        logging.info(f"Content-based recommendations for Profile ID {profile_id}:")
+        logging.info(f"Hybrid recommendations for Profile ID {profile_id}:")
         for r in results[:10]:
             logging.info(
-                f"User ID: {r['User ID']}, "
-                f"Score: {r['Score']:.4f}, "
-                f"Matching Interests: {r['Matching Interests']}, "
-                f"Matching Skills: {r['Matching Skills']}"
+                f"\nUser ID: {r['User ID']}"
+                f"\nHybrid Score: {r['Hybrid Score']:.4f}"
+                f"\nContent-Based Score: {r['Content-Based Score']:.4f}"
+                f"\nCollaborative Score: {r['Collaborative Score']:.4f}"
+                f"\nMatching Interests: {r['Matching Interests']}"
+                f"\nMatching Skills: {r['Matching Skills']}"
             )
         
         return results
     except Exception as e:
         logging.error(f"Error generating recommendations: {str(e)}")
+        logging.error("Stack trace:", exc_info=True)
         return []
+
+def print_recommendations(recommendations):
+    """Helper function to print recommendations in a readable format."""
+    if not recommendations:
+        print("No recommendations generated.")
+        return
+
+    print("\nTop Recommendations:")
+    for i, rec in enumerate(recommendations[:10], 1):
+        print(f"\n{i}. User ID: {rec['User ID']}")
+        print(f"   Hybrid Score: {rec['Hybrid Score']:.4f}")
+        print(f"   Content-Based Score: {rec['Content-Based Score']:.4f}")
+        print(f"   Collaborative Score: {rec['Collaborative Score']:.4f}")
+        print(f"   Matching Interests: {', '.join(rec['Matching Interests'])}")
+        print(f"   Matching Skills: {', '.join(rec['Matching Skills'])}")
+
 
 def main(profiles_file, users_file, profile_id_to_recommend_for):
     """Main function to run the recommendation system."""
@@ -311,18 +373,58 @@ def main(profiles_file, users_file, profile_id_to_recommend_for):
         if not profiles:
             raise ValueError("Failed to load profiles data")
 
-        logging.info("Using content-based recommendations only (no user interaction data available)")
+        logging.info(f"Loaded {len(profiles)} profiles and {len(users)} users")
         
-        # Generate recommendations using content-based approach
+        # Create initial ratings matrix
+        num_profiles = len(profiles)
+        
+        # Create user-item interaction matrix from Liked Profiles
+        existing_R = np.zeros((len(users), num_profiles))
+        
+        # Create profile ID to index mapping
+        profile_id_to_index = {p['Profile ID']: i for i, p in enumerate(profiles)}
+        
+        # Fill interaction matrix
+        for user_index, user in enumerate(users):
+            if 'Liked Profiles' in user:
+                for liked_profile in user['Liked Profiles']:
+                    if liked_profile in profile_id_to_index:
+                        existing_R[user_index, profile_id_to_index[liked_profile]] = 1
+
+        # Convert to sparse matrix and split data
+        existing_R_sparse = csr_matrix(existing_R)
+        train_data, test_data = split_data(existing_R_sparse.toarray())
+
+        # Find best hyperparameters
+        logging.info("Performing grid search for hyperparameters...")
+        best_params = grid_search_hyperparameters(train_data, train_data)
+        logging.info(f"Best Hyperparameters: {best_params}")
+
+        # Train model with best parameters
+        svd = SimpleSVD(
+            num_features=best_params['num_features'],
+            initial_learning_rate=best_params['initial_learning_rate'],
+            regularization=best_params['regularization'],
+            epochs=best_params['epochs']
+        )
+        svd.fit(train_data)
+
+        # Generate recommendations using hybrid approach
         recommendations = recommend_users_for_profile(
             profile_id_to_recommend_for,
-            profiles
+            profiles,
+            svd,
+            interest_weight=0.6,
+            skill_weight=0.4,
+            content_weight=0.6,
+            collaborative_weight=0.4
         )
 
         return recommendations
 
     except Exception as e:
         logging.error(f"Error in main function: {str(e)}")
+        logging.error(f"Stack trace: ", exc_info=True)
         return []
 
 if __name__ == "__main__":
