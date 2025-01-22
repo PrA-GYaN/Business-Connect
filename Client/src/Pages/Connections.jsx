@@ -57,7 +57,10 @@ const Connections = () => {
                 console.log("Skills:",user_skills);
                 console.log("Liked User Ids:",likedUserIds);
                 const usersData = await getRecUsers(user_interests,user_skills,likedUserIds);
-                setUsers(usersData || []);
+                const filteredUsersData = usersData.filter(user => !likedUserIds.includes(user._id));
+
+                console.log("Filtered Users (Excluding Liked Profiles):", filteredUsersData);
+                setUsers(filteredUsersData || []);
                 setLoading(false);
 
             } catch (error) {
