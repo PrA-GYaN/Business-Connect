@@ -23,7 +23,7 @@ const useGetConversations = () => {
         const resLastMessage = await axios.get("http://localhost:5000/messages/getLastMessage", {
           withCredentials: true,
         });
-        // console.log("Last Messages:", resLastMessage.data);
+        console.log("Last Messages:", resLastMessage.data);
         setLastMessage(resLastMessage.data);
 
       } catch (error) {

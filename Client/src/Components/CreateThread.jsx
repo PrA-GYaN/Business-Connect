@@ -50,6 +50,12 @@ const CreateThread = () => {
             return;
         }
 
+        if (selectedTags.length === 0) {
+            setTagError('At least one tag is required!');
+            return;
+        }
+        
+
         try {
             // Create a thread object with other data
             const newThread = {
