@@ -1,6 +1,6 @@
 import Comment from '../models/comment.model.js';
 import Thread from '../models/thread.model.js';
-import {timeAgo} from '../utils/timeAgo.js';
+import {timeAgo} from '../utils/timeago.js';
 
 export const createComment = async (req, res) => {
     try {

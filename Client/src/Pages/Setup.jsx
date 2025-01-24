@@ -139,17 +139,20 @@ const Setup = ({ fullName, businessType }) => {
     const validationErrors = [];
 
     // Validate individual categories
-    if (selections.interests.length === 0) validationErrors.push('Please select at least one interest.');
-    if (selections.skills.length === 0) validationErrors.push('Please select at least one skill.');
-    if (selections.languages.length === 0) validationErrors.push('Please select at least one language.');
-    if (!selections.education) validationErrors.push('Please select your education level.');
-    if (selections.operationalFocus.length === 0) validationErrors.push('Please select at least one operational focus.');
-    if (selections.technologies.length === 0) validationErrors.push('Please select at least one technology.');
-    if (!selections.businessModels) validationErrors.push('Please select a business model.');
-    if (selections.strategicGoals.length === 0) validationErrors.push('Please select at least one strategic goal.');
-    if (selections.performanceMetrics.length === 0) validationErrors.push('Please select at least one performance metric.');
-    if (selections.industryFocus.length === 0) validationErrors.push('Please select at least one industry focus.');
-
+    if(businessType === 'individual') {
+      if (selections.interests.length === 0) validationErrors.push('Please select at least one interest.');
+      if (selections.skills.length === 0) validationErrors.push('Please select at least one skill.');
+      if (selections.languages.length === 0) validationErrors.push('Please select at least one language.');
+      if (!selections.education) validationErrors.push('Please select your education level.');
+    }
+    else {
+      if (selections.operationalFocus.length === 0) validationErrors.push('Please select at least one operational focus.');
+      if (selections.technologies.length === 0) validationErrors.push('Please select at least one technology.');
+      if (!selections.businessModels) validationErrors.push('Please select a business model.');
+      if (selections.strategicGoals.length === 0) validationErrors.push('Please select at least one strategic goal.');
+      if (selections.performanceMetrics.length === 0) validationErrors.push('Please select at least one performance metric.');
+      if (selections.industryFocus.length === 0) validationErrors.push('Please select at least one industry focus.');
+    }
     // If there are validation errors, set the error state and return
     if (validationErrors.length > 0) {
       setError(validationErrors.join(' '));
