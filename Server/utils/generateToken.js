@@ -18,8 +18,9 @@ const generateTokenAndSetCookie = (userId,fullName,profilePic,res) => {
 
         res.cookie("User", token, {
             maxAge: 1 * 24 * 60 * 60 * 1000,  // 1 day in milliseconds
+            httpOnly: true,
             sameSite: "None",
-            secure: true,
+            secure: process.env.NODE_ENV === "production",
           });
 
     } catch (error) {
