@@ -17,10 +17,11 @@ const generateTokenAndSetCookie = (userId,fullName,profilePic,res) => {
         console.log("Token generated:", token);
 
         res.cookie("User", token, {
-            maxAge: 1 * 24 * 60 * 60 * 1000,
-            sameSite: "None", // Allows cross-site usage
-            secure: true, // Ensures the cookie is only sent over HTTPS)
-        });
+            maxAge: 1 * 24 * 60 * 60 * 1000,  // 1 day in milliseconds
+            httpOnly: true,
+            sameSite: "None",
+            secure: process.env.NODE_ENV === "production",
+          });
 
     } catch (error) {
         console.error("Error generating token:", error.message);

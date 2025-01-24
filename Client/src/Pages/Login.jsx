@@ -32,7 +32,6 @@ const Login = () => {
       const response = await axios.post(`${url}/users/login`, data, {
         withCredentials: true,
       });
-      console.log(response.data);
       toast.success('Logged in successfully.');
       setTimeout(() => {
         window.location.reload();
