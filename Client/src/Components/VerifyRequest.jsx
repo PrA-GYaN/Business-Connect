@@ -4,7 +4,7 @@ import { TiTick } from "react-icons/ti";
 import { RxCross2 } from "react-icons/rx";
 import axios from "axios";
 import { toast } from "react-toastify";
-import styles from '../Styles/Verifyrequest.module.css';  // Importing CSS Module
+import styles from '../Styles/verifyrequest.module.css';  // Importing CSS Module
 
 const VerifyRequest = () => {
     const { verreq, loading, error } = useAdmin();
