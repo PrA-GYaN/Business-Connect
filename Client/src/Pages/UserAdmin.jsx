@@ -5,6 +5,7 @@ import VerifyRequest from "../Components/VerifyRequest";
 import styles from "../Styles/UserAdmin.module.css";
 import Loader from "../Components/Loader";
 import axios from 'axios';
+const url = import.meta.env.VITE_Backend_Url;
 
 const UserAdmin = () => {
   const [selectedComponent, setSelectedComponent] = useState('admin');
@@ -18,7 +19,7 @@ const UserAdmin = () => {
     setLoading(true);
     try
     {
-      await axios.post('http://localhost:5000/users/updateData');
+      await axios.post(`${url}/users/updateData`);
       console.log(data);
       setLoading(false);
     }

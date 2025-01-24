@@ -29,13 +29,13 @@ const VerifyRequest = () => {
             const verificationId = selectedReq.Id._id;
 
             if (action === "accept") {
-                await axios.post("http://localhost:5000/users/accept", { userId });
+                await axios.post(`${url}/users/accept`, { userId });
                 toast.success("User verified successfully");
             } else {
-                await axios.post("http://localhost:5000/users/decline", { userId });
+                await axios.post(`${url}/users/decline`, { userId });
                 toast.success("User verification declined");
             }
-            await axios.post("http://localhost:5000/users/delete", { verificationId });
+            await axios.post(`${url}/users/delete`, { verificationId });
         } catch (error) {
             toast.error(`Failed to ${action} user`);
         }
@@ -47,9 +47,9 @@ const VerifyRequest = () => {
             const userId = selectedReq.Id._id;
             const rejectDetails = { userId, reason: rejectReason };
 
-            await axios.post("http://localhost:5000/users/decline", rejectDetails);
+            await axios.post("${url}/users/decline", rejectDetails);
             toast.success("User rejected successfully");
-            await axios.post("http://localhost:5000/users/delete", { verificationId: selectedReq.Id._id });
+            await axios.post("${url}/users/delete", { verificationId: selectedReq.Id._id });
             setShowRejectModal(false);
             setSelectedReq(null);  // Close modal after action
         } catch (error) {

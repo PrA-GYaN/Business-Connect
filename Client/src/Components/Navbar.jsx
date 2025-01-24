@@ -121,6 +121,13 @@ const Navbar = () => {
                   <div className={styles.navbarProfileDropdownItem} onClick={()=>navigate('/profile')}>
                     <div className={styles.dropdownLink}>Profile</div>
                   </div>
+                  {
+                    authUser === '6789c4d95460a8925b9e0a0a' && (
+                      <div className={styles.navbarProfileDropdownItem} onClick={()=>navigate('/admin')}>
+                        <div className={styles.dropdownLink}>Admin</div>
+                      </div>
+                    )
+                  }
                   <div onClick={handleLogout} className={styles.navbarProfileDropdownItem}>
                     <div className={styles.dropdownButton}>Logout</div>
                   </div>

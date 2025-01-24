@@ -3,6 +3,7 @@ import styles from '../Styles/ChangePassword.module.css';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+const url = import.meta.env.VITE_Backend_Url;
 
 const ChangePassword = ({phone}) => {
   const [newPassword, setNewPassword] = useState('');
@@ -28,7 +29,7 @@ const ChangePassword = ({phone}) => {
     {
             const data = { phone, newPassword };
             console.log(data);
-            const response = await axios.post(`http://localhost:5000/users/change-password`, data, {
+            const response = await axios.post(`${url}/users/change-password`, data, {
               withCredentials: true,
             });
             console.log(response.data);

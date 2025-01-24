@@ -56,7 +56,7 @@ const PhoneVerification = ({ data, sentOtp }) => {
       const res = await verifyOtp(otpString, sentOtp);
       if (res) {
         console.log('OTP Verified');
-        await axios.post('http://localhost:5000/users/signup', data, {
+        await axios.post(`${url}/users/signup`, data, {
           withCredentials: true,
           headers: {
             'Content-Type': 'multipart/form-data',

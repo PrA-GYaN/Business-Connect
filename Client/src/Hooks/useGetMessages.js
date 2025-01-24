@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import useConversation from "./useConversation.js";
 import toast from "react-hot-toast";
+const url = import.meta.env.VITE_Backend_Url;
 
 const useGetMessages = () => {
 	const [loading, setLoading] = useState(false);
@@ -11,7 +12,7 @@ const useGetMessages = () => {
 		const getMessages = async () => {
 			setLoading(true);
 			try {
-				const { data } = await axios.get(`http://localhost:5000/messages/${selectedConversation._id}`,
+				const { data } = await axios.get(`${url}/messages/${selectedConversation._id}`,
 					{
 						withCredentials: true,
 					}

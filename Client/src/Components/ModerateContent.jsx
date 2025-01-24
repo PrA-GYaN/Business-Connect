@@ -30,7 +30,7 @@ const ModerateContent = () => {
   // Delete thread(s) by ThreadId(s) using POST
   const deleteThread = async (threadIds) => {
     try {
-      const url = 'http://localhost:5000/threads/deletethreads';
+      const url = `${url}/threads/deletethreads`;
 
       // Ensure threadIds is always an array
       const response = await axios.post(url, { threads: threadIds }, { withCredentials: true });

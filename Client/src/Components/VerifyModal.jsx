@@ -57,7 +57,7 @@ const VerifyModal = ({ onClose, onVerify }) => {
         formData.append('image', image);      // Append the file, not the URL
 
         try {
-            const res = await axios.post('http://localhost:5000/users/verify', formData, {
+            const res = await axios.post(`${url}/users/verify`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useAuthContext } from "../Context/AuthContext";
+const url = import.meta.env.VITE_Backend_Url;
 
 const usePost = () => {
     const { authUser, fullName, profilePic } = useAuthContext();
@@ -11,7 +12,7 @@ const usePost = () => {
 
     const getPostById = async (id) => {
         try {
-            const { data } = await axios.get(`http://localhost:5000/posts/getpossbyid/${id}`);
+            const { data } = await axios.get(`${url}/posts/getpossbyid/${id}`);
             setPosts(data);
         } catch (err) {
             console.error('Error fetching post:', err);
@@ -31,7 +32,7 @@ const usePost = () => {
         }));
 
         try {
-            const { data } = await axios.post(`http://localhost:5000/posts/like/${postId}`, {}, {
+            const { data } = await axios.post(`${url}/posts/like/${postId}`, {}, {
                 withCredentials: true,
             });
             setPosts(prevPosts => prevPosts.map(post => 
@@ -63,7 +64,7 @@ const usePost = () => {
         setCommentLoading(prev => ({ ...prev, [postId]: true }));
 
         try {
-            const res = await axios.post(`http://localhost:5000/posts/comment/${postId}`, { content: commentContent }, {
+            const res = await axios.post(`${url}/posts/comment/${postId}`, { content: commentContent }, {
                 withCredentials: true,
             });
             const newCommentData = {

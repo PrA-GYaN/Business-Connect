@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuthContext } from '../Context/AuthContext';
 import {toast} from 'react-toastify';
+const url = import.meta.env.VITE_Backend_Url;
 
 const useFeed = () => {
     const { authUser, fullName, profilePic } = useAuthContext();
@@ -17,7 +18,7 @@ const useFeed = () => {
 
     const fetchPosts = async (currentPage) => {
         try {
-            const { data } = await axios.get(`http://localhost:5000/posts/getposts?page=${currentPage}&limit=20`,
+            const { data } = await axios.get(`${url}/posts/getposts?page=${currentPage}&limit=20`,
                 { withCredentials: true },
             );
             if (data.posts.length > 0) {
@@ -56,7 +57,7 @@ const useFeed = () => {
         }));
 
         try {
-            const { data } = await axios.post(`http://localhost:5000/posts/like/${postId}`, {}, {
+            const { data } = await axios.post(`${url}/posts/like/${postId}`, {}, {
                 withCredentials: true,
             });
             setPosts((prevPosts) => prevPosts.map((post) => 
@@ -92,7 +93,7 @@ const useFeed = () => {
         setCommentLoading((prev) => ({ ...prev, [postId]: true }));
 
         try {
-            const res = await axios.post(`http://localhost:5000/posts/comment/${postId}`, { content: commentContent }, {
+            const res = await axios.post(`${url}/posts/comment/${postId}`, { content: commentContent }, {
                 withCredentials: true,
             });
             const newCommentData = {

@@ -32,7 +32,7 @@ const useProfile = () => {
     };
     const getAllMeetingsAdmin = async () => {
         try {
-            const response = await axios.get(`http://localhost:5000/meetings/allmeetingsadmin`
+            const response = await axios.get(`${url}/meetings/allmeetingsadmin`
             );
             console.log("Meetings:",response.data);
             return response.data;

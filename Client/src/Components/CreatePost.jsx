@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useAuthContext } from '../Context/AuthContext';
 import Modal from './Modal';
+const url = import.meta.env.VITE_Backend_Url;
 
 const CreatePost = () => {
     const {authUser} = useAuthContext();
@@ -33,7 +34,7 @@ const CreatePost = () => {
         formData.append('content', content);
 
         try {
-            const res = await axios.post('http://localhost:5000/posts/upload', formData, {
+            const res = await axios.post(`${url}/posts/upload`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

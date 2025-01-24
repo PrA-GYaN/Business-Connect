@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuthContext } from '../Context/AuthContext';
+const url = import.meta.env.VITE_Backend_Url;
 
 const useMeetings = () => {
     const { authUser } = useAuthContext();
@@ -14,7 +15,7 @@ const useMeetings = () => {
         const fetchMeetings = async () => {
             console.log('Fetching meetings');
             try {
-                const response = await axios.get(`http://localhost:5000/meetings/allmeetings/${authUser}`, {
+                const response = await axios.get(`${url}/meetings/allmeetings/${authUser}`, {
                     withCredentials: true,
                 });
                 setMeetings(response.data);
@@ -47,7 +48,7 @@ const useMeetings = () => {
     const handleConfirm = async (meetingId) => {
         updateMeetingStatus(meetingId, 'accepted');
         try {
-            await axios.post(`http://localhost:5000/meetings/confirmmeetings/${meetingId}`, { user: authUser }, {
+            await axios.post(`${url}/meetings/confirmmeetings/${meetingId}`, { user: authUser }, {
                 withCredentials: true,
             });
             setUpdateCount(prev => prev + 1);
@@ -61,7 +62,7 @@ const useMeetings = () => {
         updateMeetingStatus(meetingId, 'rejected');
 
         try {
-            await axios.post(`http://localhost:5000/meetings/rejectmeetings/${meetingId}`, { user: authUser }, {
+            await axios.post(`${url}/meetings/rejectmeetings/${meetingId}`, { user: authUser }, {
                 withCredentials: true,
             });
         } catch (err) {
@@ -85,7 +86,7 @@ const useMeetings = () => {
 
     const meetingRequest = async (meeting) => {
         try {
-            await axios.post(`http://localhost:5000/meetings/sendmeetingreq`, { meeting }, {
+            await axios.post(`${url}/meetings/sendmeetingreq`, { meeting }, {
                 withCredentials: true,
             });
             setUpdateCount(prev => prev + 1);

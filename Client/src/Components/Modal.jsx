@@ -3,6 +3,7 @@ import { useAuthContext } from '../Context/AuthContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import styles from './Modal.module.css';
+const url = import.meta.env.VITE_Backend_Url;
 
 const Modal = ({ isOpen, onClose }) => {
     const { authUser, fullName, profilePic } = useAuthContext();
@@ -65,7 +66,7 @@ const Modal = ({ isOpen, onClose }) => {
 
         setIsLoading(true);
         try {
-            await axios.post('http://localhost:5000/posts/upload', formData, {
+            await axios.post(`${url}/posts/upload`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuthContext } from '../Context/AuthContext';
 import { toast } from 'react-toastify';
+const url = import.meta.env.VITE_Backend_Url;
 
 const useThread = () => {
     const [threads, setThreads] = useState([]);
@@ -11,7 +12,7 @@ const useThread = () => {
     useEffect(() => {
         const fetchThreads = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/threads/getall');
+                const response = await axios.get(`${url}/threads/getall`);
                 const data = Array.isArray(response.data) ? response.data : [];
                 const activeThreads = data.filter(thread => thread.status === 'active');
                 setThreads(activeThreads);
@@ -27,7 +28,7 @@ const useThread = () => {
 
     const getThreadByProfile = async (profileId) => {
         try {
-            const { data } = await axios.get(`http://localhost:5000/threads/getthreadbyprofile/${profileId}`);
+            const { data } = await axios.get(`${url}/threads/getthreadbyprofile/${profileId}`);
             return data;
         } catch (error) {
             console.error('Error fetching thread:', error);
@@ -37,7 +38,7 @@ const useThread = () => {
 
     const getThreadById = async (threadId) => {
         try {
-            const { data } = await axios.get(`http://localhost:5000/threads/getthreadbyid/${threadId}`);
+            const { data } = await axios.get(`${url}/threads/getthreadbyid/${threadId}`);
             return data;
         } catch (error) {
             console.error('Error fetching thread:', error);
@@ -48,7 +49,7 @@ const useThread = () => {
     const handleVote = async (threadId, voteType) => {
         console.log("ThreadId:",threadId);
         try {
-            const url = `http://localhost:5000/threads/${voteType}/${threadId}`;
+            const url = `${url}/threads/${voteType}/${threadId}`;
             const response = await axios.post(url, {}, { withCredentials: true });
             setThreads((prevThreads) =>
                 prevThreads.map((thread) =>

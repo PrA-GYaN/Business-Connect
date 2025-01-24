@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+const url = import.meta.env.VITE_Backend_Url;
 
 const useComments = (threadId, authUser, fullName,profilePic) => {
     const [comments, setComments] = useState([]);
@@ -125,8 +126,8 @@ const useComments = (threadId, authUser, fullName,profilePic) => {
         const hasDownvoted = comment?.downvotes.includes(authUser);
 
         try {
-            const url = `http://localhost:5000/comments/${isUpvote ? 'upvote' : 'downvote'}/${commentId}`;
-            await axios.post(url, {}, { withCredentials: true });
+            const url1 = `${url}/comments/${isUpvote ? 'upvote' : 'downvote'}/${commentId}`;
+            await axios.post(url1, {}, { withCredentials: true });
 
             setComments(prevComments =>
                 prevComments.map(comment => {

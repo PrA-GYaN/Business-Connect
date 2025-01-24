@@ -2,6 +2,7 @@ import { useEffect, useState,useRef  } from "react";
 import axios from "axios";
 import { useAuthContext } from "../Context/AuthContext";
 import { useNotificationContext } from '../Context/NotificationContext';
+const url = import.meta.env.VITE_Backend_Url;
 
 const useNotification = () => {
     const { authUser } = useAuthContext();
@@ -18,7 +19,7 @@ const useNotification = () => {
             clearNotifications();
             try {
                 console.log('Calling getNotification');
-                const res = await axios.get(`http://localhost:5000/users/notification/`,
+                const res = await axios.get(`${url}/users/notification/`,
                     {
                         withCredentials: true,
                     }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import useConversation from "./useConversation";
 import axios from "axios";
 import { toast } from 'react-toastify';
+const url = import.meta.env.VITE_Backend_Url;
 
 const useSendMessage = () => {
 	const [loading, setLoading] = useState(false);
@@ -10,7 +11,7 @@ const useSendMessage = () => {
 	const sendMessage = async (message) => {
 		setLoading(true);
 		try {
-			const response = await axios.post(`http://localhost:5000/messages/send/${selectedConversation._id}`, {
+			const response = await axios.post(`${url}/messages/send/${selectedConversation._id}`, {
 				message,
 			}, {
 				withCredentials: true,

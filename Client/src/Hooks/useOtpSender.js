@@ -23,7 +23,7 @@ const useOtpSender = () => {
         setError(null);
 
         try {
-            const response = await axios.post('http://localhost:5000/users/send-otp', {
+            const response = await axios.post(`${url}/users/send-otp`, {
                 phoneNumber,
                 otp: generatedOtp,
             });
