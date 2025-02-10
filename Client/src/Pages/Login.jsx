@@ -17,6 +17,7 @@ const Login = () => {
 } = useOtpSender();
 
   const setCookie = (token) => {
+    console.log('Setting cookie:', token);
     Cookies.set('User', token, {
       expires: 1,  // 1 day expiration
       path: '/',  // Make the cookie available on the entire domain
@@ -44,6 +45,7 @@ const Login = () => {
       });
       toast.success('Logged in successfully.');
       const cookie = response.gen_token;
+      console.log('Cookie:', cookie);
       setCookie(cookie);
       setTimeout(() => {
         window.location.reload();
