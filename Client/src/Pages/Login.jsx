@@ -44,7 +44,7 @@ const Login = () => {
         withCredentials: true,
       });
       toast.success('Logged in successfully.');
-      const cookie = response.gen_token;
+      const cookie = response.cookie;
       console.log('Cookie:', cookie);
       setCookie(cookie);
       setTimeout(() => {
