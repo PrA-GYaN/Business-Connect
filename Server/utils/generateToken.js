@@ -14,15 +14,16 @@ const generateTokenAndSetCookie = (userId,fullName,profilePic,res) => {
         const token = jwt.sign({ userId,fullName,profilePic }, process.env.JWT_SECRET, {
             expiresIn: "1d",
         });
-        console.log("Token generated:", token);
+        // console.log("Token generated:", token);
 
-        res.cookie("User", token, {
-            maxAge: 1 * 24 * 60 * 60 * 1000, 
-            httpOnly: true,
-            sameSite: "None",  
-            secure: process.env.NODE_ENV === "production" && req.secure,
-            partitioned: true,
-          });
+        // res.cookie("User", token, {
+        //     maxAge: 1 * 24 * 60 * 60 * 1000, 
+        //     httpOnly: true,
+        //     sameSite: "None",  
+        //     secure: process.env.NODE_ENV === "production" && req.secure,
+        //     partitioned: true,
+        //   });
+        return token;
 
     } catch (error) {
         console.error("Error generating token:", error.message);

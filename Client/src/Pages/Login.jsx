@@ -4,6 +4,7 @@ import styles from '../Styles/Login.module.css';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import useOtpSender from '../Hooks/useOtpSender';
+import Cookies from 'js-cookie';
 
 const url = import.meta.env.VITE_Backend_Url;
 const Login = () => {
@@ -14,7 +15,16 @@ const Login = () => {
   const {
     sendOtpfunc,
 } = useOtpSender();
-  
+
+  const setCookie = (token) => {
+    Cookies.set('User', token, {
+      expires: 1,  // 1 day expiration
+      path: '/',  // Make the cookie available on the entire domain
+      secure: process.env.NODE_ENV === 'production',  // Only set Secure in production
+      sameSite: 'None',  // Allow cross-site cookies
+    });
+  };
+
   const handleForgotPassword = async() => {
     if(!validatePhoneNumber(phoneNumber)){
       toast.error('Please enter valid phone number to reset your password.');
@@ -33,6 +43,8 @@ const Login = () => {
         withCredentials: true,
       });
       toast.success('Logged in successfully.');
+      const cookie = response.gen_token;
+      setCookie(cookie);
       setTimeout(() => {
         window.location.reload();
       }, 2000);
