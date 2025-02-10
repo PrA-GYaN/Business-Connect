@@ -17,10 +17,11 @@ const generateTokenAndSetCookie = (userId,fullName,profilePic,res) => {
         console.log("Token generated:", token);
 
         res.cookie("User", token, {
-            maxAge: 1 * 24 * 60 * 60 * 1000,  // 1 day in milliseconds
+            maxAge: 1 * 24 * 60 * 60 * 1000, 
             httpOnly: true,
-            sameSite: "None",
-            secure: process.env.NODE_ENV === "production",
+            sameSite: "None",  
+            secure: process.env.NODE_ENV === "production" && req.secure,
+            partitioned: true,
           });
 
     } catch (error) {

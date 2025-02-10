@@ -1,1 +1,5 @@
 ThreadId,Title,Content,Tags
+6791b1d34344ac22cdad758a,Reasons You Should Learn TypeScript Today ,"TypeScript is a game-changer for developers looking to write clean, scalable code. Its strong typing helps you catch bugs early, making your projects more reliable and easier to maintain. Whether you're building with React, Node.js, or Express, TypeScript integrates seamlessly with JavaScript. Plus, it's in high demandfuture-proofing your career while boosting your productivity. Companies love it for its ability to handle complex projects. Whats your favorite feature of TypeScript? Lets discuss!",News
+6791b1fe4344ac22cdad75a1,WebRTC + Socket.IO = Video Chat App ,"Ever wondered how platforms like Zoom or Google Meet work? Ive been working on a real-time video chat app using WebRTC and Socket.IO. With a simple yet secure Room ID system powered by UUID, users can connect effortlessly. My tech stack includes React and Node.js, ensuring a seamless experience. This project has taught me a lot about real-time communication and scalability. What features would you add to a video chat app? Lets brainstorm together!
+
+",News
