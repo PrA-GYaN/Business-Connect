@@ -50,7 +50,6 @@ const Home = () => {
 
 const useFilter = () => {
   setFilters(fullName);
-  console.log("Filters:",filters);
 }
 
   return (

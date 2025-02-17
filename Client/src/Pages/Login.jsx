@@ -21,7 +21,6 @@ const Login = () => {
     Cookies.set('User', token, {
       expires: 1,  // 1 day expiration
       path: '/', 
-      httpOnly: true,
       secure: true,
       sameSite: 'None',  // Allow cross-site cookies
     });

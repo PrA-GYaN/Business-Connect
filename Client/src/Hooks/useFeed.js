@@ -13,7 +13,7 @@ const useFeed = () => {
     const [newComment, setNewComment] = useState({});
     const [visibleComments, setVisibleComments] = useState({});
     const [commentLoading, setCommentLoading] = useState({});
-    const [page, setPage] = useState(1);
+    const [page, setPage] = useState(5);
     const [hasMore, setHasMore] = useState(true);
 
     const fetchPosts = async (currentPage) => {

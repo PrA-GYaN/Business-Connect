@@ -7,7 +7,6 @@ import { AiFillLike } from "react-icons/ai";
 import useFeed from '../Hooks/useFeed';
 
 const Feed = ({prop}) => {
-    console.log("Rerendring Page");
     const { authUser, profilePic } = useAuthContext();
     const {
         posts,
@@ -26,7 +25,6 @@ const Feed = ({prop}) => {
 
     // const [filterKeyword, setFilterKeyword] = useState('');
     const observerRef = useRef();
-    console.log("Filter Keyword:",prop);
     const filterKeyword = prop;
     console.log(filterKeyword);
     const filteredPosts = posts.filter(post => {
@@ -54,7 +52,6 @@ const Feed = ({prop}) => {
     }, [loading, hasMore]);
 
     if (error) return <p>{error}</p>;
-    console.log("Posts:",posts);
 
     return (
         <div className={styles.postContainer} aria-live="polite">
