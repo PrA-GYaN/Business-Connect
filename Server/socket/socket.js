@@ -10,7 +10,7 @@ dotenv.config();
 
 const app = express();
 app.use(cors({
-  origin: 'https://business-connectt.onrender.com', // Frontend origin
+  origin: process.env.Frontend_URL, // Frontend origin
   methods: ['GET', 'POST'],
   credentials: true,  // Allow credentials (cookies, etc.)
 }));
@@ -23,7 +23,7 @@ app.use(cookieParser());
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'https://business-connectt.onrender.com', // Frontend origin
+    origin: process.env.Frontend_URL, // Frontend origin
     methods: ['GET', 'POST'],
     credentials: true,
   },

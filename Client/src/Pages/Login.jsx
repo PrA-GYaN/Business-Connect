@@ -20,10 +20,16 @@ const Login = () => {
     console.log('Setting cookie:', token);
     Cookies.set('User', token, {
       expires: 1,  // 1 day expiration
-      path: '/',  // Make the cookie available on the entire domain
-      secure: process.env.NODE_ENV === 'production',  // Only set Secure in production
+      path: '/', 
+      httpOnly: true,
+      secure: true,
       sameSite: 'None',  // Allow cross-site cookies
     });
+    // Cookies.set('User', token, {
+    //   expires: 1,  // 1 day expiration
+    //   sameSite: "None",
+    //   secure: true,
+    // });
   };
 
   const handleForgotPassword = async() => {
@@ -44,8 +50,7 @@ const Login = () => {
         withCredentials: true,
       });
       toast.success('Logged in successfully.');
-      const cookie = response.cookie;
-      console.log('Cookie:', cookie);
+      const cookie = response.data.cookie;
       setCookie(cookie);
       setTimeout(() => {
         window.location.reload();

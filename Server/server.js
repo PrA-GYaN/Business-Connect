@@ -15,8 +15,9 @@ import {hatespeech} from "./utils/hatespeech.js";
 
 dotenv.config();
 
+console.log(process.env.Frontend_URL);
 const corsOptions = {
-    origin: 'https://business-connectt.onrender.com',  // Your front-end origin
+    origin: process.env.Frontend-URL,  // Your front-end origin
     credentials: true,  // Allow cookies to be sent with requests
     methods: ['GET', 'POST', 'OPTIONS'],  // Ensure the correct methods are allowed
     allowedHeaders: ['Content-Type', 'Authorization'],  // Headers you expect
